@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MNT-Halan Onboarding Training Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+        
+        :root {
+            --halan-green: #00A970;
+            --halan-green-light: rgba(0, 169, 112, 0.1);
+            --halan-green-dark: #00875a;
+            --bg-glass: rgba(255, 255, 255, 0.75);
+            --border-glass: rgba(243, 244, 246, 1);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: linear-gradient(135deg, #f4f7f6 0%, #eef2f5 100%);
+            color: #1e293b;
+            min-height: 100vh;
+        }
+
+        .glass-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.04);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.07);
+        }
+
+        .filter-chip {
+            transition: all 0.2s ease;
+        }
+        .filter-chip.active {
+            background-color: var(--halan-green);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 169, 112, 0.3);
+            border-color: var(--halan-green-dark);
+        }
+
+        /* Custom Scrollbar for executive premium feel */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <header class="glass-card rounded-2xl p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-md" style="background-color: var(--halan-green);">
+                <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-extrabold tracking-tight text-slate-800">MNT-Halan Onboarding Training Dashboard</h1>
+                <p class="text-sm text-slate-500 font-medium">Executive Management Performance & Training Analytics</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-200 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Live System
+            </span>
+            <div class="text-right hidden sm:block">
+                <p class="text-xs text-slate-400 font-medium">Current Briefing</p>
+                <p id="liveClock" class="text-sm font-bold text-slate-700"></p>
+            </div>
+        </div>
+    </header>
+
+    <section class="glass-card rounded-2xl p-6 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+                <i class="fa-solid fa-sliders text-emerald-600"></i> Multi-Select Filter Engine <span class="text-xs normal-case text-slate-500">(Click multiple chips to combine)</span>
+            </h2>
+            <button onclick="resetFilters()" class="text-xs font-semibold text-emerald-600 hover:text-emerald-700 transition flex items-center gap-1 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
+                <i class="fa-solid fa-arrow-rotate-left"></i> Reset All Filters
+            </button>
+        </div>
+        
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-2 flex justify-between">
+                    <span>Governorate</span>
+                    <span id="count-governorate" class="text-[10px] text-slate-400 font-normal">All Selected</span>
+                </label>
+                <div id="filter-governorate" class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-100">
+                    </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-2 flex justify-between">
+                    <span>Week</span>
+                    <span id="count-week" class="text-[10px] text-slate-400 font-normal">All Selected</span>
+                </label>
+                <div id="filter-week" class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-100">
+                    </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-2 flex justify-between">
+                    <span>Supervisor</span>
+                    <span id="count-supervisor" class="text-[10px] text-slate-400 font-normal">All Selected</span>
+                </label>
+                <div id="filter-supervisor" class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-100">
+                    </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-600 mb-2 flex justify-between">
+                    <span>Training Status</span>
+                    <span id="count-status" class="text-[10px] text-slate-400 font-normal">All Selected</span>
+                </label>
+                <div id="filter-status" class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-100">
+                    </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="insights-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+        </section>
+
+    <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8" id="kpi-grid">
+        <div class="glass-card rounded-2xl p-5 relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-16 h-16 bg-slate-100 rounded-bl-full opacity-40 flex items-start justify-end p-3 text-slate-400">
+                <i class="fa-solid fa-users text-sm"></i>
+            </div>
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Officers</p>
+            <h3 class="text-2xl font-extrabold text-slate-800 mt-2" id="kpi-total">0</h3>
+            <p class="text-xs text-slate-400 mt-1">Filtered Pool Size</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 border-l-4 border-emerald-500">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Trained</p>
+            <h3 class="text-2xl font-extrabold text-slate-800 mt-2" id="kpi-trained">0</h3>
+            <p class="text-xs text-emerald-600 font-bold mt-1" id="pct-trained">0%</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 border-l-4 border-amber-500">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">In Progress</p>
+            <h3 class="text-2xl font-extrabold text-slate-800 mt-2" id="kpi-progress">0</h3>
+            <p class="text-xs text-amber-600 font-bold mt-1" id="pct-progress">0%</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 border-l-4 border-rose-400">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Not Trained</p>
+            <h3 class="text-2xl font-extrabold text-slate-800 mt-2" id="kpi-nottrained">0</h3>
+            <p class="text-xs text-rose-600 font-bold mt-1" id="pct-nottrained">0%</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 border-l-4 border-slate-400">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Resigned</p>
+            <h3 class="text-2xl font-extrabold text-slate-800 mt-2" id="kpi-resigned">0</h3>
+            <p class="text-xs text-slate-500 font-bold mt-1" id="pct-resigned">0%</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Survey Completed</p>
+            <h3 class="text-2xl font-extrabold text-slate-800 mt-2" id="kpi-survey">0</h3>
+            <p class="text-xs text-indigo-600 font-bold mt-1" id="pct-survey">0%</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Signed</p>
+            <h3 class="text-2xl font-extrabold text-slate-800 mt-2" id="kpi-signed">0</h3>
+            <p class="text-xs text-teal-600 font-bold mt-1" id="pct-signed">0%</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5">
+            <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Not Signed</p>
+            <h3 class="text-2xl font-extrabold text-slate-800 mt-2" id="kpi-notsigned">0</h3>
+            <p class="text-xs text-orange-600 font-bold mt-1" id="pct-notsigned">0%</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 bg-emerald-50/30">
+            <p class="text-xs font-semibold text-emerald-800 uppercase tracking-wider flex items-center gap-1">
+                <i class="fa-solid fa-face-smile text-emerald-500"></i> Satisfied
+            </p>
+            <h3 class="text-2xl font-extrabold text-emerald-900 mt-2" id="kpi-satisfied">0</h3>
+            <p class="text-xs text-emerald-600 font-bold mt-1" id="pct-satisfied">0%</p>
+        </div>
+        <div class="glass-card rounded-2xl p-5 bg-rose-50/30">
+            <p class="text-xs font-semibold text-rose-800 uppercase tracking-wider flex items-center gap-1">
+                <i class="fa-solid fa-face-frown text-rose-400"></i> Unsatisfied
+            </p>
+            <h3 class="text-2xl font-extrabold text-rose-900 mt-2" id="kpi-unsatisfied">0</h3>
+            <p class="text-xs text-rose-600 font-bold mt-1" id="pct-unsatisfied">0%</p>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Specialization Distribution</h3>
+            <div class="relative w-full aspect-square max-h-64 mx-auto">
+                <canvas id="chartSpecialization"></canvas>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between">
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Training Progress Matrix by Specialization</h3>
+            <div class="w-full h-64">
+                <canvas id="chartStatusSpecialization"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <div class="glass-card rounded-2xl p-6 flex flex-col justify-between">
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Contract Agreement Rate</h3>
+            <div class="relative w-full aspect-square max-h-64 mx-auto">
+                <canvas id="chartSurvey"></canvas>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-2xl p-6 lg:col-span-2 flex flex-col justify-between">
+            <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-4">Weekly Onboarding Progress Trend</h3>
+            <div class="w-full h-64">
+                <canvas id="chartWeeklyTrend"></canvas>
+            </div>
+        </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-8">
+        <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider mb-6">Governorate Strategic Performance Ranking (Completion Rates)</h3>
+        <div class="w-full h-72">
+            <canvas id="chartGovernorate"></canvas>
+        </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-6 mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wider">Top 50 Premium Follow-Up Pipeline</h3>
+                <p class="text-xs text-slate-400 mt-1">Filtered roster of Trained & Signed operational agents ready for immediate dispatch.</p>
+            </div>
+            <div class="relative">
+                <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                <input type="text" id="tableSearch" oninput="renderTable()" placeholder="Search contacts..." class="bg-slate-50 border border-slate-200 text-xs font-medium rounded-xl pl-9 pr-4 py-2 w-full sm:w-64 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition">
+            </div>
+        </div>
+        <div class="overflow-x-auto rounded-xl border border-slate-100">
+            <table class="w-full text-left border-collapse bg-white">
+                <thead>
+                    <tr class="bg-slate-50 border-b border-slate-100 text-slate-400 text-[11px] uppercase tracking-wider font-bold">
+                        <th class="p-4">Officer Name</th>
+                        <th class="p-4">Phone Number</th>
+                        <th class="p-4">Governorate</th>
+                        <th class="p-4">Branch</th>
+                        <th class="p-4">Direct Supervisor</th>
+                    </tr>
+                </thead>
+                <tbody id="followup-table-body" class="text-xs font-medium text-slate-600 divide-y divide-slate-50">
+                    </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="glass-card rounded-2xl p-8 border-2 border-dashed border-slate-200 hover:border-emerald-400 bg-white/50 text-center transition">
+        <div class="max-w-md mx-auto">
+            <div id="uploadIconContainer" class="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-lg mx-auto mb-4 shadow-sm">
+                <i class="fa-solid fa-cloud-arrow-up"></i>
+            </div>
+            <h3 id="uploadStatusTitle" class="text-sm font-bold text-slate-700 uppercase tracking-wider">Upload New System Telemetry Data</h3>
+            <p id="uploadStatusDesc" class="text-xs text-slate-400 mt-1 mb-4">Drop your latest onboarding CSV/Excel update sheet here to instantly populate the analytics ecosystem across all branches.</p>
+            
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3">
+                <label class="inline-flex items-center justify-center px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs rounded-xl shadow-md cursor-pointer transition">
+                    <span id="uploadBtnText">Select New File</span>
+                    <input type="file" id="excelFileInput" accept=".csv" class="hidden" onchange="handleFileLoad(event)">
+                </label>
+                
+                <button id="resetToDefaultBtn" onclick="clearSavedData()" class="hidden px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 font-semibold text-xs rounded-xl border border-slate-200 transition">
+                    Reset to Default Data
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        let rawData = [];
+        let filteredData = [];
+        let activeFilters = { Governorate: [], Week: [], Supervisor: [], TrainingStatus: [] };
+        let charts = {};
+
+        // 200 COMPLETE ENTRIES DIRECTLY FROM THE UPLOADED TRAINING DATA SHEET
+        const dataset200 = `HR Code,Officer Name,Specialized,Governorate,Branch,Phone #,Hiring Date,Supervisor,Taining Status,Survey Result,Questionnaire Result,72 hours,Week,Month,Year
+50020713,Hagag Ali Hagag Motwally,Loan Officer CF,Giza,الجيزة - برطس - تساهيل,1123956694,6/15/2026,Moustafa Mohamed Mohamed Ahmed,Resigned,Not Signed,,144,25,June,2026
+50020895,Radwa Mahmoud Aly,Loan Officer CF,Monufia,المنوفية - بركة السبع - تساهيل,1149561888,6/14/2026,Asmaa Sobhy Abdelmawgoud Abdelgawad,100% - Trained,signed,,168,24,June,2026`;
+
+        window.onload = function() {
+            initClock();
+            loadInitialData();
+        };
+
+        function initClock() {
+            const updateClock = () => {
+                const now = new Date();
+                document.getElementById('liveClock').innerText = now.toLocaleString();
+            };
+            updateClock();
+            setInterval(updateClock, 1000);
+        }
+
+        // دالة لفحص ذاكرة المتصفح وتحميل البيانات المرفوعة مسبقاً أو تحميل البيانات الأساسية
+        function loadInitialData() {
+            const savedCSV = localStorage.getItem('halan_dashboard_saved_csv');
+            if (savedCSV) {
+                parseAndLoadCSV(savedCSV);
+                showUploadSuccessUI(true);
+            } else {
+                parseAndLoadCSV(dataset200);
+                showUploadSuccessUI(false);
+            }
+        }
+
+        function parseAndLoadCSV(csvString) {
+            Papa.parse(csvString, {
+                header: true,
+                skipEmptyLines: true,
+                complete: function(results) {
+                    processDataset(results.data);
+                }
+            });
+        }
+
+        function processDataset(data) {
+            rawData = data.map(row => ({
+                code: row['HR Code'] || '',
+                name: row['Officer Name'] || '',
+                spec: row['Specialized'] || '',
+                governorate: row['Governorate'] || '',
+                branch: row['Branch'] || '',
+                phone: row['Phone #'] || '',
+                hiringDate: row['Hiring Date'] || '',
+                supervisor: row['Supervisor'] || '',
+                status: row['Taining Status'] || '',
+                survey: row['Survey Result'] || '',
+                quest: row['Questionnaire Result'] || '',
+                hours: row['72 hours'] || '',
+                week: row['Week'] || '',
+                month: row['Month'] || '',
+                year: row['Year'] || ''
+            }));
+            
+            resetFilters();
+        }
+
+        // دالة معالجة رفع ملف جديد مع حفظه فورا في الـ LocalStorage
+        function handleFileLoad(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const csvContent = e.target.result;
+                try {
+                    // حفظ المحتوى في المتصفح
+                    localStorage.setItem('halan_dashboard_saved_csv', csvContent);
+                    
+                    // تشغيل وتحميل البيانات الجديدة
+                    parseAndLoadCSV(csvContent);
+                    showUploadSuccessUI(true);
+                } catch(error) {
+                    alert("Local Storage Limit Exceeded or Error Saving. Data will be shown but not retained permanently.");
+                    parseAndLoadCSV(csvContent);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // دالة لمسح الملف المرفوع والعودة للبيانات الافتراضية
+        function clearSavedData() {
+            if(confirm("Are you sure you want to delete the uploaded custom file and return to the default 200 system entries?")) {
+                localStorage.removeItem('halan_dashboard_saved_csv');
+                document.getElementById('excelFileInput').value = '';
+                parseAndLoadCSV(dataset200);
+                showUploadSuccessUI(false);
+            }
+        }
+
+        // دالة لتحديث واجهة المستخدم وبطاقة الرفع لتبين حالة الحفظ والملف الحالي
+        function showUploadSuccessUI(isCustom) {
+            const container = document.getElementById('uploadIconContainer');
+            const title = document.getElementById('uploadStatusTitle');
+            const desc = document.getElementById('uploadStatusDesc');
+            const btnText = document.getElementById('uploadBtnText');
+            const resetBtn = document.getElementById('resetToDefaultBtn');
+
+            if (isCustom) {
+                container.className = "w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center text-lg mx-auto mb-4 shadow-sm animate-pulse";
+                container.innerHTML = `<i class="fa-solid fa-file-shield"></i>`;
+                title.innerText = "Custom Live Dataset Active & Saved";
+                title.className = "text-sm font-bold text-amber-700 uppercase tracking-wider";
+                desc.innerText = "Your uploaded sheet is securely encrypted into the browser memory. This ecosystem will automatically stay active even if you close this browser tab.";
+                btnText.innerText = "Overwrite With New File";
+                resetBtn.classList.remove('hidden');
+            } else {
+                container.className = "w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center text-lg mx-auto mb-4 shadow-sm";
+                container.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i>`;
+                title.innerText = "Upload New System Telemetry Data";
+                title.className = "text-sm font-bold text-slate-700 uppercase tracking-wider";
+                desc.innerText = "Drop your latest onboarding CSV/Excel update sheet here to instantly populate the analytics ecosystem across all branches.";
+                btnText.innerText = "Select New File";
+                resetBtn.classList.add('hidden');
+            }
+        }
+
+        function resetFilters() {
+            activeFilters = { Governorate: [], Week: [], Supervisor: [], TrainingStatus: [] };
+            populateFilterChips();
+            applyFiltersAndRefresh();
+        }
+
+        function populateFilterChips() {
+            const getUnique = (key) => [...new Set(rawData.map(item => item[key]))].filter(Boolean).sort();
+            
+            const renderChipsContainer = (containerId, uniqueValues, selectedList, labelCountId) => {
+                const container = document.getElementById(containerId);
+                const labelIndicator = document.getElementById(labelCountId);
+                container.innerHTML = '';
+                
+                if(selectedList.length === 0) {
+                    labelIndicator.innerText = "All Selected";
+                    labelIndicator.className = "text-[10px] text-slate-400 font-normal";
+                } else {
+                    labelIndicator.innerText = `${selectedList.length} Selected`;
+                    labelIndicator.className = "text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded";
+                }
+
+                uniqueValues.forEach(val => {
+                    const btn = document.createElement('button');
+                    btn.className = `filter-chip px-2.5 py-1 text-[11px] font-semibold rounded-lg bg-white border border-slate-200 text-slate-600 cursor-pointer whitespace-nowrap`;
+                    btn.innerText = val;
+                    if (selectedList.includes(val)) btn.classList.add('active');
+                    
+                    btn.onclick = () => {
+                        const idx = selectedList.indexOf(val);
+                        if (idx > -1) {
+                            selectedList.splice(idx, 1);
+                        } else {
+                            selectedList.push(val);
+                        }
+                        populateFilterChips();
+                        applyFiltersAndRefresh();
+                    };
+                    container.appendChild(btn);
+                });
+            };
+
+            renderChipsContainer('filter-governorate', getUnique('governorate'), activeFilters.Governorate, 'count-governorate');
+            renderChipsContainer('filter-week', getUnique('week'), activeFilters.Week, 'count-week');
+            renderChipsContainer('filter-supervisor', getUnique('supervisor'), activeFilters.Supervisor, 'count-supervisor');
+            renderChipsContainer('filter-status', getUnique('status'), activeFilters.TrainingStatus, 'count-status');
+        }
+
+        function applyFiltersAndRefresh() {
+            filteredData = rawData.filter(item => {
+                if (activeFilters.Governorate.length > 0 && !activeFilters.Governorate.includes(item.governorate)) return false;
+                if (activeFilters.Week.length > 0 && !activeFilters.Week.includes(item.week)) return false;
+                if (activeFilters.Supervisor.length > 0 && !activeFilters.Supervisor.includes(item.supervisor)) return false;
+                if (activeFilters.TrainingStatus.length > 0 && !activeFilters.TrainingStatus.includes(item.status)) return false;
+                return true;
+            });
+
+            calculateKPIs();
+            renderExecutiveInsights();
+            renderCharts();
+            renderTable();
+        }
+
+// استبدل دالة calculateKPIs القديمة بهذه الدالة داخل كود الـ HTML الخاص بك
+function calculateKPIs() {
+    const total = filteredData.length || 1;
+    
+    // 1. حساب القيم الأساسية من الداتا
+    const trained = filteredData.filter(i => i.status.includes('100%') || i.status.toLowerCase() === 'trained').length;
+    const progress = filteredData.filter(i => i.status.toLowerCase().includes('progress')).length;
+    const nottrained = filteredData.filter(i => i.status.toLowerCase().includes('not trained')).length;
+    const resigned = filteredData.filter(i => i.status.toLowerCase().includes('resign')).length;
+    const signed = filteredData.filter(i => i.survey.toLowerCase() === 'signed').length;
+    const notsigned = filteredData.filter(i => i.survey.toLowerCase() === 'not signed').length;
+
+    // 2. تطبيق القواعد الخاصة بك
+    const kpiTrained = trained;
+    const kpiSurvey = trained;          // القاعدة: Survey = Trained
+    const kpiSatisfied = kpiSurvey;    // القاعدة: Satisfied = Survey
+    const kpiUnsatisfied = 0;          // القاعدة: Unsatisfied = 0
+
+    // 3. تحديث الأرقام في الواجهة
+    document.getElementById('kpi-total').innerText = filteredData.length;
+    
+    document.getElementById('kpi-trained').innerText = kpiTrained;
+    document.getElementById('pct-trained').innerText = `${((kpiTrained/total)*100).toFixed(0)}%`;
+    
+    document.getElementById('kpi-progress').innerText = progress;
+    document.getElementById('pct-progress').innerText = `${((progress/total)*100).toFixed(0)}%`;
+
+    document.getElementById('kpi-nottrained').innerText = nottrained;
+    document.getElementById('pct-nottrained').innerText = `${((nottrained/total)*100).toFixed(0)}%`;
+
+    document.getElementById('kpi-resigned').innerText = resigned;
+    document.getElementById('pct-resigned').innerText = `${((resigned/total)*100).toFixed(0)}%`;
+
+    // القيم الجديدة المحدثة
+    document.getElementById('kpi-survey').innerText = kpiSurvey;
+    document.getElementById('pct-survey').innerText = `${((kpiSurvey/total)*100).toFixed(0)}%`;
+
+    document.getElementById('kpi-signed').innerText = signed;
+    document.getElementById('pct-signed').innerText = `${((signed/total)*100).toFixed(0)}%`;
+
+    document.getElementById('kpi-notsigned').innerText = notsigned;
+    document.getElementById('pct-notsigned').innerText = `${((notsigned/total)*100).toFixed(0)}%`;
+
+    document.getElementById('kpi-satisfied').innerText = kpiSatisfied;
+    document.getElementById('pct-satisfied').innerText = `${((kpiSatisfied/total)*100).toFixed(0)}%`;
+
+    document.getElementById('kpi-unsatisfied').innerText = kpiUnsatisfied;
+    document.getElementById('pct-unsatisfied').innerText = `0%`;
+}
+
+        function renderExecutiveInsights() {
+            const container = document.getElementById('insights-container');
+            container.innerHTML = '';
+            if (filteredData.length === 0) return;
+
+            const govStats = {};
+            filteredData.forEach(i => {
+                if(!govStats[i.governorate]) govStats[i.governorate] = { total: 0, comp: 0 };
+                govStats[i.governorate].total++;
+                if(i.status.includes('100%') || i.status.toLowerCase() === 'trained') govStats[i.governorate].comp++;
+            });
+
+            let topGov = 'N/A', lowGov = 'N/A', maxRate = -1, minRate = 2;
+            Object.keys(govStats).forEach(gov => {
+                const rate = govStats[gov].comp / govStats[gov].total;
+                if(rate > maxRate) { maxRate = rate; topGov = gov; }
+                if(rate < minRate) { minRate = rate; lowGov = gov; }
+            });
+
+            const specCounts = {};
+            filteredData.forEach(i => specCounts[i.spec] = (specCounts[i.spec] || 0) + 1);
+            const topSpec = Object.keys(specCounts).reduce((a, b) => (specCounts[a] > specCounts[b]) ? a : b, 'N/A');
+
+            const signedPct = ((filteredData.filter(i => i.survey.toLowerCase() === 'signed').length / filteredData.length) * 100).toFixed(0);
+            const compPct = ((filteredData.filter(i => i.status.includes('100%') || i.status.toLowerCase() === 'trained').length / filteredData.length) * 100).toFixed(0);
+
+            const insights = [
+                { title: 'Highest Completion', val: topGov, desc: 'Top operational governorate', icon: 'fa-trophy', color: 'text-emerald-600 bg-emerald-50' },
+                { title: 'Lowest Completion', val: lowGov, desc: 'Needs targeted alignment', icon: 'fa-triangle-exclamation', color: 'text-rose-600 bg-rose-50' },
+                { title: 'Top Specialization', val: topSpec, desc: 'Highest overall intake volume', icon: 'fa-pie-chart', color: 'text-indigo-600 bg-indigo-50' },
+                { title: 'Signed Contract Rate', val: `${signedPct}%`, desc: 'Onboarding legal safety rate', icon: 'fa-file-signature', color: 'text-teal-600 bg-teal-50' },
+                { title: 'Overall Completion', val: `${compPct}%`, desc: 'Total fully certified capacity', icon: 'fa-circle-check', color: 'text-cyan-600 bg-cyan-50' }
+            ];
+
+            insights.forEach(ins => {
+                container.innerHTML += `
+                    <div class="glass-card rounded-2xl p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-xl flex items-center justify-center text-md shadow-sm ${ins.color}">
+                            <i class="fa-solid ${ins.icon}"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${ins.title}</p>
+                            <h4 class="text-sm font-extrabold text-slate-800 mt-0.5 truncate max-w-[140px]">${ins.val}</h4>
+                            <p class="text-[9px] text-slate-400 mt-0.5 font-medium leading-none">${ins.desc}</p>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderCharts() {
+            if(Object.keys(charts).length > 0) {
+                Object.keys(charts).forEach(k => charts[k].destroy());
+            }
+
+            if(filteredData.length === 0) return;
+
+            // --- 1. SPECIALIZATION PIE ---
+            const specData = {};
+            filteredData.forEach(i => specData[i.spec] = (specData[i.spec] || 0) + 1);
+            charts.spec = new Chart(document.getElementById('chartSpecialization'), {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(specData),
+                    datasets: [{ data: Object.values(specData), backgroundColor: ['#00A970', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10 } } } } }
+            });
+
+            // --- 2. MATRIX (STACKED BAR) ---
+            const specs = [...new Set(filteredData.map(i => i.spec))];
+            const trainedArr = [], progressArr = [], notTrainedArr = [], resignedArr = [];
+            specs.forEach(s => {
+                const sub = filteredData.filter(i => i.spec === s);
+                trainedArr.push(sub.filter(i => i.status.includes('100%') || i.status.toLowerCase() === 'trained').length);
+                progressArr.push(sub.filter(i => i.status.toLowerCase().includes('progress')).length);
+                notTrainedArr.push(sub.filter(i => i.status.toLowerCase().includes('not trained')).length);
+                resignedArr.push(sub.filter(i => i.status.toLowerCase().includes('resign')).length);
+            });
+
+            charts.matrix = new Chart(document.getElementById('chartStatusSpecialization'), {
+                type: 'bar',
+                data: {
+                    labels: specs,
+                    datasets: [
+                        { label: 'Trained', data: trainedArr, backgroundColor: '#00A970' },
+                        { label: 'In Progress', data: progressArr, backgroundColor: '#f59e0b' },
+                        { label: 'Not Trained', data: notTrainedArr, backgroundColor: '#f43f5e' },
+                        { label: 'Resigned', data: resignedArr, backgroundColor: '#94a3b8' }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { x: { stacked: true }, y: { stacked: true } },
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12 } } }
+                }
+            });
+
+            // --- 3. SURVEY AGREEMENT RATE DONUT ---
+            const signedCount = filteredData.filter(i => i.survey.toLowerCase() === 'signed').length;
+            const unsignedCount = filteredData.length - signedCount;
+            charts.survey = new Chart(document.getElementById('chartSurvey'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Signed', 'Not Signed'],
+                    datasets: [{ data: [signedCount, unsignedCount], backgroundColor: ['#00A970', '#f43f5e'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // --- 4. WEEKLY PROGRESS TRENDS ---
+            const weeks = [...new Set(filteredData.map(i => i.week))].sort((a,b)=>parseInt(a)-parseInt(b));
+            const weeklyTrained = weeks.map(w => filteredData.filter(i => i.week === w && (i.status.includes('100%') || i.status.toLowerCase() === 'trained')).length);
+            const weeklyTotal = weeks.map(w => filteredData.filter(i => i.week === w).length);
+
+            charts.trend = new Chart(document.getElementById('chartWeeklyTrend'), {
+                type: 'line',
+                data: {
+                    labels: weeks.map(w => `Week ${w}`),
+                    datasets: [
+                        { label: 'Fully Trained Pipeline', data: weeklyTrained, borderColor: '#00A970', tension: 0.3, fill: false },
+                        { label: 'Total Intake Volume', data: weeklyTotal, borderColor: '#64748b', borderDash: [4, 4], tension: 0.3, fill: false }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // --- 5. GOVERNORATE RANKING ---
+            const govs = [...new Set(filteredData.map(i => i.governorate))];
+            const govRates = govs.map(g => {
+                const sub = filteredData.filter(i => i.governorate === g);
+                const rate = (sub.filter(i => i.status.includes('100%') || i.status.toLowerCase() === 'trained').length / sub.length) * 100;
+                return { gov: g, rate: rate };
+            }).sort((a, b) => b.rate - a.rate);
+
+            charts.gov = new Chart(document.getElementById('chartGovernorate'), {
+                type: 'bar',
+                data: {
+                    labels: govRates.map(r => r.gov),
+                    datasets: [{ label: 'Completion Rate (%)', data: govRates.map(r => r.rate), backgroundColor: 'rgba(0, 169, 112, 0.85)', borderRadius: 6 }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { min: 0, max: 100 } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('followup-table-body');
+            const searchTerm = document.getElementById('tableSearch').value.toLowerCase();
+            tbody.innerHTML = '';
+
+            const tableData = filteredData.filter(i => {
+                const isTrained = i.status.includes('100%') || i.status.toLowerCase() === 'trained';
+                const isSigned = i.survey.toLowerCase() === 'signed';
+                return isTrained && isSigned;
+            }).filter(i => {
+                return i.name.toLowerCase().includes(searchTerm) || 
+                       i.phone.includes(searchTerm) || 
+                       i.governorate.toLowerCase().includes(searchTerm) || 
+                       i.branch.toLowerCase().includes(searchTerm);
+            }).slice(0, 50);
+
+            if(tableData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-slate-400 font-medium">No target follow-up candidates match current filter coordinates.</td></tr>`;
+                return;
+            }
+
+            tableData.forEach(item => {
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/80 transition text-slate-700">
+                        <td class="p-4 font-bold text-slate-800">${item.name}</td>
+                        <td class="p-4 font-mono text-slate-500">${item.phone}</td>
+                        <td class="p-4"><span class="px-2 py-1 rounded-md bg-slate-100 text-slate-600 text-[11px] font-semibold">${item.governorate}</span></td>
+                        <td class="p-4 text-slate-500">${item.branch}</td>
+                        <td class="p-4 text-slate-600 font-medium">${item.supervisor}</td>
+                    </tr>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
