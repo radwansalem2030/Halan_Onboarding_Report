@@ -295,208 +295,257 @@
         let charts = {};
 
         // 200 COMPLETE ENTRIES DIRECTLY FROM THE UPLOADED TRAINING DATA SHEET
-const dataset200 = `
-HR Code,Officer Name,Specialized,Governorate,Branch,Phone #,Hiring Date,Supervisor,Taining Status,Survey Result,Questionnaire Result,72 hours,Week,Month,Year
-50020713,Hagag Ali Hagag Motwally,Loan Officer CF,Giza,الجيزة - برطس - تساهيل,1123956694,46188,Moustafa Mohamed Mohamed Ahmed,Resigned,Not Signed,,178.904425000073,25,June,2026
-50014651,Shimaa Ibrahim Ismail Sharaf Aldin,Loan Officer CF,Sharqia,الشرقية - العروبة - تساهيل,1505611624,46188,Mohamed Ashraf Ahmed Metwally,50% - In Progress,Not Signed,,178.904425000073,25,June,2026
-50020630,Zainab Khaled Sabre Fadel,Loan Officer CF,Qena,قنا - الشطبية - تساهيل,1031569587,46187,Ashaaia Onsy Melad Riyad,100% - Trained,signed,,202.904425000073,24,June,2026
-50020671,Shrouq Mahmoud Ahmed Gomaa,Loan Officer CF,Cairo,القاهرة - المعادي - تساهيل,1142736831,46187,Merna Maher Hamam Smamor Saleb,,Not Signed,,202.904425000073,24,June,2026
-50020684,Nesma Saead Mostafa Soliman,Loan Officer CF,Giza,الجيزة - بولاق الدكرور - تساهيل,1008897296,46187,Ramy Wafik Boshra Eshak,,Not Signed,,202.904425000073,24,June,2026
-50020686,Omnia Nasser Abdelmged Ezz Madboly,Loan Officer CF,Qalubia,القليوبية - كفر شكر - تساهيل,1004214217,46187,Khaled Ali Mohamed Mohamed,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-50020687,Nada Yehia Mahmoud Afara,Loan Officer CF,Alex,الاسكندرية - المنتزه - تساهيل,1229056230,46187,Ahmed Gaber Aly Ahmed Aly,100% - Trained,signed,,202.904425000073,24,June,2026
-50020689,Aya Adel Fathi Khairy,Loan Officer CF,Qalubia,القليوبية - ابو زعبل - تساهيل,1108290529,46187,Eslam Ahmed Radwan Ahmed,100% - Trained,signed,,202.904425000073,24,June,2026
-50020691,Hadeer Ahmed Ahmed Mohamed Eltrebely,Loan Officer CF,Port-said,بورسعيد - بورسعيد ثان - تساهيل,1210114765,46187,Esraa Abdelsalam Ahmed Abdelsalam Elbarawy,,Not Signed,,202.904425000073,24,June,2026
-50020692,Rawan Ibrahim Aliwa Ibrahim,Loan Officer CF,Qalubia,القليوبية - الدير - تساهيل,1004653299,46187,Amira Issa Lotfy Khamis,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-50020693,Mansi Magdi Mansi Abdelsayed,Loan Officer CF,Beny-suef,بني سويف - ببا - تساهيل,1095850861,46187,Rahel Samy Gerges Younan,,Not Signed,,202.904425000073,24,June,2026
-50020696,Mohamed Yosaaf Sheahata Elsaid,Loan Officer CF,Alex,الاسكندرية - محرم بك ثان - مركزى,1288186785,46187,Mohamed Hassan Gendy Hassan Saed,50% - In Progress,signed,,202.904425000073,24,June,2026
-50020697,Gehad Nader Mohamed Salah,Loan Officer CF,Giza,الجيزة - الحوامديه - تساهيل,1117534946,46187,Hady Abdelnasser Hanfy Shaarawy,,Not Signed,,202.904425000073,24,June,2026
-50020698,Geges Aldeeb Riyad Gorgy,Loan Officer CF,Souhag,سوهاج - الحواويش - تساهيل,1204037300,46187,Maysara Mohamed Helmy Abdulrahman,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-50020699,Abdalla Ashraf Ali Elsayed,Loan Officer CF,Souhag,سوهاج - الحواويش - تساهيل,1276333955,46187,Maysara Mohamed Helmy Abdulrahman,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-50020700,Menna Mahmoud Mohamed Abdelkader,Loan Officer CF,Sharqia,الشرقية - العاشر من رمضان - تساهيل,1210396411,46187,Mohamed Ashraf Ahmed Metwally,50% - In Progress,Not Signed,,202.904425000073,24,June,2026
-50020701,Roqia Saied Saleh Gendey,Loan Officer CF,Sharqia,الشرقية - الزقازيق - تساهيل,1153308434,46187,Mohamed Yasser AbdelSadek Ibrahim,50% - In Progress,Not Signed,,202.904425000073,24,June,2026
-50020702,Eman Wahid Mahmoud Mohamed,Loan Officer CF,Souhag,سوهاج - الحواويش - تساهيل,1028691519,46187,Maysara Mohamed Helmy Abdulrahman,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-50020703,Mona Ali Ahmed Mohamed,Loan Officer CF,Cairo,القاهرة - السيده زينب - تساهيل,1155434102,46187,Omar Ashraf Abdelfattah Atya,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-50020704,Abdlrazk Goma Said Frghrly,Loan Officer CF,Asseiut,اسيوط - منفلوط ثان - تساهيل,1062356946,46187,Abdelaziz Khaled Abdelaziz Mohamed,,Not Signed,,202.904425000073,24,June,2026
-50020705,Azza Gamal Mohamed Abdelmanam,Loan Officer CF,Behira,البحيرة - كوم البركة - مركزى,101532179,46187,Karim Zakarya Mohamed Abdel,100% - Trained,signed,,202.904425000073,24,June,2026
-50020706,Mahmoud Sobhy Mahmoud Mohamed,Loan Officer CF,Giza,الجيزة - بولاق الدكرور - تساهيل,1118187613,46187,Ramy Wafik Boshra Eshak,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-50020707,Eslam Yasser Mohamed Ali,Loan Officer CF,Aswan,اسوان - الكورنيش - مركزى,1120701783,46187,Moustafa Korany Mohamed Ahmed,50% - In Progress,Not Signed,,202.904425000073,24,June,2026
-50020709,Esraa Mohamed Mahmoud Mohamed,Loan Officer CF,Ismailia,الاسماعيلية - الاسماعيلية - مركزى,1273291893,46187,Bola Ata Fakhry Tadros,,Not Signed,,202.904425000073,24,June,2026
-50020710,Hassan Eid Hassan Hassan,Loan Officer CF,Giza,الجيزة - الحوامديه - تساهيل,1125174433,46187,Hady Abdelnasser Hanfy Shaarawy,,Not Signed,,202.904425000073,24,June,2026
-50020711,Donia Osama Azat Mohamed,Loan Officer CF,Gharbya,الغربية - قطور - تساهيل,1055053865,46187,Tamer Ali Kamal Elfalah,50% - In Progress,Not Signed,,202.904425000073,24,June,2026
-50020715,Marcel Munir Elias Yusuf,Loan Officer CF,Fayoum,الفيوم - سيلا - تساهيل,1127659690,46188,Ahmed Ewais Ramadan Abdelhamed,Resigned,Not Signed,,178.904425000073,25,June,2026
-50020716,Hoda Mohamed Ramadan Mohamed,Loan Officer CF,Giza,الجيزة - المتانيا - مشروعي,1104725216,46188,Ahmed Mostafa Mohamed Ahmed,50% - In Progress,Not Signed,,178.904425000073,25,June,2026
-50020718,Mohamed Ahmed Kamal Mohamed Anwr Sabeha,Loan Officer CF,Menoufia,المنوفية - السادات - تساهيل,1282752922,46188,Abdelhakeem Fakeeh Abdelhakeem Ahmed Ghonem,,Not Signed,,178.904425000073,25,June,2026
-50020719,Ayat Ibrahim Sayed Khalil,Loan Officer CF,Luxor,الاقصر - الدير شرق - تساهيل,1101785051,46188,Michael Milad Salama Ebrahim,100% - Trained,signed,,178.904425000073,25,June,2026
-50020720,Ziad Shaban Abdulla Mohamed,Loan Officer CF,Giza,الجيزة - الصف ثان - تساهيل,1102007486,46188,Mariam Essam Attia Eskander,100% - Trained,Not Signed,,178.904425000073,25,June,2026
-50020721,Esraa Fawazy Abdelrsoal Abdelmonem,Loan Officer CF,Aswan,اسوان - نصر النوبه - مركزى,1143256755,46188,Osama Fathy Naseef Bekhet,50% - In Progress,Not Signed,,178.904425000073,25,June,2026
-50020722,Krstin Azaat Thabat Gerges,Loan Officer CF,Menia,المنيا - ديرمواس - تساهيل,1274534464,46188,Kerolos Sameh Fekry Basta,Resigned,Not Signed,,178.904425000073,25,June,2026
-50020723,Ahmed Said Abdelazim Bakry Ali,Loan Officer CF,Giza,الجيزة - اطفيح - مشروعي,1123734059,46188,Mariam Essam Attia Eskander,,Not Signed,,178.904425000073,25,June,2026
-50020724,Hend Shokry Ramadan Elghamrwy,Loan Officer CF,Behira,البحيرة - المحموديه - تساهيل,1127482701,46187,Gomaa Elsayed Mohamed Ghoneem,100% - Trained,signed,,202.904425000073,24,June,2026
-50020725,Maha Barkat Mahmoud Gaheen,Loan Officer CF,Giza,الجيزة - امبابة ثان - تساهيل,1140790343,46187,Moustafa Mohamed Mohamed Ahmed,100% - Trained,signed,,202.904425000073,24,June,2026
-50020726,Hossam Mangy Samier Takay,Loan Officer CF,Asseiut,اسيوط - المطيعه - تساهيل,1206324992,46188,Mario Khalaf Seha Zakhary,,Not Signed,,178.904425000073,25,June,2026
-50020728,Youanaa Zouheir Maks Shalaby,Loan Officer CF,Asseiut,اسيوط - كوم بوها - تساهيل,1288679469,46188,Amany Kamal Sedky Hanin,,Not Signed,,178.904425000073,25,June,2026
-50020729,Neama Aref Mohamed Qenawy Mohamed,Loan Officer CF,Ismailia,الاسماعيلية - نفيشه - تساهيل,1010189210,46187,Mahmoud Nabil Mohamed Rageh,,Not Signed,,202.904425000073,24,June,2026
-50020731,Malak Hany Sayed Helmy Farghaly,Loan Officer CF,Giza,الجيزة - امبابة - تساهيل,1122086964,46188,Ramy Wafik Boshra Eshak,50% - In Progress,Not Signed,,178.904425000073,25,June,2026
-50020734,Azza Abdelnabi Nour Eldin Mohamed,Loan Officer CF,Cairo,القاهرة - حلوان - تساهيل,1111405972,46188,Anasimon Ashraf Bebawy Yousef,50% - In Progress,Not Signed,,178.904425000073,25,June,2026
-50020735,Asmaa Ahmed Abdelaaleem Mohamed,Loan Officer CF,Giza,الجيزة - امبابة ثان - تساهيل,1032523478,46188,Moustafa Mohamed Mohamed Ahmed,100% - Trained,signed,,178.904425000073,25,June,2026
-50020736,Rewan Elsayed Ahmed Abd Elrhman Mohamed,Loan Officer CF,Port-said,بورسعيد - بورسعيد - تساهيل,1281575368,46188,Esraa Abdelsalam Ahmed Abdelsalam Elbarawy,,Not Signed,,178.904425000073,25,June,2026
-50020737,Islam Essmat AbdElAAl Mahmoud,Loan Officer CF,Giza,الجيزة - الوراق - تساهيل,1113888762,46188,Moustafa Mohamed Mohamed Ahmed,Resigned,Not Signed,,178.904425000073,25,June,2026
-50020738,Menna Allah Omar Abdelmotati Ra,Loan Officer CF,Cairo,القاهرة - حلوان - تساهيل,1149546464,46188,Anasimon Ashraf Bebawy Yousef,50% - In Progress,Not Signed,,178.904425000073,25,June,2026
-50020740,Mostafa Fawzi Mohamed Ayman,Loan Officer CF,Giza,الجيزة - الحصري - تساهيل,1065333514,46187,Hady Abdelnasser Hanfy Shaarawy,Resigned,Not Signed,,202.904425000073,24,June,2026
-50020743,Ahmed Hussien Mosa Mohamed,Loan Officer CF,Giza,الجيزة - العياط ثالث - مركزى,1159427944,46187,Ahmed Mostafa Mohamed Ahmed,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-50020746,Rawan Mahmoud Hasab Allah Hassan,Loan Officer CF,Fayoum,الفيوم - طامية - تساهيل,1096071018,46189,Ebram Samy Moawad Samaan,50% - In Progress,Not Signed,,154.904425000073,25,June,2026
-50020747,Rehab Emad Ahmad Sawy,Loan Officer CF,Menia,المنيا - بني حسن - تساهيل,1137597611,46187,Karim Khaled Yahia Abdelghany,50% - In Progress,Not Signed,,202.904425000073,24,June,2026
-50020748,Youssef Gharib Mosaad Elmghrbe,Loan Officer CF,Giza,الجيزة - العياط ثالث - مركزى,1148135181,46187,Ahmed Mostafa Mohamed Ahmed,0,Not Signed,,202.904425000073,24,June,2026
-50020749,Norhan Ali Shaban Amara,Loan Officer CF,Cairo,القاهرة - الزاويه الحمراء - تساهيل,1115726479,46188,Fatma Zaree Mohamed Salem,100% - Trained,Not Signed,,178.904425000073,25,June,2026
-50020752,Esraa Reda Elsaied Abdelrasol,Loan Officer CF,Behira,البحيرة - كوم حماده - تساهيل,1032166737,46189,Mohamed Fathy Abdelatif Abdelatif Maklad,100% - Trained,signed,,154.904425000073,25,June,2026
-50020753,Shrouk Ahmed Abdelmenem Aboelnaga Ali,Loan Officer CF,Kafr Shikh,كفر الشيخ - سخا - تساهيل,1025273524,46188,Nourhan Adel Yousef Mohamed Shehata,100% - Trained,Not Signed,,178.904425000073,25,June,2026
-50020754,Aslam Abobakr Drder Mhny,Loan Officer CF,Cairo,القاهرة - حلوان ثالث - مركزى,1007058840,46187,Anasimon Ashraf Bebawy Yousef,50% - In Progress,Not Signed,,202.904425000073,24,June,2026
-50020756,Shahad Ragab Youssef Hussein,Loan Officer CF,Behira,البحيرة - قافله - تساهيل,1117290442,46189,Ahmed Kamel Abdelatif Ali Nagy,100% - Trained,Not Signed,,154.904425000073,25,June,2026
-50020759,Mai Ahmed Khalil Ebrahem,Loan Officer CF,Dumiatte,دمياط - الزرقا - تساهيل,1014709056,46189,Walid Elsayed Mohamed Atwa Elmongy ,50% - In Progress,Not Signed,,154.904425000073,25,June,2026
-50020760,Yousef Lamlom Sedky Atallah,Loan Officer CF,Menia,المنيا - ابوقرقاص - تساهيل,1272967908,46189,Karim Khaled Yahia Abdelghany,50% - In Progress,Not Signed,,154.904425000073,25,June,2026
-50020761,Abdelhamed Shawky Abdelhamed ,Loan Officer CF,Behira,البحيرة - كوم حماده ثان - تساهيل,1096469202,46189,Mohamed Fathy Abdelatif Abdelatif Maklad,100% - Trained,signed,,154.904425000073,25,June,2026
-50020762,Madonna Samir Shehataa Ayoub,Loan Officer CF,Sharqia,الشرقية - اولاد صقر - تساهيل,1060931152,46188,Ahmed Ismael Abdelaal Abdelaal Ghoniem,,Not Signed,,178.904425000073,25,June,2026
-50020763,Mahmoud Atef Shaaban Abdatif,Loan Officer CF,Souhag,سوهاج - غرب سوهاج - تساهيل,1019377645,46189,Maysara Mohamed Helmy Abdulrahman,50% - In Progress,Not Signed,,154.904425000073,25,June,2026
-50020764,Mahmoud Atef Shaaban Ellatif,Loan Officer CF,Souhag,سوهاج - غرب سوهاج - تساهيل, ,46189,Maysara Mohamed Helmy Abdulrahman,,Not Signed,,154.904425000073,25,June,2026
-50020765,Faten Ashraf William Habib,Loan Officer CF,Beny-suef,بني سويف - شرق بني سويف - تساهيل,1227334709,46189,Amgad Ghaly Naguib Bebawy,100% - Trained,Not Signed,,154.904425000073,25,June,2026
-50020766,Hasnaa Mostafa Hassan Ahmed,Loan Officer CF,Asseiut,اسيوط - فزاره - تساهيل,1140778462,46189,Amany Kamal Sedky Hanin,100% - Trained,Not Signed,,154.904425000073,25,June,2026
-50020690,Fayza Mohamed Fargal Hassan,Loan Officer CF,Menia,المنيا - ابيوها - تساهيل,1028616472,46187,Karim Khaled Yahia Abdelghany,Resigned,Not Signed,,202.904425000073,24,June,2026
-50020714,Eman Samir Asaad Morocos,Loan Officer CF,Menia,المنيا - ابوقرقاص - تساهيل,1143863575,46187,Karim Khaled Yahia Abdelghany,33% - In Progress,Not Signed,,202.904425000073,24,June,2026
-20025946,Noura Shaban Hamdoun Mohamadin,Loan Officer,Souhag,سوهاج - نيده - تساهيل,1142518664,46187,Maysara Mohamed Helmy Abdulrahman,,Not Signed,,202.904425000073,24,June,2026
-20051958,Hany Samir Barakat Said,Loan Officer,Menia,المنيا - منشية الدهب - تساهيل,1095755154,46187,Sherif Dahy Zakaria Ibrahem,,Not Signed,,202.904425000073,24,June,2026
-20065535,Rasha Rashad Abdelsattar Mahmoud,Loan Officer,Behira,البحيرة - الكوم الاخضر - تساهيل,1114508485,46187,Karim Zakarya Mohamed Abdel,100% - Trained,signed,,202.904425000073,24,June,2026
-20066504,Osama Alfy Abdelmalak Mosaad,Loan Officer Investment,Asseiut,اسيوط - ديروط ثان - تساهيل,1552114190,46187,Amany Kamal Sedky Hanin,100% - Trained,signed,,202.904425000073,24,June,2026
-20082690,Mohamed Elsafi Mohamed Mohamed Shehata,Loan Officer,Behira,البحيرة - قافله - تساهيل,1206597567,46188,Ahmed Kamel Abdelatif Ali Nagy,100% - Trained,Not Signed,,178.904425000073,25,June,2026
-20082786,Ahmed Ragab Abdelwahab Mahmoud,Loan Officer,Beny-suef,بني سويف - بهبشين - تساهيل,1220039224,46187,Amgad Ghaly Naguib Bebawy,,Not Signed,,202.904425000073,24,June,2026
-20082789,Saber Khaled Fouad Mahamed,Loan Officer,Souhag,سوهاج - دار السلام سوهاج - تساهيل,1028564971,46187,Hamdy Fawzy Mahmoud Abdelrahem,100% - Trained,signed,,202.904425000073,24,June,2026
-20082790,Omnia Tarek Attia Mostafa,Loan Officer Investment,Gharbya,الغربية - قطور - تساهيل,1019536548,46187,Tamer Ali Kamal Elfalah,50% - In Progress,Not Signed,,202.904425000073,24,June,2026
-20082792,Shaima Mohamed Ali Abdallah,Loan Officer,Asseiut,اسيوط - الغنايم ثان - مركزى,1140369419,46187,Mario Khalaf Seha Zakhary,,Not Signed,,202.904425000073,24,June,2026
-20082795,Sarwfeem Samuel Rezek FaragAllah,Loan Officer,Menia,المنيا - برطباط - تساهيل,1274337288,46187,Kerolos Wasef Fahmy Wasef,,Not Signed,,202.904425000073,24,June,2026
-20082796,Zinab Abualsaud Shehata Mohamed,Loan Officer,Souhag,سوهاج - العسيرات - تساهيل,1121956087,46187,Abelrazik Tharwat Abdelrazik Qasem,100% - Trained,signed,,202.904425000073,24,June,2026
-20082799,Dina AboBakr Hassn Soliman,Loan Officer Investment,Menoufia,المنوفية - تلوانه - تساهيل,1062067542,46187,Mohamed Zaghlol Abdelmoatty Rady,100% - Trained,signed,,202.904425000073,24,June,2026
-20082801,Basant Mohamed Ahmed Abdo,Loan Officer,Alex,الاسكندرية - البيطاش - تساهيل,1205290493,46187,Amr yehia Abdelmonem Mohamed,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-20082803,Shaymaa Ahmed Mahmoud Ahmed,Loan Officer,Alex,الاسكندرية - البيطاش - تساهيل,1208935032,46187,Amr yehia Abdelmonem Mohamed,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-20082804,Mohamed Hamed Ebraheem Mohamed,Loan Officer,Behira,البحيرة - ابوحمص ثان - تساهيل,1143269168,46187,Ahmed Bahaa Eldin Soliman,100% - Trained,signed,,202.904425000073,24,June,2026
-20082807,Shrouq Mostafa Mohamad Ahl,Loan Officer,Qalubia,القليوبية - ابو زعبل - تساهيل,1128656481,46187,Eslam Ahmed Radwan Ahmed,100% - Trained,signed,,202.904425000073,24,June,2026
-20082809,Tasbeeh Hassani Abdulmajed Mohamed,Loan Officer,Luxor,الاقصر - الزينيه بحري - تساهيل,1062937234,46187,Ismael Haggag Ismael Abdelhafez,100% - Trained,signed,,202.904425000073,24,June,2026
-20082811,Amal Ashraf Moustafa Ebrahim,Loan Officer,Luxor,الاقصر - الزينيه بحري - تساهيل,1031648377,46187,Ismael Haggag Ismael Abdelhafez,100% - Trained,signed,,202.904425000073,24,June,2026
-20082812,Rania Ebrahim Zaaghlol Ebrahim,Loan Officer,Sharqia,الشرقية - بدر - تساهيل,1093986708,46187,Mohamed Ashraf Ahmed Metwally,33% - In Progress,Not Signed,,202.904425000073,24,June,2026
-20082815,Hanan Mosad Ahmed Mohamed ElHour,Loan Officer,Behira,البحيرة - رشيد ثان - مركزى, ,46187,Ahmed Bahaa Eldin Soliman,100% - Trained,signed,,202.904425000073,24,June,2026
-20082816,Mohamed Tharwat Adeltawab Mohamed,Loan Officer,Giza,الجيزة - البدرشين ثان - تساهيل,1129418179,46187,Ahmed Mostafa Mohamed Ahmed,,Not Signed,,202.904425000073,24,June,2026
-20082818,Mai Elsayed Abbas Mohamed,Loan Officer,Alex,الاسكندرية - البيطاش - تساهيل,1272162699,46187,Amr yehia Abdelmonem Mohamed,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-20082823,Aya Ali Aboelmagd Ali,Loan Officer,Souhag,سوهاج - جرجا - تساهيل,1098158318,46187,Abelrazik Tharwat Abdelrazik Qasem,100% - Trained,signed,,202.904425000073,24,June,2026
-20082824,Nabil Nagy Shafik Boles,Loan Officer,Souhag,سوهاج - جرجا ثان - تساهيل,1280076876,46187,Abelrazik Tharwat Abdelrazik Qasem,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-20082827,Amed Elsayed Mohamed Badran,Loan Officer,Daqhlia,الدقهلية - بلقاس - تساهيل,1055990809,46187,Mahmoud Mohsen Ahmed Abdallah Aldawlatly,,Not Signed,,202.904425000073,24,June,2026
-20082828,Jailan Mustafa Ahmed Baioumy,Loan Officer Investment,Behira,البحيرة - ابوالمطامير ثان - مركزى,1070952533,46187,Karim Zakarya Mohamed Abdel,100% - Trained,signed,,202.904425000073,24,June,2026
-20082831,Asmaa Algero Alsamman Ali,Loan Officer,Souhag,سوهاج - بني حميل - تساهيل,1050225068,46187,Hamdy Fawzy Mahmoud Abdelrahem,100% - Trained,signed,,202.904425000073,24,June,2026
-20082833,Ahmed Ibrahum Metwally Shafatr,Loan Officer,Gharbya,الغربية - طنطا - تساهيل,1093475002,46187,Ahmed Samir fathi Elganainy,67% - In Progress,Not Signed,,202.904425000073,24,June,2026
-20082835,Abdallah Gamal Mohamed Refaat,Loan Officer,Giza,الجيزة - البدرشين ثان - تساهيل,1154881404,46187,Ahmed Mostafa Mohamed Ahmed,,Not Signed,,202.904425000073,24,June,2026
-20082841,Marina Eied Gergies Sedra,Loan Officer,Menia,المنيا - برطباط - تساهيل,1553700442,46187,Kerolos Wasef Fahmy Wasef,33% - In Progress,Not Signed,,202.904425000073,24,June,2026
-20082842,Rabab Mohamed Mahmoud Mohamed,Loan Officer,Alex,الاسكندرية - البيطاش - تساهيل,1278722498,46187,Amr yehia Abdelmonem Mohamed,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-20082844,Hagr Ragab Abdallah Abobakr,Loan Officer,Marsa Matruh,مطروح - مرسي مطروح - مركزى,1279361556,46187,Ahmed Gaber Aly Ahmed Aly,100% - Trained,signed,,202.904425000073,24,June,2026
-20082845,Aya Waleed Mohamed Mostafa,Loan Officer,Gharbya,الغربية - قطور - تساهيل,1004012395,46187,Tamer Ali Kamal Elfalah,67% - In Progress,Not Signed,,202.904425000073,24,June,2026
-20082847,Rozaline Hana Boshra Hana,Loan Officer,Luxor,الاقصر - البغدادي - تساهيل,1212806254,46187,Mostafa Eltayeb Mostafa Mohamed,33% - In Progress,Not Signed,,202.904425000073,24,June,2026
-20082848,Mohamed Gamal Hamed ZainEldn,Loan Officer Investment,Menoufia,المنوفية - تلوانه - تساهيل,1114099073,46187,Mohamed Zaghlol Abdelmoatty Rady,100% - Trained,signed,,202.904425000073,24,June,2026
-20082849,Feryal Elsayed Elshahat Elsayed,Loan Officer,Kafr Shikh,كفر الشيخ - سريوه الكبري - تساهيل,1092663723,46187, Emad Atef Adly Ibrahem,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-20082850,Marwa Mahmoud Mokhtar Taha,Loan Officer,Qalubia,القليوبية - شبلنجه - تساهيل,1094888266,46187,Khaled Ali Mohamed Mohamed,,Not Signed,,202.904425000073,24,June,2026
-20082853,Salma Alsayed Albaz Ebrahem,Loan Officer,Daqhlia,الدقهلية - شها - تساهيل,1015433421,46187,Abdallah Sabry Abdallah Barakat,,Not Signed,,202.904425000073,24,June,2026
-20082855,Beshoy Gerges Saad Beshay,Loan Officer,Alex,الاسكندرية - البيطاش - تساهيل,1206259842,46187,Amr yehia Abdelmonem Mohamed,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-20082857,Mohamed Karem Habib Abdelelaziz,Loan Officer,Fayoum,الفيوم - اطسا - تساهيل,1063912957,46187,Marina Emad Attia Beshay,100% - Trained,signed,,202.904425000073,24,June,2026
-20082858,Rewan Mohamed Mohamed Mostafa,Loan Officer,Port-said,بورسعيد - بورسعيد - تساهيل,1069345004,46187,Esraa Abdelsalam Ahmed Abdelsalam Elbarawy,,Not Signed,,202.904425000073,24,June,2026
-20082859,Asmaa Hamdy Hamed Noman,Loan Officer,Dumiatte,دمياط - سيف الدين - تساهيل,1099049513,46187,Walid Elsayed Mohamed Atwa Elmongy ,,Not Signed,,202.904425000073,24,June,2026
-20082860,Azaa Elsayed Mohamed Abdelrazk,Loan Officer,Daqhlia,الدقهلية - دنجواي شربين - تساهيل,100251374,46187,Abdallah Sabry Abdallah Barakat,,Not Signed,,202.904425000073,24,June,2026
-20082861,Kerlous Adel Waheeb Meshrqy,Loan Officer,Asseiut,اسيوط - صنبو ثان - تساهيل,1224008316,46187,Amany Kamal Sedky Hanin,33% - In Progress,Not Signed,,202.904425000073,24,June,2026
-20082863,Manar Samy Mahmoud Ali Mansour,Loan Officer,Qalubia,القليوبية - شبرا الخيمة - تساهيل,1100874004,46187,Nourhan Ahmed Mohamed Abdelwahab,33% - In Progress,Not Signed,,202.904425000073,24,June,2026
-20082865,Fares Abdelkarim Gaber ,Loan Officer,Alex,الاسكندرية - البيطاش - تساهيل,1275420244,46187,Amr yehia Abdelmonem Mohamed,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-20082866,Mahmoud Sabry Nasr Nagy,Loan Officer,Behira,البحيرة - دمنهور - مشروعي,1014647903,46187,Ibrahim Reda Abdelaziz Kheerallah,100% - Trained,signed,,202.904425000073,24,June,2026
-20082867,Eslam Ezzat Nagy Mohamed,Loan Officer,Fayoum,الفيوم - مدينة الفيوم - تساهيل,1146426021,46187,Ahmed Ewais Ramadan Abdelhamed,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-20082869,Demiana Ashraf Abdelsayed Abdullah,Loan Officer,Cairo,القاهرة - الشرابية - تساهيل,1037063493,46187,Fatma Zaree Mohamed Salem,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-20082873,Ahmad Khaled Ahmad Ikram,Loan Officer,Menia,المنيا - ملوي ثان - تساهيل,1149592044,46187,Sandy Wageh Zakaria Rizk,67% - In Progress,Not Signed,,202.904425000073,24,June,2026
-20082875,Heba Salah Sleiman Ali,Loan Officer,Souhag,سوهاج - العسيرات - تساهيل,1116601059,46188,Abelrazik Tharwat Abdelrazik Qasem,100% - Trained,signed,,178.904425000073,25,June,2026
-20082876,Noha Abdelaziz Hassen Abdelaziz,Loan Officer,Sharqia,الشرقية - ابوحماد - مشروعي,1228381137,46188,Samar Mahmoud Mohamed Elsayed,33% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082877,Yousef Eazet Abdelazem Bstawey,Loan Officer,Giza,الجيزة - بولاق الدكرور - تساهيل,1143206289,46188,Ramy Wafik Boshra Eshak,,Not Signed,,178.904425000073,25,June,2026
-20082878,Hanaa Khamis Hasanin Sanior,Loan Officer Investment,Behira,البحيرة - ادكو - تساهيل,1277893837,46188,Ahmed Kamel Abdelatif Ali Nagy,100% - Trained,signed,,178.904425000073,25,June,2026
-20082880,Sandy Adel Nour Labeb,Loan Officer Investment,Giza,الجيزة - فيصل - تساهيل,1276244623,46188,Mohamed Saeed Hosny Shazly,0% - WRONG ENTRY,Not Signed,,178.904425000073,25,June,2026
-20082881,Eman AbdelAziz Hassan Soleiman,Loan Officer,Souhag,سوهاج - ساقلته - تساهيل,1140490614,46188,Maysara Mohamed Helmy Abdulrahman,,Not Signed,,178.904425000073,25,June,2026
-20082884,Sosana Milad Mikhaeil Bolis,Loan Officer,Cairo,القاهرة - شبرا مصر - تساهيل,1140709074,46188,Omar Ashraf Abdelfattah Atya,100% - Trained,Not Signed,,178.904425000073,25,June,2026
-20082886,Abanoub Narouz Gares Abdo,Loan Officer,Luxor,الاقصر - الشغب - تساهيل,1123880295,46188,Michael Milad Salama Ebrahim,33% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082888,Nagwa Mousa Mohamed Abouria,Loan Officer,Gharbya,الغربية - مشله - تساهيل,1024319076,46188,Mahmoud Mohamed Talaat Abdelreheim,Resigned,Not Signed,,178.904425000073,25,June,2026
-20082889,Wesam Mohamed Abelrauf Ahmed Ahmed,Loan Officer,Ismailia,الاسماعيلية - الظاهرية - مركزى,1150662077,46188,Mahmoud Nabil Mohamed Rageh,,Not Signed,,178.904425000073,25,June,2026
-20082890,Marwa Mohamed Asaad Morad,Loan Officer,Sharqia,الشرقية - بدر - تساهيل,1067375186,46188,Mohamed Ashraf Ahmed Metwally,33% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082891,Ahmed Eid Mohamedabdallah Khalifa,Loan Officer,Dumiatte,دمياط - فارسكور - تساهيل,1113052023,46188,Walid Elsayed Mohamed Atwa Elmongy ,33% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082893,Shawky Badwy Shehata Ebrahem,Loan Officer,Menoufia,المنوفية - ميت الواسطى - تساهيل,1154609858,46188,Abdelhakeem Fakeeh Abdelhakeem Ahmed Ghonem,100% - Trained,signed,,178.904425000073,25,June,2026
-20082894,Tahya Mostafa Elsyed Ahmed,Loan Officer,Daqhlia,الدقهلية - نبروه - تساهيل,1014708244,46188,Amr Adel Mohamed Shehata,67% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082895,Onay Emad Abdp Ibrahim,Loan Officer,Gharbya,الغربية - قطور - تساهيل,1229482627,46188,Tamer Ali Kamal Elfalah,Resigned,Not Signed,,178.904425000073,25,June,2026
-20082896,Alaa Fathy Elsayed Gomaa,Loan Officer,Behira,البحيرة - دربك - تساهيل ,1271419989,46188,Gomaa Elsayed Mohamed Ghoneem,100% - Trained,signed,,178.904425000073,25,June,2026
-20082897,Menna Khaled Loutfi Ali Hindk,Loan Officer,Daqhlia,الدقهلية - نبروه - تساهيل,1031809483,46188,Amr Adel Mohamed Shehata,67% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082899,Abdo Mohamed Abdo Salem,Loan Officer,Sharqia,الشرقية - فاقوس - مشروعي,1036150183,46187,Ahmed Ismael Abdelaal Abdelaal Ghoniem,,Not Signed,,202.904425000073,24,June,2026
-20082900,Reham Malak Makram Ataya,Loan Officer,Sharqia,الشرقية - بدر - تساهيل,1229202498,46188,Mohamed Ashraf Ahmed Metwally,33% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082902,Gamal Khairy Mohamed Taha,Loan Officer,Cairo,القاهرة - الاميرية - تساهيل,1099573576,46188,Fatma Zaree Mohamed Salem,33% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082903,Mohamed Fathy Gomaa Mohamed,Loan Officer,Behira,البحيرة - غازى - تساهيل,1275520686,46188,Karim Zakarya Mohamed Abdel,,Not Signed,,178.904425000073,25,June,2026
-20082905,Marwan Hussen Sayed Mohamed,Loan Officer,Qalubia,القليوبية - القناطر الخيريه - تساهيل,1097172493,46188,Nourhan Farid Hamdy Abdelreheem,33% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082907,Ahmed Osman Ibrahem Osman,Loan Officer,Ismailia,الاسماعيلية - الاسماعيلية - مركزى,1206821832,46188,Bola Ata Fakhry Tadros,,Not Signed,,178.904425000073,25,June,2026
-20082908,RAED Medhat Helmy Khalil,Loan Officer,Menia,المنيا - الروضه ثان - تساهيل,1022077172,46188,Sandy Wageh Zakaria Rizk,,Not Signed,,178.904425000073,25,June,2026
-20082909,Asmaa Amin Mohamed Mohamed,Loan Officer,Sharqia,الشرقية - جميزة بني عمرو - تساهيل,1016545808,46188,Ahmed Ismael Abdelaal Abdelaal Ghoniem,33% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082910,AbdRahman Mahmoud Ahmed Hamdan,Loan Officer,Asseiut,اسيوط - القوصية - تساهيل,1067511010,46188,Amany Kamal Sedky Hanin,,Not Signed,,178.904425000073,25,June,2026
-20082912,Aya Eldesouky Abdrabbo Zaghloul,Loan Officer,Gharbya,الغربية - مشله - تساهيل,1019923290,46188,Mahmoud Mohamed Talaat Abdelreheim,Resigned,Not Signed,,178.904425000073,25,June,2026
-20082914,Abdallah Ahmed Ali Ahmed,Loan Officer,Luxor,الاقصر - الاقصر - تساهيل,1094180082,46188,Ismael Haggag Ismael Abdelhafez,100% - Trained,Not Signed,,178.904425000073,25,June,2026
-20082915,Eslam Sabry Elsaid Nasr,Loan Officer,Gharbya,الغربية - كفر الزيات - تساهيل,1003690293,46188,Mahmoud Mohamed Talaat Abdelreheim,Resigned,Not Signed,,178.904425000073,25,June,2026
-20082916,Hany Ayman Hamad Mohamed,Loan Officer,Gharbya,الغربية - نهطاي - تساهيل,1012061650,46188,Tamer Ali Kamal Elfalah,Resigned,Not Signed,,178.904425000073,25,June,2026
-20082917,Ahmed Nabil Abdelnabi Abdo,Loan Officer,Cairo,القاهرة - البساتين - تساهيل,1129734899,46188,Merna Maher Hamam Smamor Saleb,100% - Trained,Not Signed,,178.904425000073,25,June,2026
-20082918,Fady Khaled Alfy Ragheb,Loan Officer,Souhag,سوهاج - نجع النجار - تساهيل,1278183862,46188,Khaled Hagag Mohamed Mahmoud,100% - Trained,signed,,178.904425000073,25,June,2026
-20082919,Shahd Anwar Farag Abdallah,Loan Officer,Gharbya,الغربية - مشله - تساهيل,1012841647,46188,Mahmoud Mohamed Talaat Abdelreheim,33% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082920,Moaz Mohamed Mohamed Salem,Loan Officer,Alex,الاسكندرية - العامريه ثان - مركزى,1153377532,46187,Mohamed Hassan Gendy Hassan Saed,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-20082922,Omar Adel Mansour Saad,Loan Officer,Behira,البحيرة - حسن قاسم - تساهيل,1280016797,46188,Ibrahim Reda Abdelaziz Kheerallah,,Not Signed,,178.904425000073,25,June,2026
-20082923,Amira Abdelsalam Ahmed Sayed,Loan Officer,Giza,الجيزة - فيصل ثان - تساهيل,1145333321,46188,Mohamed Saeed Hosny Shazly,,Not Signed,,178.904425000073,25,June,2026
-20082924,Mostafa Hagag Abdallah Mohamed,Loan Officer,Luxor,الاقصر - ارمنت الحيط - تساهيل,1195725598,46188,Mostafa Eltayeb Mostafa Mohamed,100% - Trained,signed,,178.904425000073,25,June,2026
-20082926,Esraa Hany Fawzy Esmail,Loan Officer,Beny-suef,بني سويف - الواسطي ثالث - مركزى,1102414766,46188,Abram Magdy Tawfik Hana,,Not Signed,,178.904425000073,25,June,2026
-20082927,David Sameh Qalini Farag Alla,Loan Officer,Menia,المنيا - سمالوط - مشروعي,1063688320,46188,Abanoub Emad Thabet Farag,,Not Signed,,178.904425000073,25,June,2026
-20082928,Mohamed Saeed Ahmed Abul,Loan Officer,Fayoum,الفيوم - اللاهون - تساهيل,103812124,46188,Ahmed Ewais Ramadan Abdelhamed,,Not Signed,,178.904425000073,25,June,2026
-20082929,Mohamed Hamed Mohamed Eid,Loan Officer,Daqhlia,الدقهلية - الجمالية - تساهيل,1005767657,46188,Eslam Mohamed Elsayed Khedr,,Not Signed,,178.904425000073,25,June,2026
-20082930,Nadia Ashraf Abdo Mohamed Shahat,Loan Officer,Suez,السويس - الجناين - تساهيل,1093368089,46188,Ahmed Shaban Ali Shaban,,Not Signed,,178.904425000073,25,June,2026
-20082931,Reham Khaled Gaber Matar,Loan Officer,Behira,البحيرة - دمنهور - مشروعي,1008091296,46187,Ibrahim Reda Abdelaziz Kheerallah,Resigned,Not Signed,,202.904425000073,24,June,2026
-20082932,Marwan Ibrahim Rashad Mohamed,Loan Officer,Suez,السويس - السويس - تساهيل,1068391931,46188,Ahmed Shaban Ali Shaban,,Not Signed,,178.904425000073,25,June,2026
-20082933,Kirolos Osama Louis Basta,Loan Officer,Cairo,القاهرة - الف مسكن - تساهيل,1101894904,46188,Mina Ibrahim Azmy Aziz,,Not Signed,,178.904425000073,25,June,2026
-20082934,Asmaa Mahmoud Khalaf Mahmoud,Loan Officer,Asseiut,اسيوط - ساحل سليم - تساهيل,1112875993,46188,Mahmoud Raslan Abo Elghaet Mohamed,,Not Signed,,178.904425000073,25,June,2026
-20082935,Manar Ahmed Ahmed Hassan,Loan Officer Investment,Giza,الجيزة - العياط ثان - تساهيل,1015329974,46187,Ahmed Mostafa Mohamed Ahmed,,Not Signed,,202.904425000073,24,June,2026
-20082936,Mahmoud Hamdi Tawfiq Mohamed,Loan Officer,Souhag,سوهاج - اخميم ثان - تساهيل,1109173838,46188,Maysara Mohamed Helmy Abdulrahman,100% - Trained,Not Signed,,178.904425000073,25,June,2026
-20082937,Hagar Mostafa Taha Morsi,Loan Officer,Giza,الجيزة - البدرشين ثان - تساهيل,1050609550,46188,Ahmed Mostafa Mohamed Ahmed,,Not Signed,,178.904425000073,25,June,2026
-20082938,Girgis Siha Abdelsabour Siha,Loan Officer,Asseiut,اسيوط - نزلة عبد اللاه - تساهيل,1226891887,46188,Amany Kamal Sedky Hanin,,Not Signed,,178.904425000073,25,June,2026
-20082939,Mohamed Aly Elsayed Araby,Loan Officer,Ismailia,الاسماعيلية - نفيشه - تساهيل,1027928179,46187,Mahmoud Nabil Mohamed Rageh,,Not Signed,,202.904425000073,24,June,2026
-20082941,Aya Khalid Eisa Khalifa,Loan Officer,Giza,الجيزة - البدرشين ثان - تساهيل,1102529784,46188,Ahmed Mostafa Mohamed Ahmed,,Not Signed,,178.904425000073,25,June,2026
-20082942,Shahd Yasser Fawzy Ibrahim,Loan Officer,Giza,الجيزة - البراجيل - تساهيل,1151374380,46188,Ramy Wafik Boshra Eshak,67% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082943,Eman Saied Hassan Rezk,Loan Officer,Behira,البحيرة - كفر الدوار - تساهيل,1280053190,46187,Ahmed Kamel Abdelatif Ali Nagy,100% - Trained,signed,,202.904425000073,24,June,2026
-20082947,Fatma Ahmed Ashrey Kaliel,Loan Officer,Souhag,سوهاج - شرق سوهاج - تساهيل,1093116889,46188,Khaled Hagag Mohamed Mahmoud,100% - Trained,signed,,178.904425000073,25,June,2026
-20082949,Zahraa Khairy Hamdy Mahmoud,Loan Officer,Sharqia,الشرقية - الابراهيميه - تساهيل,1023481449,46188,Samar Mahmoud Mohamed Elsayed,,Not Signed,,178.904425000073,25,June,2026
-20082953,Mohamed Saed Mohamed Ibraheem,Loan Officer,Beny-suef,بني سويف - اقفهص - تساهيل,1001756024,46189,Peter Samy Mahfouz Makhlof,,Not Signed,,154.904425000073,25,June,2026
-20082954,Osama Khairy Labib Wahba,Loan Officer,Menia,المنيا - ابوقرقاص البلد - تساهيل,1278683232,46189,Karim Khaled Yahia Abdelghany,,Not Signed,,154.904425000073,25,June,2026
-20082956,Alaa Mohamed Ahmed Osman,Loan Officer Investment,Menoufia,المنوفية - تلوانه - تساهيل,1063108997,46189,Mohamed Zaghlol Abdelmoatty Rady,100% - Trained,signed,,154.904425000073,25,June,2026
-20082958,Mayada Ahmed Ibrahim Ahmed,Loan Officer,Sharqia,الشرقية - ديرب نجم - مركزى,1060699363,46188,Mohamed Ashraf Ahmed Metwally,33% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082960,Bsmala Ashraf Mohamed Ali,Loan Officer,Sharqia,الشرقية - ديرب نجم - مركزى,1224813474,46188,Mohamed Ashraf Ahmed Metwally,33% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082961,Reda Ebrahem Hasan Wasel,Loan Officer,Daqhlia,الدقهلية - الطريق الجديد - تساهيل,1018053833,46187,Mahmoud Mohsen Ahmed Abdallah Aldawlatly,,Not Signed,,202.904425000073,24,June,2026
-20082962,Habiba Mohamed Mohamed Abdelaty,Loan Officer,Souhag,سوهاج - الشيخ مكرم - تساهيل,1067800974,46189,Khaled Hagag Mohamed Mahmoud,100% - Trained,signed,,154.904425000073,25,June,2026
-20082963,Mohamed Adel Saad Salama,Loan Officer,Daqhlia,الدقهلية - دكرنس - تساهيل,1020708918,46188,Alaa Eldin Ahmed Ibrahim Ahmed Sengab,33% - In Progress,Not Signed,,178.904425000073,25,June,2026
-20082965,Walaa Nasr Salama Yousef,Loan Officer,Menoufia,المنوفية - سنتريس - تساهيل,1128918933,46189,Mohamed Nagah Mahmoud Khamis,100% - Trained,signed,,154.904425000073,25,June,2026
-20082967,Engy Kamil Faiek Marzok,Loan Officer,Asseiut,اسيوط - فزاره - تساهيل,1204169786,46189,Amany Kamal Sedky Hanin,,Not Signed,,154.904425000073,25,June,2026
-20082968,Ahmed Alaa Elshahat Elsayed,Loan Officer,Gharbya,الغربية - المحلة الكبري - تساهيل,1023724488,46189,Ahmed Samir fathi Elganainy,100% - Trained,signed,,154.904425000073,25,June,2026
-20082970,Salwa Samir Abdullah Khalil,Loan Officer,Giza,الجيزة - اطفيح ثان - تساهيل,1147093531,46189,Mariam Essam Attia Eskander,100% - Trained,Not Signed,,154.904425000073,25,June,2026
-20082971,Omnia Mohamed Ali Ibrahim,Loan Officer,Cairo,القاهرة - المطرية - تساهيل,1211326107,46189,Fatma Zaree Mohamed Salem,,Not Signed,,154.904425000073,25,June,2026
-20082972,Mariam Mohamed Mohamed Yosif,Loan Officer,Asseiut,اسيوط - فزاره - تساهيل,1032688009,46189,Amany Kamal Sedky Hanin,100% - Trained,Not Signed,,154.904425000073,25,June,2026
-20082978,Mostafa Othman Youssef Essa,Loan Officer,Menia,المنيا - بندر ملوي - مركزى,1017147066,46189,Sandy Wageh Zakaria Rizk,0,Not Signed,,154.904425000073,25,June,2026
-9001158,Christen Magdy Moris Youssef,Gamaya Officer,Menia,المنيا - ديرمواس - تساهيل,1279496759,46187,Kerolos Sameh Fekry Basta,100% - Trained,Not Signed,,202.904425000073,24,June,2026
-9001163,Reda Khalef Rayad Selim,Gamaya Officer,Qena,قنا - الترامسه - تساهيل,1027560162,46187,Abdelrahman ahmed mohamed Abdelrahem,,Not Signed,,202.904425000073,24,June,2026
-9001164,Asmaa Shaaban Mahmoud Mohamed,Gamaya Officer,Aswan,اسوان - السباعيه - مركزى,1142997609,46188,Moaaz Ahmed Hussien Hamza,100% - Trained,Not Signed,,178.904425000073,25,June,2026
-9001165,Shaimaa Yousry Ahmed Mohamed,Gamaya Officer,Asseiut,اسيوط - منفلوط ثان - تساهيل,1091425490,46187,Abdelaziz Khaled Abdelaziz Mohamed,50% - In Progress,Not Signed,,202.904425000073,24,June,2026
-9001166,Radwa Hasan Metwaly Hasan,Gamaya Officer,Souhag,سوهاج - الشيخ مكرم - تساهيل,1008627632,46188,Khaled Hagag Mohamed Mahmoud,100% - Trained,signed,,178.904425000073,25,June,2026
-9001170,Romany Marzouk Wasef Aziz,Gamaya Officer,Menia,المنيا - بني عبيد - تساهيل,1277209236,46189,Elshaimaa Osama Fahim Ahmed Farag,Resigned,Not Signed,,154.904425000073,25,June,2026
-9001171,Youstina Gerges Shehata Hannah,Gamaya Officer,Beny-suef,بني سويف - بني سويف - مشروعي,1280239781,46188,Amgad Ghaly Naguib Bebawy,100% - Trained,Not Signed,,178.904425000073,25,June,2026
-9001172,Mariam Mohamed Samir Mohamed Abdelmaksod,Gamaya Officer,Menia,المنيا - بنى محمد سلطان - تساهيل,1206842576,46188,Sherif Dahy Zakaria Ibrahem,,Not Signed,,178.904425000073,25,June,2026
-9001174,Abanoub Sobhy Nasr Ebrahim,Gamaya Officer,Kafr Shikh,كفر الشيخ - سيدي سالم - تساهيل,1001182109,46187,Ahmed Mahgoub Ibrahim Mahgoub,,Not Signed,,202.904425000073,24,June,2026
-9001175,Nermeen Tarek Ali Mabrouk,Gamaya Officer,Daqhlia,الدقهلية - نبروه - تساهيل,1007016058,46189,Amr Adel Mohamed Shehata,100% - Trained,signed,,154.904425000073,25,June,2026
-9001176,Selvana Rezk Marzok Farag,Gamaya Officer,Kafr Shikh,كفر الشيخ - بيلا - تساهيل,1275835947,46188, Emad Atef Adly Ibrahem,100% - Trained,Not Signed,,178.904425000073,25,June,2026
-9001181,Farha Mahdy Sayed Ahmed,Gamaya Officer,Souhag,سوهاج - شرق سوهاج - تساهيل,1021548176,46189,Khaled Hagag Mohamed Mahmoud,100% - Trained,signed,,154.904425000073,25,June,2026
-9001169,Nada Deyaelden Mohamed Ahmed,Gamaya Officer,Souhag,سوهاج - شرق سوهاج - تساهيل,1288460084,46188,Khaled Hagag Mohamed Mahmoud,Resigned,Not Signed,,178.904425000073,25,June,2026
-`;
+50020713,Hagag Ali Hagag Motwally,Loan Officer CF,Giza,الجيزة - برطس - تساهيل,1123956694,46188,Moustafa Mohamed Mohamed Ahmed,Resigned,Not Signed,,181.741875000007,25,June,2026
+50014651,Shimaa Ibrahim Ismail Sharaf Aldin,Loan Officer CF,Sharqia,الشرقية - العروبة - تساهيل,1505611624,46188,Mohamed Ashraf Ahmed Metwally,50% - In Progress,Not Signed,,181.741875000007,25,June,2026
+50020630,Zainab Khaled Sabre Fadel,Loan Officer CF,Qena,قنا - الشطبية - تساهيل,1031569587,46187,Ashaaia Onsy Melad Riyad,100% - Trained,signed,,205.741875000007,24,June,2026
+50020671,Shrouq Mahmoud Ahmed Gomaa,Loan Officer CF,Cairo,القاهرة - المعادي - تساهيل,1142736831,46187,Merna Maher Hamam Smamor Saleb,,Not Signed,,205.741875000007,24,June,2026
+50020684,Nesma Saead Mostafa Soliman,Loan Officer CF,Giza,الجيزة - بولاق الدكرور - تساهيل,1008897296,46187,Ramy Wafik Boshra Eshak,,Not Signed,,205.741875000007,24,June,2026
+50020686,Omnia Nasser Abdelmged Ezz Madboly,Loan Officer CF,Qalubia,القليوبية - كفر شكر - تساهيل,1004214217,46187,Khaled Ali Mohamed Mohamed,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+50020687,Nada Yehia Mahmoud Afara,Loan Officer CF,Alex,الاسكندرية - المنتزه - تساهيل,1229056230,46187,Ahmed Gaber Aly Ahmed Aly,100% - Trained,signed,,205.741875000007,24,June,2026
+50020689,Aya Adel Fathi Khairy,Loan Officer CF,Qalubia,القليوبية - ابو زعبل - تساهيل,1108290529,46187,Eslam Ahmed Radwan Ahmed,100% - Trained,signed,,205.741875000007,24,June,2026
+50020691,Hadeer Ahmed Ahmed Mohamed Eltrebely,Loan Officer CF,Port-said,بورسعيد - بورسعيد ثان - تساهيل,1210114765,46187,Esraa Abdelsalam Ahmed Abdelsalam Elbarawy,,Not Signed,,205.741875000007,24,June,2026
+50020692,Rawan Ibrahim Aliwa Ibrahim,Loan Officer CF,Qalubia,القليوبية - الدير - تساهيل,1004653299,46187,Amira Issa Lotfy Khamis,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+50020693,Mansi Magdi Mansi Abdelsayed,Loan Officer CF,Beny-suef,بني سويف - ببا - تساهيل,1095850861,46187,Rahel Samy Gerges Younan,,Not Signed,,205.741875000007,24,June,2026
+50020696,Mohamed Yosaaf Sheahata Elsaid,Loan Officer CF,Alex,الاسكندرية - محرم بك ثان - مركزى,1288186785,46187,Mohamed Hassan Gendy Hassan Saed,50% - In Progress,signed,,205.741875000007,24,June,2026
+50020697,Gehad Nader Mohamed Salah,Loan Officer CF,Giza,الجيزة - الحوامديه - تساهيل,1117534946,46187,Hady Abdelnasser Hanfy Shaarawy,50% - In Progress,Not Signed,,205.741875000007,24,June,2026
+50020698,Geges Aldeeb Riyad Gorgy,Loan Officer CF,Souhag,سوهاج - الحواويش - تساهيل,1204037300,46187,Maysara Mohamed Helmy Abdulrahman,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+50020699,Abdalla Ashraf Ali Elsayed,Loan Officer CF,Souhag,سوهاج - الحواويش - تساهيل,1276333955,46187,Maysara Mohamed Helmy Abdulrahman,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+50020700,Menna Mahmoud Mohamed Abdelkader,Loan Officer CF,Sharqia,الشرقية - العاشر من رمضان - تساهيل,1210396411,46187,Mohamed Ashraf Ahmed Metwally,50% - In Progress,Not Signed,,205.741875000007,24,June,2026
+50020701,Roqia Saied Saleh Gendey,Loan Officer CF,Sharqia,الشرقية - الزقازيق - تساهيل,1153308434,46187,Mohamed Yasser AbdelSadek Ibrahim,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+50020702,Eman Wahid Mahmoud Mohamed,Loan Officer CF,Souhag,سوهاج - الحواويش - تساهيل,1028691519,46187,Maysara Mohamed Helmy Abdulrahman,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+50020703,Mona Ali Ahmed Mohamed,Loan Officer CF,Cairo,القاهرة - السيده زينب - تساهيل,1155434102,46187,Omar Ashraf Abdelfattah Atya,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+50020704,Abdlrazk Goma Said Frghrly,Loan Officer CF,Asseiut,اسيوط - منفلوط ثان - تساهيل,1062356946,46187,Abdelaziz Khaled Abdelaziz Mohamed,,Not Signed,,205.741875000007,24,June,2026
+50020705,Azza Gamal Mohamed Abdelmanam,Loan Officer CF,Behira,البحيرة - كوم البركة - مركزى,101532179,46187,Karim Zakarya Mohamed Abdel,100% - Trained,signed,,205.741875000007,24,June,2026
+50020706,Mahmoud Sobhy Mahmoud Mohamed,Loan Officer CF,Giza,الجيزة - بولاق الدكرور - تساهيل,1118187613,46187,Ramy Wafik Boshra Eshak,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+50020707,Eslam Yasser Mohamed Ali,Loan Officer CF,Aswan,اسوان - الكورنيش - مركزى,1120701783,46187,Moustafa Korany Mohamed Ahmed,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+50020709,Esraa Mohamed Mahmoud Mohamed,Loan Officer CF,Ismailia,الاسماعيلية - الاسماعيلية - مركزى,1273291893,46187,Bola Ata Fakhry Tadros,,Not Signed,,205.741875000007,24,June,2026
+50020710,Hassan Eid Hassan Hassan,Loan Officer CF,Giza,الجيزة - الحوامديه - تساهيل,1125174433,46187,Hady Abdelnasser Hanfy Shaarawy,,Not Signed,,205.741875000007,24,June,2026
+50020711,Donia Osama Azat Mohamed,Loan Officer CF,Gharbya,الغربية - قطور - تساهيل,1055053865,46187,Tamer Ali Kamal Elfalah,50% - In Progress,Not Signed,,205.741875000007,24,June,2026
+50020715,Marcel Munir Elias Yusuf,Loan Officer CF,Fayoum,الفيوم - سيلا - تساهيل,1127659690,46188,Ahmed Ewais Ramadan Abdelhamed,Resigned,Not Signed,,181.741875000007,25,June,2026
+50020716,Hoda Mohamed Ramadan Mohamed,Loan Officer CF,Giza,الجيزة - المتانيا - مشروعي,1104725216,46188,Ahmed Mostafa Mohamed Ahmed,50% - In Progress,Not Signed,,181.741875000007,25,June,2026
+50020718,Mohamed Ahmed Kamal Mohamed Anwr Sabeha,Loan Officer CF,Menoufia,المنوفية - السادات - تساهيل,1282752922,46188,Abdelhakeem Fakeeh Abdelhakeem Ahmed Ghonem,,Not Signed,,181.741875000007,25,June,2026
+50020719,Ayat Ibrahim Sayed Khalil,Loan Officer CF,Luxor,الاقصر - الدير شرق - تساهيل,1101785051,46188,Michael Milad Salama Ebrahim,100% - Trained,signed,,181.741875000007,25,June,2026
+50020720,Ziad Shaban Abdulla Mohamed,Loan Officer CF,Giza,الجيزة - الصف ثان - تساهيل,1102007486,46188,Mariam Essam Attia Eskander,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+50020721,Esraa Fawazy Abdelrsoal Abdelmonem,Loan Officer CF,Aswan,اسوان - نصر النوبه - مركزى,1143256755,46188,Osama Fathy Naseef Bekhet,50% - In Progress,Not Signed,,181.741875000007,25,June,2026
+50020722,Krstin Azaat Thabat Gerges,Loan Officer CF,Menia,المنيا - ديرمواس - تساهيل,1274534464,46188,Kerolos Sameh Fekry Basta,Resigned,Not Signed,,181.741875000007,25,June,2026
+50020723,Ahmed Said Abdelazim Bakry Ali,Loan Officer CF,Giza,الجيزة - اطفيح - مشروعي,1123734059,46188,Mariam Essam Attia Eskander,,Not Signed,,181.741875000007,25,June,2026
+50020724,Hend Shokry Ramadan Elghamrwy,Loan Officer CF,Behira,البحيرة - المحموديه - تساهيل,1127482701,46187,Gomaa Elsayed Mohamed Ghoneem,100% - Trained,signed,,205.741875000007,24,June,2026
+50020725,Maha Barkat Mahmoud Gaheen,Loan Officer CF,Giza,الجيزة - امبابة ثان - تساهيل,1140790343,46187,Moustafa Mohamed Mohamed Ahmed,100% - Trained,signed,,205.741875000007,24,June,2026
+50020726,Hossam Mangy Samier Takay,Loan Officer CF,Asseiut,اسيوط - المطيعه - تساهيل,1206324992,46188,Mario Khalaf Seha Zakhary,,Not Signed,,181.741875000007,25,June,2026
+50020728,Youanaa Zouheir Maks Shalaby,Loan Officer CF,Asseiut,اسيوط - كوم بوها - تساهيل,1288679469,46188,Amany Kamal Sedky Hanin,,Not Signed,,181.741875000007,25,June,2026
+50020729,Neama Aref Mohamed Qenawy Mohamed,Loan Officer CF,Ismailia,الاسماعيلية - نفيشه - تساهيل,1010189210,46187,Mahmoud Nabil Mohamed Rageh,,Not Signed,,205.741875000007,24,June,2026
+50020731,Malak Hany Sayed Helmy Farghaly,Loan Officer CF,Giza,الجيزة - امبابة - تساهيل,1122086964,46188,Ramy Wafik Boshra Eshak,50% - In Progress,Not Signed,,181.741875000007,25,June,2026
+50020734,Azza Abdelnabi Nour Eldin Mohamed,Loan Officer CF,Cairo,القاهرة - حلوان - تساهيل,1111405972,46188,Anasimon Ashraf Bebawy Yousef,50% - In Progress,Not Signed,,181.741875000007,25,June,2026
+50020735,Asmaa Ahmed Abdelaaleem Mohamed,Loan Officer CF,Giza,الجيزة - امبابة ثان - تساهيل,1032523478,46188,Moustafa Mohamed Mohamed Ahmed,100% - Trained,signed,,181.741875000007,25,June,2026
+50020736,Rewan Elsayed Ahmed Abd Elrhman Mohamed,Loan Officer CF,Port-said,بورسعيد - بورسعيد - تساهيل,1281575368,46188,Esraa Abdelsalam Ahmed Abdelsalam Elbarawy,,Not Signed,,181.741875000007,25,June,2026
+50020737,Islam Essmat AbdElAAl Mahmoud,Loan Officer CF,Giza,الجيزة - الوراق - تساهيل,1113888762,46188,Moustafa Mohamed Mohamed Ahmed,Resigned,Not Signed,,181.741875000007,25,June,2026
+50020738,Menna Allah Omar Abdelmotati Ra,Loan Officer CF,Cairo,القاهرة - حلوان - تساهيل,1149546464,46188,Anasimon Ashraf Bebawy Yousef,50% - In Progress,Not Signed,,181.741875000007,25,June,2026
+50020740,Mostafa Fawzi Mohamed Ayman,Loan Officer CF,Giza,الجيزة - الحصري - تساهيل,1065333514,46187,Hady Abdelnasser Hanfy Shaarawy,Resigned,Not Signed,,205.741875000007,24,June,2026
+50020743,Ahmed Hussien Mosa Mohamed,Loan Officer CF,Giza,الجيزة - العياط ثالث - مركزى,1159427944,46187,Ahmed Mostafa Mohamed Ahmed,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+50020746,Rawan Mahmoud Hasab Allah Hassan,Loan Officer CF,Fayoum,الفيوم - طامية - تساهيل,1096071018,46189,Ebram Samy Moawad Samaan,50% - In Progress,Not Signed,,157.741875000007,25,June,2026
+50020747,Rehab Emad Ahmad Sawy,Loan Officer CF,Menia,المنيا - بني حسن - تساهيل,1137597611,46187,Karim Khaled Yahia Abdelghany,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+50020748,Youssef Gharib Mosaad Elmghrbe,Loan Officer CF,Giza,الجيزة - العياط ثالث - مركزى,1148135181,46187,Ahmed Mostafa Mohamed Ahmed,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+50020749,Norhan Ali Shaban Amara,Loan Officer CF,Cairo,القاهرة - الزاويه الحمراء - تساهيل,1115726479,46188,Fatma Zaree Mohamed Salem,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+50020752,Esraa Reda Elsaied Abdelrasol,Loan Officer CF,Behira,البحيرة - كوم حماده - تساهيل,1032166737,46189,Mohamed Fathy Abdelatif Abdelatif Maklad,100% - Trained,signed,,157.741875000007,25,June,2026
+50020753,Shrouk Ahmed Abdelmenem Aboelnaga Ali,Loan Officer CF,Kafr Shikh,كفر الشيخ - سخا - تساهيل,1025273524,46188,Nourhan Adel Yousef Mohamed Shehata,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+50020754,Aslam Abobakr Drder Mhny,Loan Officer CF,Cairo,القاهرة - حلوان ثالث - مركزى,1007058840,46187,Anasimon Ashraf Bebawy Yousef,50% - In Progress,Not Signed,,205.741875000007,24,June,2026
+50020756,Shahad Ragab Youssef Hussein,Loan Officer CF,Behira,البحيرة - قافله - تساهيل,1117290442,46189,Ahmed Kamel Abdelatif Ali Nagy,100% - Trained,Not Signed,,157.741875000007,25,June,2026
+50020759,Mai Ahmed Khalil Ebrahem,Loan Officer CF,Dumiatte,دمياط - الزرقا - تساهيل,1014709056,46189,Walid Elsayed Mohamed Atwa Elmongy ,50% - In Progress,Not Signed,,157.741875000007,25,June,2026
+50020760,Yousef Lamlom Sedky Atallah,Loan Officer CF,Menia,المنيا - ابوقرقاص - تساهيل,1272967908,46189,Karim Khaled Yahia Abdelghany,100% - Trained,Not Signed,,157.741875000007,25,June,2026
+50020761,Abdelhamed Shawky Abdelhamed ,Loan Officer CF,Behira,البحيرة - كوم حماده ثان - تساهيل,1096469202,46189,Mohamed Fathy Abdelatif Abdelatif Maklad,100% - Trained,signed,,157.741875000007,25,June,2026
+50020762,Madonna Samir Shehataa Ayoub,Loan Officer CF,Sharqia,الشرقية - اولاد صقر - تساهيل,1060931152,46188,Ahmed Ismael Abdelaal Abdelaal Ghoniem,,Not Signed,,181.741875000007,25,June,2026
+50020763,Mahmoud Atef Shaaban Abdatif,Loan Officer CF,Souhag,سوهاج - غرب سوهاج - تساهيل,1019377645,46189,Maysara Mohamed Helmy Abdulrahman,50% - In Progress,Not Signed,,157.741875000007,25,June,2026
+50020764,Mahmoud Atef Shaaban Ellatif,Loan Officer CF,Souhag,سوهاج - غرب سوهاج - تساهيل, ,46189,Maysara Mohamed Helmy Abdulrahman,,Not Signed,,157.741875000007,25,June,2026
+50020765,Faten Ashraf William Habib,Loan Officer CF,Beny-suef,بني سويف - شرق بني سويف - تساهيل,1227334709,46189,Amgad Ghaly Naguib Bebawy,100% - Trained,Not Signed,,157.741875000007,25,June,2026
+50020766,Hasnaa Mostafa Hassan Ahmed,Loan Officer CF,Asseiut,اسيوط - فزاره - تساهيل,1140778462,46189,Amany Kamal Sedky Hanin,100% - Trained,Not Signed,,157.741875000007,25,June,2026
+50020690,Fayza Mohamed Fargal Hassan,Loan Officer CF,Menia,المنيا - ابيوها - تساهيل,1028616472,46187,Karim Khaled Yahia Abdelghany,Resigned,Not Signed,,205.741875000007,24,June,2026
+50020714,Eman Samir Asaad Morocos,Loan Officer CF,Menia,المنيا - ابوقرقاص - تساهيل,1143863575,46187,Karim Khaled Yahia Abdelghany,33% - In Progress,Not Signed,,205.741875000007,24,June,2026
+20025946,Noura Shaban Hamdoun Mohamadin,Loan Officer,Souhag,سوهاج - نيده - تساهيل,1142518664,46187,Maysara Mohamed Helmy Abdulrahman,,Not Signed,,205.741875000007,24,June,2026
+20051958,Hany Samir Barakat Said,Loan Officer,Menia,المنيا - منشية الدهب - تساهيل,1095755154,46187,Sherif Dahy Zakaria Ibrahem,,Not Signed,,205.741875000007,24,June,2026
+20065535,Rasha Rashad Abdelsattar Mahmoud,Loan Officer,Behira,البحيرة - الكوم الاخضر - تساهيل,1114508485,46187,Karim Zakarya Mohamed Abdel,100% - Trained,signed,,205.741875000007,24,June,2026
+20066504,Osama Alfy Abdelmalak Mosaad,Loan Officer Investment,Asseiut,اسيوط - ديروط ثان - تساهيل,1552114190,46187,Amany Kamal Sedky Hanin,100% - Trained,signed,,205.741875000007,24,June,2026
+20082690,Mohamed Elsafi Mohamed Mohamed Shehata,Loan Officer,Behira,البحيرة - قافله - تساهيل,1206597567,46188,Ahmed Kamel Abdelatif Ali Nagy,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+20082786,Ahmed Ragab Abdelwahab Mahmoud,Loan Officer,Beny-suef,بني سويف - بهبشين - تساهيل,1220039224,46187,Amgad Ghaly Naguib Bebawy,,Not Signed,,205.741875000007,24,June,2026
+20082789,Saber Khaled Fouad Mahamed,Loan Officer,Souhag,سوهاج - دار السلام سوهاج - تساهيل,1028564971,46187,Hamdy Fawzy Mahmoud Abdelrahem,100% - Trained,signed,,205.741875000007,24,June,2026
+20082790,Omnia Tarek Attia Mostafa,Loan Officer Investment,Gharbya,الغربية - قطور - تساهيل,1019536548,46187,Tamer Ali Kamal Elfalah,50% - In Progress,Not Signed,,205.741875000007,24,June,2026
+20082792,Shaima Mohamed Ali Abdallah,Loan Officer,Asseiut,اسيوط - الغنايم ثان - مركزى,1140369419,46187,Mario Khalaf Seha Zakhary,,Not Signed,,205.741875000007,24,June,2026
+20082795,Sarwfeem Samuel Rezek FaragAllah,Loan Officer,Menia,المنيا - برطباط - تساهيل,1274337288,46187,Kerolos Wasef Fahmy Wasef,Resigned,Not Signed,,205.741875000007,24,June,2026
+20082796,Zinab Abualsaud Shehata Mohamed,Loan Officer,Souhag,سوهاج - العسيرات - تساهيل,1121956087,46187,Abelrazik Tharwat Abdelrazik Qasem,100% - Trained,signed,,205.741875000007,24,June,2026
+20082799,Dina AboBakr Hassn Soliman,Loan Officer Investment,Menoufia,المنوفية - تلوانه - تساهيل,1062067542,46187,Mohamed Zaghlol Abdelmoatty Rady,100% - Trained,signed,,205.741875000007,24,June,2026
+20082801,Basant Mohamed Ahmed Abdo,Loan Officer,Alex,الاسكندرية - البيطاش - تساهيل,1205290493,46187,Amr yehia Abdelmonem Mohamed,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+20082803,Shaymaa Ahmed Mahmoud Ahmed,Loan Officer,Alex,الاسكندرية - البيطاش - تساهيل,1208935032,46187,Amr yehia Abdelmonem Mohamed,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+20082804,Mohamed Hamed Ebraheem Mohamed,Loan Officer,Behira,البحيرة - ابوحمص ثان - تساهيل,1143269168,46187,Ahmed Bahaa Eldin Soliman,100% - Trained,signed,,205.741875000007,24,June,2026
+20082807,Shrouq Mostafa Mohamad Ahl,Loan Officer,Qalubia,القليوبية - ابو زعبل - تساهيل,1128656481,46187,Eslam Ahmed Radwan Ahmed,100% - Trained,signed,,205.741875000007,24,June,2026
+20082809,Tasbeeh Hassani Abdulmajed Mohamed,Loan Officer,Luxor,الاقصر - الزينيه بحري - تساهيل,1062937234,46187,Ismael Haggag Ismael Abdelhafez,100% - Trained,signed,,205.741875000007,24,June,2026
+20082811,Amal Ashraf Moustafa Ebrahim,Loan Officer,Luxor,الاقصر - الزينيه بحري - تساهيل,1031648377,46187,Ismael Haggag Ismael Abdelhafez,100% - Trained,signed,,205.741875000007,24,June,2026
+20082812,Rania Ebrahim Zaaghlol Ebrahim,Loan Officer,Sharqia,الشرقية - بدر - تساهيل,1093986708,46187,Mohamed Ashraf Ahmed Metwally,33% - In Progress,Not Signed,,205.741875000007,24,June,2026
+20082815,Hanan Mosad Ahmed Mohamed ElHour,Loan Officer,Behira,البحيرة - رشيد ثان - مركزى, ,46187,Ahmed Bahaa Eldin Soliman,100% - Trained,signed,,205.741875000007,24,June,2026
+20082816,Mohamed Tharwat Adeltawab Mohamed,Loan Officer,Giza,الجيزة - البدرشين ثان - تساهيل,1129418179,46187,Ahmed Mostafa Mohamed Ahmed,Resigned,Not Signed,,205.741875000007,24,June,2026
+20082818,Mai Elsayed Abbas Mohamed,Loan Officer,Alex,الاسكندرية - البيطاش - تساهيل,1272162699,46187,Amr yehia Abdelmonem Mohamed,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+20082823,Aya Ali Aboelmagd Ali,Loan Officer,Souhag,سوهاج - جرجا - تساهيل,1098158318,46187,Abelrazik Tharwat Abdelrazik Qasem,100% - Trained,signed,,205.741875000007,24,June,2026
+20082824,Nabil Nagy Shafik Boles,Loan Officer,Souhag,سوهاج - جرجا ثان - تساهيل,1280076876,46187,Abelrazik Tharwat Abdelrazik Qasem,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+20082827,Amed Elsayed Mohamed Badran,Loan Officer,Daqhlia,الدقهلية - بلقاس - تساهيل,1055990809,46187,Mahmoud Mohsen Ahmed Abdallah Aldawlatly,,Not Signed,,205.741875000007,24,June,2026
+20082828,Jailan Mustafa Ahmed Baioumy,Loan Officer Investment,Behira,البحيرة - ابوالمطامير ثان - مركزى,1070952533,46187,Karim Zakarya Mohamed Abdel,100% - Trained,signed,,205.741875000007,24,June,2026
+20082831,Asmaa Algero Alsamman Ali,Loan Officer,Souhag,سوهاج - بني حميل - تساهيل,1050225068,46187,Hamdy Fawzy Mahmoud Abdelrahem,100% - Trained,signed,,205.741875000007,24,June,2026
+20082833,Ahmed Ibrahum Metwally Shafatr,Loan Officer,Gharbya,الغربية - طنطا - تساهيل,1093475002,46187,Ahmed Samir fathi Elganainy,67% - In Progress,Not Signed,,205.741875000007,24,June,2026
+20082835,Abdallah Gamal Mohamed Refaat,Loan Officer,Giza,الجيزة - البدرشين ثان - تساهيل,1154881404,46187,Ahmed Mostafa Mohamed Ahmed,,Not Signed,,205.741875000007,24,June,2026
+20082841,Marina Eied Gergies Sedra,Loan Officer,Menia,المنيا - برطباط - تساهيل,1553700442,46187,Kerolos Wasef Fahmy Wasef,67% - In Progress,Not Signed,,205.741875000007,24,June,2026
+20082842,Rabab Mohamed Mahmoud Mohamed,Loan Officer,Alex,الاسكندرية - البيطاش - تساهيل,1278722498,46187,Amr yehia Abdelmonem Mohamed,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+20082844,Hagr Ragab Abdallah Abobakr,Loan Officer,Marsa Matruh,مطروح - مرسي مطروح - مركزى,1279361556,46187,Ahmed Gaber Aly Ahmed Aly,100% - Trained,signed,,205.741875000007,24,June,2026
+20082845,Aya Waleed Mohamed Mostafa,Loan Officer,Gharbya,الغربية - قطور - تساهيل,1004012395,46187,Tamer Ali Kamal Elfalah,67% - In Progress,Not Signed,,205.741875000007,24,June,2026
+20082847,Rozaline Hana Boshra Hana,Loan Officer,Luxor,الاقصر - البغدادي - تساهيل,1212806254,46187,Mostafa Eltayeb Mostafa Mohamed,33% - In Progress,Not Signed,,205.741875000007,24,June,2026
+20082848,Mohamed Gamal Hamed ZainEldn,Loan Officer Investment,Menoufia,المنوفية - تلوانه - تساهيل,1114099073,46187,Mohamed Zaghlol Abdelmoatty Rady,100% - Trained,signed,,205.741875000007,24,June,2026
+20082849,Feryal Elsayed Elshahat Elsayed,Loan Officer,Kafr Shikh,كفر الشيخ - سريوه الكبري - تساهيل,1092663723,46187, Emad Atef Adly Ibrahem,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+20082850,Marwa Mahmoud Mokhtar Taha,Loan Officer,Qalubia,القليوبية - شبلنجه - تساهيل,1094888266,46187,Khaled Ali Mohamed Mohamed,,Not Signed,,205.741875000007,24,June,2026
+20082853,Salma Alsayed Albaz Ebrahem,Loan Officer,Daqhlia,الدقهلية - شها - تساهيل,1015433421,46187,Abdallah Sabry Abdallah Barakat,,Not Signed,,205.741875000007,24,June,2026
+20082855,Beshoy Gerges Saad Beshay,Loan Officer,Alex,الاسكندرية - البيطاش - تساهيل,1206259842,46187,Amr yehia Abdelmonem Mohamed,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+20082857,Mohamed Karem Habib Abdelelaziz,Loan Officer,Fayoum,الفيوم - اطسا - تساهيل,1063912957,46187,Marina Emad Attia Beshay,100% - Trained,signed,,205.741875000007,24,June,2026
+20082858,Rewan Mohamed Mohamed Mostafa,Loan Officer,Port-said,بورسعيد - بورسعيد - تساهيل,1069345004,46187,Esraa Abdelsalam Ahmed Abdelsalam Elbarawy,,Not Signed,,205.741875000007,24,June,2026
+20082859,Asmaa Hamdy Hamed Noman,Loan Officer,Dumiatte,دمياط - سيف الدين - تساهيل,1099049513,46187,Walid Elsayed Mohamed Atwa Elmongy ,,Not Signed,,205.741875000007,24,June,2026
+20082860,Azaa Elsayed Mohamed Abdelrazk,Loan Officer,Daqhlia,الدقهلية - دنجواي شربين - تساهيل,100251374,46187,Abdallah Sabry Abdallah Barakat,,Not Signed,,205.741875000007,24,June,2026
+20082861,Kerlous Adel Waheeb Meshrqy,Loan Officer,Asseiut,اسيوط - صنبو ثان - تساهيل,1224008316,46187,Amany Kamal Sedky Hanin,33% - In Progress,Not Signed,,205.741875000007,24,June,2026
+20082863,Manar Samy Mahmoud Ali Mansour,Loan Officer,Qalubia,القليوبية - شبرا الخيمة - تساهيل,1100874004,46187,Nourhan Ahmed Mohamed Abdelwahab,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+20082865,Fares Abdelkarim Gaber ,Loan Officer,Alex,الاسكندرية - البيطاش - تساهيل,1275420244,46187,Amr yehia Abdelmonem Mohamed,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+20082866,Mahmoud Sabry Nasr Nagy,Loan Officer,Behira,البحيرة - دمنهور - مشروعي,1014647903,46187,Ibrahim Reda Abdelaziz Kheerallah,100% - Trained,signed,,205.741875000007,24,June,2026
+20082867,Eslam Ezzat Nagy Mohamed,Loan Officer,Fayoum,الفيوم - مدينة الفيوم - تساهيل,1146426021,46187,Ahmed Ewais Ramadan Abdelhamed,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+20082869,Demiana Ashraf Abdelsayed Abdullah,Loan Officer,Cairo,القاهرة - الشرابية - تساهيل,1037063493,46187,Fatma Zaree Mohamed Salem,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+20082873,Ahmad Khaled Ahmad Ikram,Loan Officer,Menia,المنيا - ملوي ثان - تساهيل,1149592044,46187,Sandy Wageh Zakaria Rizk,67% - In Progress,Not Signed,,205.741875000007,24,June,2026
+20082875,Heba Salah Sleiman Ali,Loan Officer,Souhag,سوهاج - العسيرات - تساهيل,1116601059,46188,Abelrazik Tharwat Abdelrazik Qasem,100% - Trained,signed,,181.741875000007,25,June,2026
+20082876,Noha Abdelaziz Hassen Abdelaziz,Loan Officer,Sharqia,الشرقية - ابوحماد - مشروعي,1228381137,46188,Samar Mahmoud Mohamed Elsayed,33% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082877,Yousef Eazet Abdelazem Bstawey,Loan Officer,Giza,الجيزة - بولاق الدكرور - تساهيل,1143206289,46188,Ramy Wafik Boshra Eshak,,Not Signed,,181.741875000007,25,June,2026
+20082878,Hanaa Khamis Hasanin Sanior,Loan Officer Investment,Behira,البحيرة - ادكو - تساهيل,1277893837,46188,Ahmed Kamel Abdelatif Ali Nagy,100% - Trained,signed,,181.741875000007,25,June,2026
+20082880,Sandy Adel Nour Labeb,Loan Officer Investment,Giza,الجيزة - فيصل - تساهيل,1276244623,46188,Mohamed Saeed Hosny Shazly,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+20082881,Eman AbdelAziz Hassan Soleiman,Loan Officer,Souhag,سوهاج - ساقلته - تساهيل,1140490614,46188,Maysara Mohamed Helmy Abdulrahman,,Not Signed,,181.741875000007,25,June,2026
+20082884,Sosana Milad Mikhaeil Bolis,Loan Officer,Cairo,القاهرة - شبرا مصر - تساهيل,1140709074,46188,Omar Ashraf Abdelfattah Atya,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+20082886,Abanoub Narouz Gares Abdo,Loan Officer,Luxor,الاقصر - الشغب - تساهيل,1123880295,46188,Michael Milad Salama Ebrahim,33% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082888,Nagwa Mousa Mohamed Abouria,Loan Officer,Gharbya,الغربية - مشله - تساهيل,1024319076,46188,Mahmoud Mohamed Talaat Abdelreheim,Resigned,Not Signed,,181.741875000007,25,June,2026
+20082889,Wesam Mohamed Abelrauf Ahmed Ahmed,Loan Officer,Ismailia,الاسماعيلية - الظاهرية - مركزى,1150662077,46188,Mahmoud Nabil Mohamed Rageh,,Not Signed,,181.741875000007,25,June,2026
+20082890,Marwa Mohamed Asaad Morad,Loan Officer,Sharqia,الشرقية - بدر - تساهيل,1067375186,46188,Mohamed Ashraf Ahmed Metwally,33% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082891,Ahmed Eid Mohamedabdallah Khalifa,Loan Officer,Dumiatte,دمياط - فارسكور - تساهيل,1113052023,46188,Walid Elsayed Mohamed Atwa Elmongy ,33% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082893,Shawky Badwy Shehata Ebrahem,Loan Officer,Menoufia,المنوفية - ميت الواسطى - تساهيل,1154609858,46188,Abdelhakeem Fakeeh Abdelhakeem Ahmed Ghonem,100% - Trained,signed,,181.741875000007,25,June,2026
+20082894,Tahya Mostafa Elsyed Ahmed,Loan Officer,Daqhlia,الدقهلية - نبروه - تساهيل,1014708244,46188,Amr Adel Mohamed Shehata,67% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082895,Onay Emad Abdp Ibrahim,Loan Officer,Gharbya,الغربية - قطور - تساهيل,1229482627,46188,Tamer Ali Kamal Elfalah,Resigned,Not Signed,,181.741875000007,25,June,2026
+20082896,Alaa Fathy Elsayed Gomaa,Loan Officer,Behira,البحيرة - دربك - تساهيل ,1271419989,46188,Gomaa Elsayed Mohamed Ghoneem,100% - Trained,signed,,181.741875000007,25,June,2026
+20082897,Menna Khaled Loutfi Ali Hindk,Loan Officer,Daqhlia,الدقهلية - نبروه - تساهيل,1031809483,46188,Amr Adel Mohamed Shehata,67% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082899,Abdo Mohamed Abdo Salem,Loan Officer,Sharqia,الشرقية - فاقوس - مشروعي,1036150183,46187,Ahmed Ismael Abdelaal Abdelaal Ghoniem,,Not Signed,,205.741875000007,24,June,2026
+20082900,Reham Malak Makram Ataya,Loan Officer,Sharqia,الشرقية - بدر - تساهيل,1229202498,46188,Mohamed Ashraf Ahmed Metwally,33% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082902,Gamal Khairy Mohamed Taha,Loan Officer,Cairo,القاهرة - الاميرية - تساهيل,1099573576,46188,Fatma Zaree Mohamed Salem,67% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082903,Mohamed Fathy Gomaa Mohamed,Loan Officer,Behira,البحيرة - غازى - تساهيل,1275520686,46188,Karim Zakarya Mohamed Abdel,,Not Signed,,181.741875000007,25,June,2026
+20082905,Marwan Hussen Sayed Mohamed,Loan Officer,Qalubia,القليوبية - القناطر الخيريه - تساهيل,1097172493,46188,Nourhan Farid Hamdy Abdelreheem,33% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082907,Ahmed Osman Ibrahem Osman,Loan Officer,Ismailia,الاسماعيلية - الاسماعيلية - مركزى,1206821832,46188,Bola Ata Fakhry Tadros,,Not Signed,,181.741875000007,25,June,2026
+20082908,RAED Medhat Helmy Khalil,Loan Officer,Menia,المنيا - الروضه ثان - تساهيل,1022077172,46188,Sandy Wageh Zakaria Rizk,,Not Signed,,181.741875000007,25,June,2026
+20082909,Asmaa Amin Mohamed Mohamed,Loan Officer,Sharqia,الشرقية - جميزة بني عمرو - تساهيل,1016545808,46188,Ahmed Ismael Abdelaal Abdelaal Ghoniem,33% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082910,AbdRahman Mahmoud Ahmed Hamdan,Loan Officer,Asseiut,اسيوط - القوصية - تساهيل,1067511010,46188,Amany Kamal Sedky Hanin,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+20082912,Aya Eldesouky Abdrabbo Zaghloul,Loan Officer,Gharbya,الغربية - مشله - تساهيل,1019923290,46188,Mahmoud Mohamed Talaat Abdelreheim,Resigned,Not Signed,,181.741875000007,25,June,2026
+20082914,Abdallah Ahmed Ali Ahmed,Loan Officer,Luxor,الاقصر - الاقصر - تساهيل,1094180082,46188,Ismael Haggag Ismael Abdelhafez,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+20082915,Eslam Sabry Elsaid Nasr,Loan Officer,Gharbya,الغربية - كفر الزيات - تساهيل,1003690293,46188,Mahmoud Mohamed Talaat Abdelreheim,Resigned,Not Signed,,181.741875000007,25,June,2026
+20082916,Hany Ayman Hamad Mohamed,Loan Officer,Gharbya,الغربية - نهطاي - تساهيل,1012061650,46188,Tamer Ali Kamal Elfalah,Resigned,Not Signed,,181.741875000007,25,June,2026
+20082917,Ahmed Nabil Abdelnabi Abdo,Loan Officer,Cairo,القاهرة - البساتين - تساهيل,1129734899,46188,Merna Maher Hamam Smamor Saleb,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+20082918,Fady Khaled Alfy Ragheb,Loan Officer,Souhag,سوهاج - نجع النجار - تساهيل,1278183862,46188,Khaled Hagag Mohamed Mahmoud,100% - Trained,signed,,181.741875000007,25,June,2026
+20082919,Shahd Anwar Farag Abdallah,Loan Officer,Gharbya,الغربية - مشله - تساهيل,1012841647,46188,Mahmoud Mohamed Talaat Abdelreheim,33% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082920,Moaz Mohamed Mohamed Salem,Loan Officer,Alex,الاسكندرية - العامريه ثان - مركزى,1153377532,46187,Mohamed Hassan Gendy Hassan Saed,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+20082922,Omar Adel Mansour Saad,Loan Officer,Behira,البحيرة - حسن قاسم - تساهيل,1280016797,46188,Ibrahim Reda Abdelaziz Kheerallah,,Not Signed,,181.741875000007,25,June,2026
+20082923,Amira Abdelsalam Ahmed Sayed,Loan Officer,Giza,الجيزة - فيصل ثان - تساهيل,1145333321,46188,Mohamed Saeed Hosny Shazly,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+20082924,Mostafa Hagag Abdallah Mohamed,Loan Officer,Luxor,الاقصر - ارمنت الحيط - تساهيل,1195725598,46188,Mostafa Eltayeb Mostafa Mohamed,100% - Trained,signed,,181.741875000007,25,June,2026
+20082926,Esraa Hany Fawzy Esmail,Loan Officer,Beny-suef,بني سويف - الواسطي ثالث - مركزى,1102414766,46188,Abram Magdy Tawfik Hana,,Not Signed,,181.741875000007,25,June,2026
+20082927,David Sameh Qalini Farag Alla,Loan Officer,Menia,المنيا - سمالوط - مشروعي,1063688320,46188,Abanoub Emad Thabet Farag,,Not Signed,,181.741875000007,25,June,2026
+20082928,Mohamed Saeed Ahmed Abul,Loan Officer,Fayoum,الفيوم - اللاهون - تساهيل,103812124,46188,Ahmed Ewais Ramadan Abdelhamed,,Not Signed,,181.741875000007,25,June,2026
+20082929,Mohamed Hamed Mohamed Eid,Loan Officer,Daqhlia,الدقهلية - الجمالية - تساهيل,1005767657,46188,Eslam Mohamed Elsayed Khedr,,Not Signed,,181.741875000007,25,June,2026
+20082930,Nadia Ashraf Abdo Mohamed Shahat,Loan Officer,Suez,السويس - الجناين - تساهيل,1093368089,46188,Ahmed Shaban Ali Shaban,,Not Signed,,181.741875000007,25,June,2026
+20082931,Reham Khaled Gaber Matar,Loan Officer,Behira,البحيرة - دمنهور - مشروعي,1008091296,46187,Ibrahim Reda Abdelaziz Kheerallah,Resigned,Not Signed,,205.741875000007,24,June,2026
+20082932,Marwan Ibrahim Rashad Mohamed,Loan Officer,Suez,السويس - السويس - تساهيل,1068391931,46188,Ahmed Shaban Ali Shaban,,Not Signed,,181.741875000007,25,June,2026
+20082933,Kirolos Osama Louis Basta,Loan Officer,Cairo,القاهرة - الف مسكن - تساهيل,1101894904,46188,Mina Ibrahim Azmy Aziz,,Not Signed,,181.741875000007,25,June,2026
+20082934,Asmaa Mahmoud Khalaf Mahmoud,Loan Officer,Asseiut,اسيوط - ساحل سليم - تساهيل,1112875993,46188,Mahmoud Raslan Abo Elghaet Mohamed,,Not Signed,,181.741875000007,25,June,2026
+20082935,Manar Ahmed Ahmed Hassan,Loan Officer Investment,Giza,الجيزة - العياط ثان - تساهيل,1015329974,46187,Ahmed Mostafa Mohamed Ahmed,,Not Signed,,205.741875000007,24,June,2026
+20082936,Mahmoud Hamdi Tawfiq Mohamed,Loan Officer,Souhag,سوهاج - اخميم ثان - تساهيل,1109173838,46188,Maysara Mohamed Helmy Abdulrahman,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+20082937,Hagar Mostafa Taha Morsi,Loan Officer,Giza,الجيزة - البدرشين ثان - تساهيل,1050609550,46188,Ahmed Mostafa Mohamed Ahmed,,Not Signed,,181.741875000007,25,June,2026
+20082938,Girgis Siha Abdelsabour Siha,Loan Officer,Asseiut,اسيوط - نزلة عبد اللاه - تساهيل,1226891887,46188,Amany Kamal Sedky Hanin,,Not Signed,,181.741875000007,25,June,2026
+20082939,Mohamed Aly Elsayed Araby,Loan Officer,Ismailia,الاسماعيلية - نفيشه - تساهيل,1027928179,46187,Mahmoud Nabil Mohamed Rageh,,Not Signed,,205.741875000007,24,June,2026
+20082941,Aya Khalid Eisa Khalifa,Loan Officer,Giza,الجيزة - البدرشين ثان - تساهيل,1102529784,46188,Ahmed Mostafa Mohamed Ahmed,,Not Signed,,181.741875000007,25,June,2026
+20082942,Shahd Yasser Fawzy Ibrahim,Loan Officer,Giza,الجيزة - البراجيل - تساهيل,1151374380,46188,Ramy Wafik Boshra Eshak,67% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082943,Eman Saied Hassan Rezk,Loan Officer,Behira,البحيرة - كفر الدوار - تساهيل,1280053190,46187,Ahmed Kamel Abdelatif Ali Nagy,100% - Trained,signed,,205.741875000007,24,June,2026
+20082947,Fatma Ahmed Ashrey Kaliel,Loan Officer,Souhag,سوهاج - شرق سوهاج - تساهيل,1093116889,46188,Khaled Hagag Mohamed Mahmoud,100% - Trained,signed,,181.741875000007,25,June,2026
+20082949,Zahraa Khairy Hamdy Mahmoud,Loan Officer,Sharqia,الشرقية - الابراهيميه - تساهيل,1023481449,46188,Samar Mahmoud Mohamed Elsayed,,Not Signed,,181.741875000007,25,June,2026
+20082953,Mohamed Saed Mohamed Ibraheem,Loan Officer,Beny-suef,بني سويف - اقفهص - تساهيل,1001756024,46189,Peter Samy Mahfouz Makhlof,,Not Signed,,157.741875000007,25,June,2026
+20082954,Osama Khairy Labib Wahba,Loan Officer,Menia,المنيا - ابوقرقاص البلد - تساهيل,1278683232,46189,Karim Khaled Yahia Abdelghany,,Not Signed,,157.741875000007,25,June,2026
+20082956,Alaa Mohamed Ahmed Osman,Loan Officer Investment,Menoufia,المنوفية - تلوانه - تساهيل,1063108997,46189,Mohamed Zaghlol Abdelmoatty Rady,100% - Trained,signed,,157.741875000007,25,June,2026
+20082958,Mayada Ahmed Ibrahim Ahmed,Loan Officer,Sharqia,الشرقية - ديرب نجم - مركزى,1060699363,46188,Mohamed Ashraf Ahmed Metwally,33% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082960,Bsmala Ashraf Mohamed Ali,Loan Officer,Sharqia,الشرقية - ديرب نجم - مركزى,1224813474,46188,Mohamed Ashraf Ahmed Metwally,33% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082961,Reda Ebrahem Hasan Wasel,Loan Officer,Daqhlia,الدقهلية - الطريق الجديد - تساهيل,1018053833,46187,Mahmoud Mohsen Ahmed Abdallah Aldawlatly,,Not Signed,,205.741875000007,24,June,2026
+20082962,Habiba Mohamed Mohamed Abdelaty,Loan Officer,Souhag,سوهاج - الشيخ مكرم - تساهيل,1067800974,46189,Khaled Hagag Mohamed Mahmoud,100% - Trained,signed,,157.741875000007,25,June,2026
+20082963,Mohamed Adel Saad Salama,Loan Officer,Daqhlia,الدقهلية - دكرنس - تساهيل,1020708918,46188,Alaa Eldin Ahmed Ibrahim Ahmed Sengab,33% - In Progress,Not Signed,,181.741875000007,25,June,2026
+20082965,Walaa Nasr Salama Yousef,Loan Officer,Menoufia,المنوفية - سنتريس - تساهيل,1128918933,46189,Mohamed Nagah Mahmoud Khamis,100% - Trained,signed,,157.741875000007,25,June,2026
+20082967,Engy Kamil Faiek Marzok,Loan Officer,Asseiut,اسيوط - فزاره - تساهيل,1204169786,46189,Amany Kamal Sedky Hanin,,Not Signed,,157.741875000007,25,June,2026
+20082968,Ahmed Alaa Elshahat Elsayed,Loan Officer,Gharbya,الغربية - المحلة الكبري - تساهيل,1023724488,46189,Ahmed Samir fathi Elganainy,100% - Trained,signed,,157.741875000007,25,June,2026
+20082970,Salwa Samir Abdullah Khalil,Loan Officer,Giza,الجيزة - اطفيح ثان - تساهيل,1147093531,46189,Mariam Essam Attia Eskander,100% - Trained,Not Signed,,157.741875000007,25,June,2026
+20082971,Omnia Mohamed Ali Ibrahim,Loan Officer,Cairo,القاهرة - المطرية - تساهيل,1211326107,46189,Fatma Zaree Mohamed Salem,,Not Signed,,157.741875000007,25,June,2026
+20082972,Mariam Mohamed Mohamed Yosif,Loan Officer,Asseiut,اسيوط - فزاره - تساهيل,1032688009,46189,Amany Kamal Sedky Hanin,100% - Trained,Not Signed,,157.741875000007,25,June,2026
+20082978,Mostafa Othman Youssef Essa,Loan Officer,Menia,المنيا - بندر ملوي - مركزى,1017147066,46189,Sandy Wageh Zakaria Rizk,33% - In Progress,Not Signed,,157.741875000007,25,June,2026
+9001158,Christen Magdy Moris Youssef,Gamaya Officer,Menia,المنيا - ديرمواس - تساهيل,1279496759,46187,Kerolos Sameh Fekry Basta,100% - Trained,Not Signed,,205.741875000007,24,June,2026
+9001163,Reda Khalef Rayad Selim,Gamaya Officer,Qena,قنا - الترامسه - تساهيل,1027560162,46187,Abdelrahman ahmed mohamed Abdelrahem,,Not Signed,,205.741875000007,24,June,2026
+9001164,Asmaa Shaaban Mahmoud Mohamed,Gamaya Officer,Aswan,اسوان - السباعيه - مركزى,1142997609,46188,Moaaz Ahmed Hussien Hamza,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+9001165,Shaimaa Yousry Ahmed Mohamed,Gamaya Officer,Asseiut,اسيوط - منفلوط ثان - تساهيل,1091425490,46187,Abdelaziz Khaled Abdelaziz Mohamed,50% - In Progress,Not Signed,,205.741875000007,24,June,2026
+9001166,Radwa Hasan Metwaly Hasan,Gamaya Officer,Souhag,سوهاج - الشيخ مكرم - تساهيل,1008627632,46188,Khaled Hagag Mohamed Mahmoud,100% - Trained,signed,,181.741875000007,25,June,2026
+9001170,Romany Marzouk Wasef Aziz,Gamaya Officer,Menia,المنيا - بني عبيد - تساهيل,1277209236,46189,Elshaimaa Osama Fahim Ahmed Farag,Resigned,Not Signed,,157.741875000007,25,June,2026
+9001171,Youstina Gerges Shehata Hannah,Gamaya Officer,Beny-suef,بني سويف - بني سويف - مشروعي,1280239781,46188,Amgad Ghaly Naguib Bebawy,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+9001172,Mariam Mohamed Samir Mohamed Abdelmaksod,Gamaya Officer,Menia,المنيا - بنى محمد سلطان - تساهيل,1206842576,46188,Sherif Dahy Zakaria Ibrahem,,Not Signed,,181.741875000007,25,June,2026
+9001174,Abanoub Sobhy Nasr Ebrahim,Gamaya Officer,Kafr Shikh,كفر الشيخ - سيدي سالم - تساهيل,1001182109,46187,Ahmed Mahgoub Ibrahim Mahgoub,,Not Signed,,205.741875000007,24,June,2026
+9001175,Nermeen Tarek Ali Mabrouk,Gamaya Officer,Daqhlia,الدقهلية - نبروه - تساهيل,1007016058,46189,Amr Adel Mohamed Shehata,100% - Trained,signed,,157.741875000007,25,June,2026
+9001176,Selvana Rezk Marzok Farag,Gamaya Officer,Kafr Shikh,كفر الشيخ - بيلا - تساهيل,1275835947,46188, Emad Atef Adly Ibrahem,100% - Trained,Not Signed,,181.741875000007,25,June,2026
+9001181,Farha Mahdy Sayed Ahmed,Gamaya Officer,Souhag,سوهاج - شرق سوهاج - تساهيل,1021548176,46189,Khaled Hagag Mohamed Mahmoud,100% - Trained,signed,,157.741875000007,25,June,2026
+9001169,Nada Deyaelden Mohamed Ahmed,Gamaya Officer,Souhag,سوهاج - شرق سوهاج - تساهيل,1288460084,46188,Khaled Hagag Mohamed Mahmoud,Resigned,Not Signed,,181.741875000007,25,June,2026
+9001169,Mona Ashraf Mohamed zaghloul,Loan Officer,Dumiatte,دمياط - فارسكور - تساهيل,1507237585,46187,Walid Elsayed Mohamed Atwa Elmongy ,Resigned,Not Signed,,205.741875000007,24,June,2026
+20042953,Rana Mohamed Mohamed Sharif,Loan Officer,Gharbya,الغربية - سمنود - تساهيل,1208147312,46188,Tamer Ali Kamal Elfalah,,Not Signed,,181.741875000007,25,June,2026
+20048015,Mustafa Maher Mari Ahmed,Loan Officer,Qena,قنا - دشنا - تساهيل,1063749896,46189,Hassan Aly Hassan Abdelbaky,,Not Signed,,157.741875000007,25,June,2026
+20051325,Faris abdul Mohamed Moussa,Loan Officer,Behira,البحيرة - قافله - تساهيل,1271377269,46187,Ahmed Kamel Abdelatif Ali Nagy,,Not Signed,,205.741875000007,24,June,2026
+20056616,Mohamed Ibrahim Metwally Farag,Loan Officer,Kafr Shikh,كفر الشيخ - عبدالباعث الفقى - تساهيل,1011747942,46187,Housam ElShahat Elsayed Abdelhalem Gad,,Not Signed,,205.741875000007,24,June,2026
+20065558,Ashraf Rafaat Kamel Saleh,Loan Officer,Menia,المنيا - مغاغة ثان - تساهيل,1279448011,46190,Kerolos Wasef Fahmy Wasef,,Not Signed,,133.741875000007,25,June,2026
+20081869,dina mohamed alywa abdelhamed,Loan Officer,Qalubia,القليوبية - كفر شكر ثالث,1095608476,46187,Khaled Ali Mohamed Mohamed,,Not Signed,,205.741875000007,24,June,2026
+20082814,Waled wahed hosny ali hamed,Loan Officer,Qalubia,القليوبية - كفر شكر ثالث,1033492518,46187,Khaled Ali Mohamed Mohamed,,Not Signed,,205.741875000007,24,June,2026
+20082819,fatma mahrous desoky mahrous,Loan Officer,Behira,البحيرة - نجيب محفوظ,1212286696,46187,Ahmed Samir Mohamed Moustafa Abohassan,,Not Signed,,205.741875000007,24,June,2026
+20082826,ghada ragab mohamed qandeel,Loan Officer,Giza,الجيزة - البدرشين ثان - تساهيل,1122393720,46187,Ahmed Mostafa Mohamed Ahmed,,Not Signed,,205.741875000007,24,June,2026
+20082870,ahmed magdy moahmed elqabany,Loan Officer,Behira,البحيرة - دمنهور - مشروعي,1093427258,46189,Ibrahim Reda Abdelaziz Kheerallah,,Not Signed,,157.741875000007,25,June,2026
+20082984,mai shokry kamal yousef elansary,Loan Officer,Behira,البحيرة - دمنهور - تساهيل,1039937794,46189,Ibrahim Reda Abdelaziz Kheerallah,,Not Signed,,157.741875000007,25,June,2026
+20082988,rewan mohamed salama abudaraa,Loan Officer,Behira,البحيرة - دمنهور - مشروعي,1011512403,46189,Ibrahim Reda Abdelaziz Kheerallah,,Not Signed,,157.741875000007,25,June,2026
+20082989,amr ahmed makram mohamed,Loan Officer,Menia,المنيا - ابوقرقاص ثالث - مركزى,1515162837,46189,Karim Khaled Yahia Abdelghany,,Not Signed,,157.741875000007,25,June,2026
+20082990,rania nabih dawod almetwaly,Loan Officer,Dumiatte,دمياط - كفرالبطيخ - تساهيل,1023185190,46190,Bassel Bahr Rezk Eleraqy Elsabaa,,Not Signed,,133.741875000007,25,June,2026
+20083001,raghadah amir elsayid wardan,Loan Officer,Dumiatte,دمياط - كفر سعد - تساهيل,1227183620,46190,Amr Ahmed Saad Elshrabasy,,Not Signed,,133.741875000007,25,June,2026
+20083033,AMANY SAIED MOHAMED REDWAN,Loan Officer,Behira,البحيرة - نجيب محفوظ,1031407728,46191,Ahmed Samir Mohamed Moustafa Abohassan,,Not Signed,,109.741875000007,25,June,2026
+20083039,sabah ebrahem marof mohamed,Loan Officer,Behira,البحيرة - ابيس - تساهيل,1271115447,46190,Ahmed Kamel Abdelatif Ali Nagy,,Not Signed,,133.741875000007,25,June,2026
+20083040,bahy ezat elsayed abozaid,Loan Officer,Behira,البحيرة - صفط الحريه - تساهيل,1018310962,46189,Moataz Mamdouh Mostafa Abdelaal,,Not Signed,,157.741875000007,25,June,2026
+20083041,ahmed mohamed mahmoud mohamed,Loan Officer,Behira,البحيرة - دربك - تساهيل ,1022550460,46190,Gomaa Elsayed Mohamed Ghoneem,,Not Signed,,133.741875000007,25,June,2026
+20083043,engy magdy abdelmseh shhata,Loan Officer Investment,Cairo,القاهرة - التبين - تساهيل,1125451949,46194,Anasimon Ashraf Bebawy Yousef,,Not Signed,,37.741875000007,25,June,2026
+20083054,basama moamen saed esaa,Loan Officer CF,Giza,الجيزة - السادس من اكتوبر - تساهيل,1093073122,46188,Hady Abdelnasser Hanfy Shaarawy,,Not Signed,,181.741875000007,25,June,2026
+50013327,ester elkes samaan elkes abdelshahid gerges,Loan Officer CF,Menia,المنيا - اتليدم - تساهيل,1210146102,46190,Sandy Wageh Zakaria Rizk,,Not Signed,,133.741875000007,25,June,2026
+50020585,ziad khaled ahmed abdelmageed,Loan Officer CF,Souhag,سوهاج - غرب سوهاج - تساهيل,1111443606,46189,Maysara Mohamed Helmy Abdulrahman,,Not Signed,,157.741875000007,25,June,2026
+50020769,yousef samy shaker makar,Loan Officer CF,Asseiut,اسيوط - ابوتيج ثان - مركزى,1274434645,46189,Mario Khalaf Seha Zakhary,,Not Signed,,157.741875000007,25,June,2026
+50020770,mohmed klid mahmod abdelrhem,Loan Officer CF,Souhag,سوهاج - الجبيرات - تساهيل,1159307180,46189,Andro Samir Lahzy Ragheb,,Not Signed,,157.741875000007,25,June,2026
+50020771,karem mahmoud fouad mahmoud,Loan Officer CF,Souhag,سوهاج - غرب سوهاج - تساهيل,1061504020,46189,Maysara Mohamed Helmy Abdulrahman,,Not Signed,,157.741875000007,25,June,2026
+50020772,Noha Miser Minesy Rajab,Loan Officer CF,Behira,البحيرة - دمنهور - مشروعي,1018228311,46189,Ibrahim Reda Abdelaziz Kheerallah,,Not Signed,,157.741875000007,25,June,2026
+50020774,Yasmine Fawzi Mahmoud Alroumi,Loan Officer CF,Behira,البحيرة - دمنهور - مشروعي,1070172900,46189,Ibrahim Reda Abdelaziz Kheerallah,,Not Signed,,157.741875000007,25,June,2026
+50020775,eman shabin abed rmadin,Loan Officer CF,Qalubia,القليوبية - بيجام - تساهيل,1141910582,46188,Nourhan Farid Hamdy Abdelreheem,,Not Signed,,181.741875000007,25,June,2026
+50020778,ziad khairy hamadi qenawy,Loan Officer CF,Souhag,سوهاج - الشواوله - تساهيل,1120910692,46190,Abelrazik Tharwat Abdelrazik Qasem,,Not Signed,,133.741875000007,25,June,2026
+50020779,rania shahta abdalaziz hassan,Loan Officer CF,Sharqia,الشرقية - العروبة - تساهيل,1016060674,46190,Mohamed Ashraf Ahmed Metwally,,Not Signed,,133.741875000007,25,June,2026
+50020780,kholoud Samir Mahmoud Mohamed,Loan Officer CF,Behira,البحيرة - غازى - تساهيل,1228369679,46190,Karim Zakarya Mohamed Abdel,,Not Signed,,133.741875000007,25,June,2026
+50020784,Nada saad mohamed ibrahim,Loan Officer CF,Behira,البحيرة - كفر الدوار - تساهيل,1018216818,46191,Ahmed Kamel Abdelatif Ali Nagy,,Not Signed,,109.741875000007,25,June,2026
+50020786,mai mohamed rabie mohamed,Loan Officer CF,Dumiatte,دمياط - دمياط الجديده - تساهيل,1014366595,46190,Amr Ahmed Saad Elshrabasy,,Not Signed,,133.741875000007,25,June,2026
+50020787,omaima gamal abdelaziz abdo,Loan Officer CF,Behira,البحيرة - شبرا خيت - تساهيل,1028616335,46190,Gomaa Elsayed Mohamed Ghoneem,,Not Signed,,133.741875000007,25,June,2026
+50020791,aya mohamed saber mohamed,Loan Officer CF,Cairo,القاهرة - المرج ثان - تساهيل,1104789380,46187,Mina Ibrahim Azmy Aziz,,Not Signed,,205.741875000007,24,June,2026
+50020792,taghred bekhet mostafa attia,Loan Officer CF,Cairo,القاهرة - المرج ثان - تساهيل,1066352558,46187,Mina Ibrahim Azmy Aziz,,Not Signed,,205.741875000007,24,June,2026
+50020793,ahmed mohmed ahmed mohmed,Loan Officer CF,Sharqia,الشرقية - كفر صقر - تساهيل,1005389676,46188,Ahmed Ismael Abdelaal Abdelaal Ghoniem,,Not Signed,,181.741875000007,25,June,2026
+50020795,Kirolos Osama Louis Abdlmlk,Gamaya Officer,Asseiut,اسيوط - بني رافع - تساهيل,1272413099,46187,Abdelaziz Khaled Abdelaziz Mohamed,,Not Signed,,205.741875000007,24,June,2026
+9001160,yasmen elbadry abdo awad,Gamaya Officer,Souhag,سوهاج - شرق سوهاج - تساهيل,1062140351,46189,Khaled Hagag Mohamed Mahmoud,,Not Signed,,157.741875000007,25,June,2026
+9001184,Mariam Adel Bolis Abdelsayed,Gamaya Officer,Beny-suef,بني سويف - ببا - تساهيل,1214727200,46188,Rahel Samy Gerges Younan,,Not Signed,,181.741875000007,25,June,2026
+9001185,Hend ahmed hassan mohamed,Gamaya Officer,Aswan,اسوان - كلح القاره - مركزى,1152288633,46189,Moaaz Ahmed Hussien Hamza,,Not Signed,,157.741875000007,25,June,2026
+9001186,Bassant Abdeltawab Zaky Deiab Botros,Gamaya Officer,Giza,الجيزة - اطفيح - تساهيل,1159534124,46187,Mariam Essam Attia Eskander,,Not Signed,,205.741875000007,24,June,2026
+9001189,alaa salah mohamed khalaf,Gamaya Officer,Souhag,سوهاج - شرق سوهاج - تساهيل,1015862120,46189,Khaled Hagag Mohamed Mahmoud,,Not Signed,,157.741875000007,25,June,2026
+9001190,reham ramadan mohamed ali,Gamaya Officer,Menia,المنيا - سمالوط ثان - تساهيل,1013796587,46189,Abanoub Emad Thabet Farag,,Not Signed,,157.741875000007,25,June,2026
+9001192,noura samir mohamed kamel,Gamaya Officer,Qalubia,القليوبية - الخصوص ثان - تساهيل,1229119420,46189,Nourhan Ahmed Mohamed Abdelwahab,,Not Signed,,157.741875000007,25,June,2026
+9001193,Nourhan Magdy Hanfy Mahmoud Othman,Gamaya Officer,Alex,الاسكندرية - الدولي,1067205466,46189,Ahmed Gaber Aly Ahmed Aly,100% - Trained,Not Signed,,157.741875000007,25,June,2026
+9001196,Sara abdalghany abdalhamed ebrahem,Gamaya Officer,Daqhlia,الدقهلية - البيضا - تساهيل,1039457719,46190,Ahmed Fathy Elsayed Hammed Ahmed Omara,,Not Signed,,133.741875000007,25,June,2026
+9001198,Nada mosad elbakry abdelmakd,Gamaya Officer,Daqhlia,الدقهلية - طناح - تساهيل,1226080057,46188,Amr Adel Mohamed Shehata,,Not Signed,,181.741875000007,25,June,2026
+9001199,Sabah Ghazy Mohamed Ali Oda,Gamaya Officer,Gharbya,الغربية - سنباط - تساهيل,1069272861,46188,Tamer Ali Kamal Elfalah,,Not Signed,,181.741875000007,25,June,2026
+9001201,Lauren Atef Saber Moawad,Gamaya Officer,Sharqia,الشرقية - ام الزين - مشروعي,1207325515,46191,Mohamed Ashraf Ahmed Metwally,,Not Signed,,109.741875000007,25,June,2026
         window.onload = function() {
             initClock();
             loadInitialData();
