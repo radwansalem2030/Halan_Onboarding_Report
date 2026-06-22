@@ -739,7 +739,11 @@ function calculateKPIs() {
     const progress = filteredData.filter(i => i.status.toLowerCase().includes('progress')).length;
     
     // تعديل الفحص هنا عشان يلقط الـ Not Trained بأي شكل مكتوب بيه
-    const nottrained = filteredData.filter(i => i.status.toLowerCase().includes('not trained')).length;
+   // استبدل السطر القديم في دالة calculateKPIs بالسطر ده:
+const nottrained = filteredData.filter(i => {
+    const status = i.status ? i.status.toLowerCase().trim() : "";
+    return status === "" || status.includes('not trained') || status.includes('not-trained');
+}).length;
     
     const resigned = filteredData.filter(i => i.status.toLowerCase().includes('resign')).length;
     const signed = filteredData.filter(i => i.survey.toLowerCase() === 'signed').length;
