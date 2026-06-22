@@ -734,19 +734,22 @@ HR Code,Officer Name,Specialized,Governorate,Branch,Phone #,Hiring Date,Supervis
 function calculateKPIs() {
     const total = filteredData.length || 1;
     
-    // 1. حساب القيم الأساسية من الداتا
-    const trained = filteredData.filter(i => i.status.includes('100%') || i.status.toLowerCase() === 'trained').length;
+    // 1. حساب القيم الأساسية مع التأكد من مطابقة النصوص بشكل صحيح (Case Insensitive)
+    const trained = filteredData.filter(i => i.status.toLowerCase().includes('100%') || i.status.toLowerCase().includes('trained')).length;
     const progress = filteredData.filter(i => i.status.toLowerCase().includes('progress')).length;
+    
+    // تعديل الفحص هنا عشان يلقط الـ Not Trained بأي شكل مكتوب بيه
     const nottrained = filteredData.filter(i => i.status.toLowerCase().includes('not trained')).length;
+    
     const resigned = filteredData.filter(i => i.status.toLowerCase().includes('resign')).length;
     const signed = filteredData.filter(i => i.survey.toLowerCase() === 'signed').length;
     const notsigned = filteredData.filter(i => i.survey.toLowerCase() === 'not signed').length;
 
     // 2. تطبيق القواعد الخاصة بك
     const kpiTrained = trained;
-    const kpiSurvey = trained;          // القاعدة: Survey = Trained
-    const kpiSatisfied = kpiSurvey;    // القاعدة: Satisfied = Survey
-    const kpiUnsatisfied = 0;          // القاعدة: Unsatisfied = 0
+    const kpiSurvey = trained;
+    const kpiSatisfied = kpiSurvey;
+    const kpiUnsatisfied = 0;
 
     // 3. تحديث الأرقام في الواجهة
     document.getElementById('kpi-total').innerText = filteredData.length;
@@ -757,13 +760,13 @@ function calculateKPIs() {
     document.getElementById('kpi-progress').innerText = progress;
     document.getElementById('pct-progress').innerText = `${((progress/total)*100).toFixed(0)}%`;
 
+    // تحديث قيم الـ Not Trained
     document.getElementById('kpi-nottrained').innerText = nottrained;
     document.getElementById('pct-nottrained').innerText = `${((nottrained/total)*100).toFixed(0)}%`;
 
     document.getElementById('kpi-resigned').innerText = resigned;
     document.getElementById('pct-resigned').innerText = `${((resigned/total)*100).toFixed(0)}%`;
 
-    // القيم الجديدة المحدثة
     document.getElementById('kpi-survey').innerText = kpiSurvey;
     document.getElementById('pct-survey').innerText = `${((kpiSurvey/total)*100).toFixed(0)}%`;
 
@@ -779,7 +782,6 @@ function calculateKPIs() {
     document.getElementById('kpi-unsatisfied').innerText = kpiUnsatisfied;
     document.getElementById('pct-unsatisfied').innerText = `0%`;
 }
-
         function renderExecutiveInsights() {
             const container = document.getElementById('insights-container');
             container.innerHTML = '';
