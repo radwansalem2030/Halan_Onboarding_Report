@@ -738,6 +738,7 @@ function calculateKPIs() {
     const activeTotal = filteredData.filter(i =>
     !(i.status || '').toLowerCase().includes('resign')
 ).length || 1;
+
     // 1. حساب القيم الأساسية مع التأكد من مطابقة النصوص بشكل صحيح (Case Insensitive)
     const trained = filteredData.filter(i => i.status.toLowerCase().includes('100%') || i.status.toLowerCase().includes('trained')).length;
     const progress = filteredData.filter(i => i.status.toLowerCase().includes('progress')).length;
@@ -770,10 +771,6 @@ const nottrained = filteredData.filter(i => {
 
     // 3. تحديث الأرقام في الواجهة
     document.getElementById('kpi-total').innerText = filteredData.length;
-
-  const activeTotal = filteredData.filter(i =>
-    !(i.status || '').toLowerCase().includes('resign')
-).length || 1;
 
 document.getElementById('kpi-trained').innerText = kpiTrained;
 document.getElementById('pct-trained').innerText = `${((kpiTrained/activeTotal)*100).toFixed(0)}%`;
