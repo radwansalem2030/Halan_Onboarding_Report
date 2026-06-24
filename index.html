@@ -748,7 +748,16 @@ const nottrained = filteredData.filter(i => {
     
     const resigned = filteredData.filter(i => i.status.toLowerCase().includes('resign')).length;
     const signed = filteredData.filter(i => i.survey.toLowerCase() === 'signed').length;
-    const notsigned = filteredData.filter(i => i.survey.toLowerCase() === 'not signed').length;
+    const notsigned = filteredData.filter(i => {
+    const status = (i.status || '').toLowerCase();
+    const survey = (i.survey || '').toLowerCase().trim();
+
+    const isTrained =
+        status.includes('100%') ||
+        status.includes('trained');
+
+    return isTrained && survey !== 'signed';
+}).length;
 
     // 2. تطبيق القواعد الخاصة بك
     const kpiTrained = trained;
@@ -886,8 +895,18 @@ const nottrained = filteredData.filter(i => {
             });
 
             // --- 3. SURVEY AGREEMENT RATE DONUT ---
-            const signedCount = filteredData.filter(i => i.survey.toLowerCase() === 'signed').length;
-            const unsignedCount = filteredData.length - signedCount;
+const trainedUsers = filteredData.filter(i => {
+    const status = (i.status || '').toLowerCase();
+    return status.includes('100%') || status.includes('trained');
+});
+
+const signedCount = trainedUsers.filter(i =>
+    (i.survey || '').toLowerCase().trim() === 'signed'
+).length;
+
+const unsignedCount = trainedUsers.filter(i =>
+    (i.survey || '').toLowerCase().trim() !== 'signed'
+).length;
             charts.survey = new Chart(document.getElementById('chartSurvey'), {
                 type: 'doughnut',
                 data: {
