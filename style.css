@@ -1,0 +1,142 @@
+:root {
+    --brand-purple: #6366F1;
+    --brand-purple-light: rgba(99, 102, 241, 0.08);
+    --primary: #10B981;
+    --orange: #F59E0B;
+    --red: #EF4444;
+    --bg-main: #F4F6FA;
+    --card-bg: #FFFFFF;
+    --border-color: #E6EBF4;
+    --text-main: #1E293B;
+    --text-muted: #64748B;
+    --radius-lg: 20px;
+    --radius-md: 12px;
+    --shadow-premium: 0 10px 25px -5px rgba(15, 23, 42, 0.03), 0 4px 12px -4px rgba(15, 23, 42, 0.02);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    min-height: 100vh;
+    padding: 40px 32px;
+    letter-spacing: -0.01em;
+}
+
+.dashboard-container { max-width: 1400px; margin: 0 auto; display: flex; flex-direction: column; gap: 24px; }
+.dashboard-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
+.header-main h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.03em; color: #0F172A; }
+.header-main .subtitle { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+.header-actions { display: flex; align-items: center; gap: 12px; }
+
+.date-badge, .status-pill {
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    padding: 8px 16px; border-radius: 30px; font-size: 12px; font-weight: 600; color: var(--text-main);
+    box-shadow: var(--shadow-premium); display: flex; align-items: center; gap: 8px;
+}
+.status-indicator { width: 8px; height: 8px; border-radius: 50%; }
+.status-indicator.live { background-color: var(--primary); box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+
+/* Grid Rules */
+.metrics-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 20px; }
+.metric-card {
+    background: var(--card-bg); border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-premium);
+    display: flex; flex-direction: column; justify-content: space-between; min-height: 160px;
+}
+.metric-card.main-kpi { grid-column: span 4; }
+.metrics-grid .metric-card:not(.main-kpi) { grid-column: span 2; }
+
+.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.label-group { display: flex; align-items: center; gap: 10px; }
+.card-icon-wrapper { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
+.card-icon-wrapper.human { background: rgba(99, 102, 241, 0.1); color: var(--brand-purple); }
+.card-icon-wrapper.trained { background: rgba(16, 185, 129, 0.1); color: var(--primary); }
+.card-icon-wrapper.progress-icon { background: rgba(245, 158, 11, 0.1); color: var(--orange); }
+.card-icon-wrapper.pending-icon { background: #F1F5F9; color: var(--text-muted); }
+
+.card-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-muted); }
+.card-label-sub { font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px; }
+.main-value { font-size: 34px; font-weight: 700; letter-spacing: -0.04em; color: #0F172A; line-height: 1.1; }
+.text-orange-main { color: var(--orange) !important; }
+
+.card-body-split { display: flex; justify-content: space-between; align-items: center; gap: 20px; width: 100%; }
+.value-block { display: flex; flex-direction: column; gap: 6px; }
+.nested-stats { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.stat-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: rgba(239, 68, 68, 0.06); white-space: nowrap; }
+.stat-subtext { font-size: 11px; color: var(--text-muted); }
+
+/* Distribution System */
+.pure-distribution-wrapper { flex-grow: 1; max-width: 180px; }
+.segmented-bar { display: flex; width: 100%; height: 8px; border-radius: 4px; overflow: hidden; background: #F1F5F9; margin-bottom: 8px; }
+.segment-chunk { height: 100%; }
+.segmented-legend { display: flex; flex-direction: column; gap: 4px; }
+.legend-item { display: flex; align-items: center; justify-content: space-between; font-size: 11px; font-weight: 500; }
+.legend-left { display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
+.legend-dot { width: 6px; height: 6px; border-radius: 50%; }
+
+/* Unified Radial Custom Layout */
+.card-body-radial { display: flex; align-items: center; justify-content: space-between; width: 100%; flex-grow: 1; gap: 10px; }
+.radial-info { display: flex; flex-direction: column; justify-content: center; }
+.percentage-label { font-size: 13px; font-weight: 600; margin-top: 4px; }
+.progress-circle-container { width: 56px; height: 56px; flex-shrink: 0; }
+.circular-chart { display: block; max-width: 100%; }
+.circle-bg { fill: none; stroke: #F1F5F9; stroke-width: 3.8; }
+.circle { fill: none; stroke-width: 3.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke-dasharray 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* Circle Colors Mapping */
+.circle-purple { stroke: var(--brand-purple); }
+.circle-orange { stroke: var(--orange); }
+.circle-gray { stroke: #94A3B8; }
+.text-purple { color: var(--brand-purple) !important; }
+
+/* Middle Layout Structure */
+.middle-charts-layout { display: grid; grid-template-columns: 6.5fr 3.5fr; gap: 20px; }
+.main-trend-box { justify-content: flex-start; gap: 16px; }
+.split-insight-card { display: flex; flex-direction: column; gap: 16px; }
+.insight-column { display: flex; flex-direction: column; gap: 6px; }
+.insight-divider { height: 1px; background-color: var(--border-color); width: 100%; }
+.insight-value-group { display: flex; align-items: baseline; gap: 10px; }
+.rate-badge { font-size: 11px; font-weight: 700; color: var(--red); background: rgba(239, 68, 68, 0.08); padding: 2px 8px; border-radius: 6px; }
+.signed-metrics-list { display: flex; flex-direction: column; gap: 6px; }
+.signed-item { display: flex; align-items: center; font-size: 12px; font-weight: 500; }
+.signed-item .dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+.dot-success { background-color: var(--primary); }
+.dot-warning { background-color: var(--orange); }
+.signed-item .item-name { color: var(--text-muted); flex-grow: 1; }
+.explanation-text { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
+
+/* Line Chart Graphics */
+.pure-line-chart-wrapper { width: 100%; position: relative; }
+.svg-chart-render { width: 100%; height: 160px; }
+.chart-axis-line { stroke: var(--border-color); stroke-width: 1; }
+.trend-line { stroke: var(--brand-purple); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; fill: none; }
+.trend-area { fill: url(#chart-gradient); opacity: 0.15; }
+.chart-dot { fill: var(--brand-purple); stroke: #FFFFFF; stroke-width: 2; transition: r 0.2s ease; }
+.chart-dot:hover { r: 6; }
+.chart-text-lbl { font-size: 10px; fill: var(--text-muted); font-weight: 500; text-anchor: middle; }
+.chart-text-val { font-size: 10px; fill: var(--text-main); font-weight: 600; text-anchor: middle; }
+
+/* Leaderboards Components */
+.leaderboards-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.section-title-container h3 { font-size: 15px; font-weight: 700; color: #0F172A; }
+.section-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.leaderboard-list { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+.leader-row-item { display: flex; align-items: center; gap: 12px; }
+.leader-rank-badge { width: 22px; height: 22px; background: #F1F5F9; color: var(--text-muted); font-size: 10px; font-weight: 700; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.leader-region-name { font-size: 12px; font-weight: 600; width: 120px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text-main); }
+.leader-track-bar { flex-grow: 1; height: 6px; background: #F1F5F9; border-radius: 10px; overflow: hidden; }
+.leader-fill-bar { height: 100%; border-radius: 10px; }
+.leader-pct-value { font-size: 12px; font-weight: 700; text-align: right; width: 40px; color: #0F172A; }
+
+/* 📱 Strict Mobile First View Overrides (1 Card Full Width per Screen) */
+@media (max-width: 768px) {
+    body { padding: 20px 16px; }
+    .metrics-grid { display: flex; flex-direction: column; gap: 16px; }
+    .metrics-grid .metric-card { width: 100% !important; grid-column: span 10 !important; }
+    .card-body-split { flex-direction: column; align-items: flex-start; gap: 16px; }
+    .pure-distribution-wrapper { max-width: 100%; width: 100%; }
+    .middle-charts-layout { grid-template-columns: 1fr; }
+    .leaderboards-grid { grid-template-columns: 1fr; }
+}
