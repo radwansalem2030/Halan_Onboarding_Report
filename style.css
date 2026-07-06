@@ -76,36 +76,49 @@ body {
 .legend-left { display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
 .legend-dot { width: 6px; height: 6px; border-radius: 50%; }
 
-/* Layout for Radial Cards (Laptop Mode) */
+/* 🔥 الهندسة الجديدة لكروت الدوناتس (توزيع ذكي ومظهر ممتلئ وعصري) */
 .card-body-radial { 
-    display: flex; 
-    align-items: center; 
-    justify-content: space-between; 
-    width: 100%; 
-    flex-grow: 1; 
-    gap: 16px;
-    padding-top: 6px;
+    display: flex !important; 
+    align-items: center !important; 
+    justify-content: space-between !important; 
+    width: 100% !important; 
+    gap: 12px !important;
+    padding-top: 8px;
 }
-.radial-info { display: flex; flex-direction: column; justify-content: center; }
+.radial-info { 
+    display: flex !important; 
+    flex-direction: column !important; 
+    justify-content: center !important;
+    flex: 1 !important;
+}
 .percentage-label { font-size: 13px; font-weight: 600; margin-top: 4px; }
 
-/* Donut Chart Container (Laptop Mode) */
+/* 🔥 تكبير حجم الحاوية لملء الفراغ تماماً على اللاب توب والموبايل */
 .progress-circle-container { 
-    width: 78px;       
-    height: 78px;      
-    flex-shrink: 0; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 90px !important;       
+    height: 90px !important;      
+    flex-shrink: 0 !important; 
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    position: relative;
 }
-.circular-chart { display: block; width: 100%; height: 100%; }
-.circle-bg { fill: none; stroke: #F1F5F9; stroke-width: 3.2; }
-.circle { fill: none; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; transition: stroke-dasharray 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+.circular-chart { display: block; width: 100% !important; height: 100% !important; }
 
-/* Circle Colors Mapping */
-.circle-purple { stroke: var(--brand-purple); }
-.circle-orange { stroke: var(--orange); }
-.circle-gray { stroke: #94A3B8; }
+/* زيادة سُمك الخطوط لإعطاء مظهر لوحات التحكم الفاخرة المودرن */
+.circle-bg { fill: none; stroke: #F1F5F9 !important; stroke-width: 4.5 !important; }
+.circle { 
+    fill: none; 
+    stroke-width: 4.8 !important; 
+    stroke-linecap: round !important; 
+    stroke-linejoin: round !important; 
+    transition: stroke-dasharray 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+}
+
+/* 🔥 إضافة تأثير التوهج المضيء (Modern UI Soft Glow Effect) لقتل الفراغ الأبيض بصرياً */
+.circle-purple { stroke: var(--brand-purple) !important; filter: drop-shadow(0 4px 10px rgba(99, 102, 241, 0.35)); }
+.circle-orange { stroke: var(--orange) !important; filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.35)); }
+.circle-gray { stroke: #94A3B8 !important; filter: drop-shadow(0 4px 10px rgba(148, 163, 184, 0.25)); }
 .text-purple { color: var(--brand-purple) !important; }
 
 /* Middle Layout Structure */
@@ -157,19 +170,14 @@ body {
     .middle-charts-layout { grid-template-columns: 1fr; }
     .leaderboards-grid { grid-template-columns: 1fr; }
     
-    /* 🔥 الحل السحري النهائي: منع تمدد الأرقام وقفل المسافة مع الشارت تماماً */
+    /* ضبط ميزان المساحة العرضية على الموبايل لتبدو ممتلئة وفخمة */
     .card-body-radial { 
-        justify-content: flex-start !important; 
-        gap: 24px !important; 
+        justify-content: space-between !important; 
+        gap: 16px !important; 
         width: 100% !important;
     }
-    .radial-info {
-        flex: 0 0 auto !important;
-        width: auto !important;
-    }
     .progress-circle-container { 
-        width: 68px !important; 
-        height: 68px !important; 
-        flex-shrink: 0 !important;
+        width: 84px !important; 
+        height: 84px !important; 
     } 
 }
