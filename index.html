@@ -25,7 +25,7 @@
             </div>
         </header>
 
-        <!-- Top Overview Row (Donut Charts Added & Spaces Filled) -->
+        <!-- Top Overview Row -->
         <div class="metrics-grid">
             
             <!-- Card 1: Total New Hired -->
@@ -52,7 +52,7 @@
                 </div>
             </div>
 
-            <!-- Card 2: Trained Status (Purple Donut) -->
+            <!-- Card 2: Trained Status (النسبة جوة الدائرة فقط) -->
             <div class="metric-card radial-kpi-card">
                 <div class="card-header">
                     <div class="label-group">
@@ -61,20 +61,22 @@
                     </div>
                 </div>
                 <div class="card-body-radial">
-                    <div class="radial-info">
+                    <div class="radial-left-content">
                         <span class="main-value" id="trained-count-val">0</span>
-                        <span class="percentage-label text-purple" id="trained-pct-val">0%</span>
+                        <div class="card-description-text">Trained Officers</div>
                     </div>
                     <div class="progress-circle-container">
                         <svg viewBox="0 0 36 36" class="circular-chart">
                             <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path id="radial-progress-bar" class="circle circle-purple" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
+                        <!-- الـ ID هنا مباشرة ليتم حقن النسبة في السنتر بشكل رائع -->
+                        <div class="radial-center-text text-purple" id="trained-pct-val">0%</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 3: In Progress (Orange Donut Added) -->
+            <!-- Card 3: In Progress (النسبة جوة الدائرة فقط) -->
             <div class="metric-card radial-kpi-card">
                 <div class="card-header">
                     <div class="label-group">
@@ -83,20 +85,22 @@
                     </div>
                 </div>
                 <div class="card-body-radial">
-                    <div class="radial-info">
+                    <div class="radial-left-content">
                         <span class="main-value text-orange-main" id="inprogress-val">0</span>
-                        <span class="percentage-label text-orange-main" id="inprogress-pct-val">0%</span>
+                        <div class="card-description-text">Under Training</div>
                     </div>
                     <div class="progress-circle-container">
                         <svg viewBox="0 0 36 36" class="circular-chart">
                             <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path id="inprogress-radial-bar" class="circle circle-orange" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
+                        <!-- الـ ID هنا مباشرة ليتم حقن النسبة في السنتر بشكل رائع -->
+                        <div class="radial-center-text text-orange-main" id="inprogress-pct-val">0%</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 4: Not Trained (Slate Gray Donut Added) -->
+            <!-- Card 4: Not Trained (النسبة جوة الدائرة فقط) -->
             <div class="metric-card radial-kpi-card">
                 <div class="card-header">
                     <div class="label-group">
@@ -105,15 +109,17 @@
                     </div>
                 </div>
                 <div class="card-body-radial">
-                    <div class="radial-info">
+                    <div class="radial-left-content">
                         <span class="main-value text-muted" id="nottrained-val">0</span>
-                        <span class="percentage-label text-muted" id="nottrained-pct-val">0%</span>
+                        <div class="card-description-text">Pending Phase</div>
                     </div>
                     <div class="progress-circle-container">
                         <svg viewBox="0 0 36 36" class="circular-chart">
                             <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path id="nottrained-radial-bar" class="circle circle-gray" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
+                        <!-- الـ ID هنا مباشرة ليتم حقن النسبة في السنتر بشكل رائع -->
+                        <div class="radial-center-text text-muted" id="nottrained-pct-val">0%</div>
                     </div>
                 </div>
             </div>
