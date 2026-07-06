@@ -43,7 +43,7 @@ body {
 .metric-card {
     background: var(--card-bg); border: 1px solid var(--border-color);
     border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-premium);
-    display: flex; flex-direction: column; justify-content: space-between; min-height: 160px;
+    display: flex; flex-direction: column; justify-content: space-between; min-height: 175px;
 }
 .metric-card.main-kpi { grid-column: span 4; }
 .metrics-grid .metric-card:not(.main-kpi) { grid-column: span 2; }
@@ -58,7 +58,7 @@ body {
 
 .card-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-muted); }
 .card-label-sub { font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px; }
-.main-value { font-size: 34px; font-weight: 700; letter-spacing: -0.04em; color: #0F172A; line-height: 1.1; }
+.main-value { font-size: 36px; font-weight: 700; letter-spacing: -0.04em; color: #0F172A; line-height: 1.1; }
 .text-orange-main { color: var(--orange) !important; }
 
 .card-body-split { display: flex; justify-content: space-between; align-items: center; gap: 20px; width: 100%; }
@@ -76,14 +76,31 @@ body {
 .legend-left { display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
 .legend-dot { width: 6px; height: 6px; border-radius: 50%; }
 
-/* Unified Radial Custom Layout */
-.card-body-radial { display: flex; align-items: center; justify-content: space-between; width: 100%; flex-grow: 1; gap: 10px; }
+/* 🔥 Premium Updated Layout for Radial Cards (Closer & Compressed) */
+.card-body-radial { 
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between; /* Perfect distribution inside container */
+    width: 100%; 
+    flex-grow: 1; 
+    gap: 16px;
+    padding-top: 6px;
+}
 .radial-info { display: flex; flex-direction: column; justify-content: center; }
 .percentage-label { font-size: 13px; font-weight: 600; margin-top: 4px; }
-.progress-circle-container { width: 56px; height: 56px; flex-shrink: 0; }
-.circular-chart { display: block; max-width: 100%; }
-.circle-bg { fill: none; stroke: #F1F5F9; stroke-width: 3.8; }
-.circle { fill: none; stroke-width: 3.8; stroke-linecap: round; stroke-linejoin: round; transition: stroke-dasharray 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* 🔥 Upgraded Donut Chart Sizes to Fill the Laptop White Space */
+.progress-circle-container { 
+    width: 78px;       /* Increased from 56px to match executive dashboards */
+    height: 78px;      /* Increased from 56px */
+    flex-shrink: 0; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.circular-chart { display: block; width: 100%; height: 100%; }
+.circle-bg { fill: none; stroke: #F1F5F9; stroke-width: 3.2; }
+.circle { fill: none; stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round; transition: stroke-dasharray 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
 
 /* Circle Colors Mapping */
 .circle-purple { stroke: var(--brand-purple); }
@@ -130,7 +147,7 @@ body {
 .leader-fill-bar { height: 100%; border-radius: 10px; }
 .leader-pct-value { font-size: 12px; font-weight: 700; text-align: right; width: 40px; color: #0F172A; }
 
-/* 📱 Strict Mobile First View Overrides (1 Card Full Width per Screen) */
+/* 📱 Strict Mobile First View Overrides */
 @media (max-width: 768px) {
     body { padding: 20px 16px; }
     .metrics-grid { display: flex; flex-direction: column; gap: 16px; }
@@ -139,4 +156,5 @@ body {
     .pure-distribution-wrapper { max-width: 100%; width: 100%; }
     .middle-charts-layout { grid-template-columns: 1fr; }
     .leaderboards-grid { grid-template-columns: 1fr; }
+    .progress-circle-container { width: 64px; height: 64px; } /* Slightly scaled down for small mobile devices */
 }
