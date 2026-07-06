@@ -43,12 +43,20 @@ body {
 .metric-card {
     background: var(--card-bg); border: 1px solid var(--border-color);
     border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-premium);
-    display: flex; flex-direction: column; justify-content: space-between; min-height: 175px;
+    display: flex; flex-direction: column; min-height: 210px; /* زيادة الطول ليعطي راحة للعين للتفاصيل الجديدة */
 }
 .metric-card.main-kpi { grid-column: span 4; }
 .metrics-grid .metric-card:not(.main-kpi) { grid-column: span 2; }
 
-.card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+/* 🌟 عمل اللاين الرمادي الشفاف تحت عنوان الكارت بالظبط */
+.card-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    border-bottom: 1px solid rgba(30, 41, 59, 0.08); 
+    padding-bottom: 12px; 
+    margin-bottom: 16px; 
+}
 .label-group { display: flex; align-items: center; gap: 10px; }
 .card-icon-wrapper { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
 .card-icon-wrapper.human { background: rgba(99, 102, 241, 0.1); color: var(--brand-purple); }
@@ -56,12 +64,10 @@ body {
 .card-icon-wrapper.progress-icon { background: rgba(245, 158, 11, 0.1); color: var(--orange); }
 .card-icon-wrapper.pending-icon { background: #F1F5F9; color: var(--text-muted); }
 
-.card-label { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; color: var(--text-muted); }
-.card-label-sub { font-size: 10px; font-weight: 700; color: var(--text-muted); display: block; margin-bottom: 6px; }
-.main-value { font-size: 36px; font-weight: 700; letter-spacing: -0.04em; color: #0F172A; line-height: 1.1; }
-.text-orange-main { color: var(--orange) !important; }
+.card-label { font-size: 12px; font-weight: 700; letter-spacing: 0.03em; color: var(--text-main); }
+.main-value { font-size: 38px; font-weight: 700; letter-spacing: -0.04em; color: #0F172A; line-height: 1; }
 
-.card-body-split { display: flex; justify-content: space-between; align-items: center; gap: 20px; width: 100%; }
+.card-body-split { display: flex; justify-content: space-between; align-items: center; gap: 20px; width: 100%; flex-grow: 1; }
 .value-block { display: flex; flex-direction: column; gap: 6px; }
 .nested-stats { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .stat-badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: rgba(239, 68, 68, 0.06); white-space: nowrap; }
@@ -76,50 +82,66 @@ body {
 .legend-left { display: flex; align-items: center; gap: 6px; color: var(--text-muted); }
 .legend-dot { width: 6px; height: 6px; border-radius: 50%; }
 
-/* 🔥 الهندسة الجديدة لكروت الدوناتس (توزيع ذكي ومظهر ممتلئ وعصري) */
+/* 🌟 تظبيط هيكل كروت الدائرة المستنطرة والشغل الفخم */
 .card-body-radial { 
-    display: flex !important; 
-    align-items: center !important; 
-    justify-content: space-between !important; 
-    width: 100% !important; 
-    gap: 12px !important;
-    padding-top: 8px;
+    display: flex; 
+    justify-content: space-between; 
+    align-items: center; 
+    width: 100%; 
+    flex-grow: 1; 
 }
-.radial-info { 
-    display: flex !important; 
-    flex-direction: column !important; 
-    justify-content: center !important;
-    flex: 1 !important;
+.radial-left-content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: flex-start;
 }
-.percentage-label { font-size: 13px; font-weight: 600; margin-top: 4px; }
+/* ديسكربشن تحت الرقم مباشرة */
+.card-description-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    font-weight: 500;
+}
+/* النسبة تحت خالص على الشمال */
+.trend-badge-bottom {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: auto; /* يزق العنصر لتحت خالص */
+    padding-top: 14px;
+}
+.metric-card:nth-child(3) .trend-badge-bottom { color: var(--orange); }
+.metric-card:nth-child(4) .trend-badge-bottom { color: var(--text-muted); }
 
-/* 🔥 تكبير حجم الحاوية لملء الفراغ تماماً على اللاب توب والموبايل */
+/* 🌟 حاوية التشارت الدائري مع السنترة المطلقة */
 .progress-circle-container { 
-    width: 90px !important;       
-    height: 90px !important;      
-    flex-shrink: 0 !important; 
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    position: relative;
+    width: 82px;       
+    height: 82px;      
+    flex-shrink: 0; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative; /* مهم جداً لسنترة النص الداخلي */
 }
-.circular-chart { display: block; width: 100% !important; height: 100% !important; }
+.circular-chart { display: block; width: 100%; height: 100%; }
+.circle-bg { fill: none; stroke: #ECEFF4; stroke-width: 3.8; }
+.circle { fill: none; stroke-width: 3.8; stroke-linecap: round; }
 
-/* زيادة سُمك الخطوط لإعطاء مظهر لوحات التحكم الفاخرة المودرن */
-.circle-bg { fill: none; stroke: #F1F5F9 !important; stroke-width: 4.5 !important; }
-.circle { 
-    fill: none; 
-    stroke-width: 4.8 !important; 
-    stroke-linecap: round !important; 
-    stroke-linejoin: round !important; 
-    transition: stroke-dasharray 0.6s cubic-bezier(0.4, 0, 0.2, 1); 
+.circle-purple { stroke: var(--brand-purple); }
+.circle-orange { stroke: var(--orange); }
+.circle-gray { stroke: #94A3B8; }
+
+/* 🌟 النص الداخلي في منتصف الدائرة بالظبط */
+.radial-center-text {
+    position: absolute;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0F172A;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
 }
-
-/* 🔥 إضافة تأثير التوهج المضيء (Modern UI Soft Glow Effect) لقتل الفراغ الأبيض بصرياً */
-.circle-purple { stroke: var(--brand-purple) !important; filter: drop-shadow(0 4px 10px rgba(99, 102, 241, 0.35)); }
-.circle-orange { stroke: var(--orange) !important; filter: drop-shadow(0 4px 10px rgba(245, 158, 11, 0.35)); }
-.circle-gray { stroke: #94A3B8 !important; filter: drop-shadow(0 4px 10px rgba(148, 163, 184, 0.25)); }
-.text-purple { color: var(--brand-purple) !important; }
 
 /* Middle Layout Structure */
 .middle-charts-layout { display: grid; grid-template-columns: 6.5fr 3.5fr; gap: 20px; }
@@ -160,7 +182,7 @@ body {
 .leader-fill-bar { height: 100%; border-radius: 10px; }
 .leader-pct-value { font-size: 12px; font-weight: 700; text-align: right; width: 40px; color: #0F172A; }
 
-/* 📱 Strict Mobile First View Overrides */
+/* 📱 Responsive Mobile First View Overrides */
 @media (max-width: 768px) {
     body { padding: 20px 16px; }
     .metrics-grid { display: flex; flex-direction: column; gap: 16px; }
@@ -170,14 +192,10 @@ body {
     .middle-charts-layout { grid-template-columns: 1fr; }
     .leaderboards-grid { grid-template-columns: 1fr; }
     
-    /* ضبط ميزان المساحة العرضية على الموبايل لتبدو ممتلئة وفخمة */
+    /* الحفاظ على التوزيع الشيك في الموبايل بدون تلفيق */
     .card-body-radial { 
+        flex-direction: row !important;
         justify-content: space-between !important; 
-        gap: 16px !important; 
-        width: 100% !important;
+        align-items: center !important;
     }
-    .progress-circle-container { 
-        width: 84px !important; 
-        height: 84px !important; 
-    } 
 }
