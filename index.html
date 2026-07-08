@@ -11,7 +11,6 @@
 <body>
     <div class="dashboard-container">
         
-        <!-- Premium Minimal Header -->
         <header class="dashboard-header">
             <div class="header-main">
                 <h1>New Hired Onboarding  Report</h1>
@@ -25,10 +24,8 @@
             </div>
         </header>
 
-        <!-- Top Overview Row -->
         <div class="metrics-grid">
             
-            <!-- Card 1: Total New Hired -->
             <div class="metric-card main-kpi">
                 <div class="card-header">
                     <div class="label-group">
@@ -52,7 +49,6 @@
                 </div>
             </div>
 
-            <!-- Card 2: Trained Status (النسبة جوة الدائرة فقط) -->
             <div class="metric-card radial-kpi-card">
                 <div class="card-header">
                     <div class="label-group">
@@ -70,13 +66,11 @@
                             <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path id="radial-progress-bar" class="circle circle-purple" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
-                        <!-- الـ ID هنا مباشرة ليتم حقن النسبة في السنتر بشكل رائع -->
                         <div class="radial-center-text text-purple" id="trained-pct-val">0%</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 3: In Progress (النسبة جوة الدائرة فقط) -->
             <div class="metric-card radial-kpi-card">
                 <div class="card-header">
                     <div class="label-group">
@@ -94,13 +88,11 @@
                             <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path id="inprogress-radial-bar" class="circle circle-orange" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
-                        <!-- الـ ID هنا مباشرة ليتم حقن النسبة في السنتر بشكل رائع -->
                         <div class="radial-center-text text-orange-main" id="inprogress-pct-val">0%</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Card 4: Not Trained (النسبة جوة الدائرة فقط) -->
             <div class="metric-card radial-kpi-card">
                 <div class="card-header">
                     <div class="label-group">
@@ -118,14 +110,12 @@
                             <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path id="nottrained-radial-bar" class="circle circle-gray" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
-                        <!-- الـ ID هنا مباشرة ليتم حقن النسبة في السنتر بشكل رائع -->
                         <div class="radial-center-text text-muted" id="nottrained-pct-val">0%</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Middle Row: Line Chart Trend & Mini Insights -->
         <div class="middle-charts-layout">
             <div class="metric-card chart-container main-trend-box">
                 <div class="section-title-container">
@@ -166,7 +156,6 @@
             </div>
         </div>
 
-        <!-- Bottom Row: Leaderboards Systems -->
         <div class="leaderboards-grid">
             <div class="metric-card">
                 <div class="section-title-container">
@@ -182,6 +171,17 @@
                     <p class="section-subtitle">Lowest training completion ratios</p>
                 </div>
                 <div class="leaderboard-list" id="bottom5-gov-list"></div>
+            </div>
+        </div>
+
+        <div class="exceeded-standalone-row">
+            <div class="metric-card full-width-card">
+                <div class="section-title-container">
+                    <h3>Exceeded 72 Hours Workforce Log</h3>
+                    <p class="section-subtitle">Detailed roster of pending phase officers who exceeded the 72-hour limit along with case comments</p>
+                </div>
+                <div class="exceeded-list-container" id="exceeded-72h-list">
+                    </div>
             </div>
         </div>
 
