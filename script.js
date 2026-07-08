@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const nodeTop5List = document.getElementById('top5-gov-list');
     const nodeBottom5List = document.getElementById('bottom5-gov-list');
     const nodeUpdateBadge = document.getElementById('data-update-badge');
-    const nodeExceededList = document.getElementById('exceeded-72h-list'); // ربط الحاوية الجديدة
     
     // Radials Elements
     const nodeRadialTrained = document.getElementById('radial-progress-bar');
@@ -119,7 +118,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPureSpecialization(rawRecords);
         renderPremiumLineChart(rawRecords);
         calculateGovernorateLeaderboards(rawRecords);
-        renderExceededListDOM(exceededSubset); // استدعاء دالة بناء جدول المتجاوزين لـ 72 ساعة تلقائياً
     }
 
     // Dynamic Specialization Parser (Fixed Zeroing Out Bug)
@@ -262,7 +260,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         svgCode += `</svg>`;
-        nodeLineChartContainer.innerHTML = svg Code;
+        nodeLineChartContainer.innerHTML = svgCode;
     }
 
     // Leaderboards Processing
@@ -316,34 +314,42 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // بناء الهيكل الداخلي لقائمة الـ 72 ساعة وقراءة الـ Comment بذكاء ديناميكي كامل مرن
-    function renderExceededListDOM(list) {
-        if (!nodeExceededList) return;
-        nodeExceededList.innerHTML = '';
-        if (list.length === 0) {
-            nodeExceededList.innerHTML = `<div style="font-size:12px; color:var(--text-muted); padding:24px 0; text-align:center;">No records found matching this criteria.</div>`;
+    // 🔴 الدالة الجديدة الخاصة بعرض جدول الـ 72 ساعة والتعليقات
+    function renderExceeded72hList(dataset) {
+        const tbody = document.getElementById('exceeded-72h-list-body');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        const exceededPeople = dataset.filter(r => {
+            const notTrained = !r['Training Status'] || r['Training Status'].trim() === '';
+            const hasExceeded = r['72 hours'] && r['72 hours'].includes('Exceeded');
+            return notTrained && hasExceeded;
+        });
+
+        if (exceededPeople.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="padding: 20px; text-align: center; color: var(--text-muted); font-style: italic;">No records found matching criteria.</td></tr>`;
             return;
         }
-        list.forEach((rec) => {
-            // محرك فحص ذكي لاستخراج الاسم بأي صيغة عمود محتملة بالملف
-            const name = rec['Name'] || rec['Officer Name'] || rec['Employee Name'] || rec['Full Name'] || 'Workforce Officer';
-            // محرك فحص ذكي لاستخراج حقل الـ Comment أو الـ Comments وعرضه فوراً
-            const comment = rec['Comment'] || rec['Comments'] || rec['comment'] || 'No case comment recorded';
-            const gov = rec['Governorate'] || '';
+
+        exceededPeople.forEach(person => {
+            const name = person['Name'] || person['Officer Name'] || person['Employee Name'] || 'Workforce Officer';
+            const gov = person['Governorate'] || '-';
+            const comment = person['Comment'] || person['comment'] || person['Comments'] || 'No case comment recorded';
+
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = '1px solid var(--border-color)';
+            tr.style.transition = 'background-color 0.2s';
             
-            const item = document.createElement('div');
-            item.className = 'exceeded-item-row';
-            item.innerHTML = `
-                <div class="exceeded-officer-info">
-                    <span class="exceeded-dot-indicator"></span>
-                    <strong class="exceeded-name">${name}</strong>
-                    ${gov ? `<span class="exceeded-gov-badge">${gov}</span>` : ''}
-                </div>
-                <div class="exceeded-comment-box" title="${comment}">
-                    <span class="comment-label">Comment:</span> ${comment}
-                </div>
+            tr.innerHTML = `
+                <td style="padding: 14px 8px; font-weight: 600; color: var(--text-main);">${name}</td>
+                <td style="padding: 14px 8px; color: var(--text-muted); font-weight: 500;">${gov}</td>
+                <td style="padding: 14px 8px; color: var(--red); font-weight: 500; line-height: 1.4;">${comment}</td>
             `;
-            nodeExceededList.appendChild(item);
+            
+            tr.addEventListener('mouseover', () => tr.style.backgroundColor = '#F8FAFC');
+            tr.addEventListener('mouseout', () => tr.style.backgroundColor = 'transparent');
+            
+            tbody.appendChild(tr);
         });
     }
 
@@ -356,6 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(csvText => {
             const dataset = parseCSVDataEngine(csvText);
             processMetricsPipeline(dataset);
+            renderExceeded72hList(dataset); // 🔴 تم استدعاء الدالة الجديدة هنا بنجاح
             nodeUpdateBadge.textContent = "Data Synced Live";
         })
         .catch(err => {
