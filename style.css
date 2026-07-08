@@ -199,3 +199,112 @@ body {
         align-items: center !important;
     }
 }
+
+/* ==========================================================================
+   Exceeded 72 Hours Dynamic List Premium Styling
+   ========================================================================== */
+.exceeded-standalone-row {
+    width: 100%;
+    margin-bottom: 12px;
+}
+.metric-card.full-width-card {
+    width: 100%;
+    min-height: auto;
+}
+.exceeded-list-container {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+    max-height: 380px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+/* تخصيص المسار الانسيابي للمؤشر الجانبي للـ Scroll */
+.exceeded-list-container::-webkit-scrollbar {
+    width: 6px;
+}
+.exceeded-list-container::-webkit-scrollbar-track {
+    background: #F1F5F9;
+    border-radius: 4px;
+}
+.exceeded-list-container::-webkit-scrollbar-thumb {
+    background: #CBD5E1;
+    border-radius: 4px;
+}
+.exceeded-list-container::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8;
+}
+
+.exceeded-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    gap: 20px;
+    transition: all 0.2s ease;
+}
+.exceeded-item-row:hover {
+    background: #F1F5F9;
+    border-color: #CBD5E1;
+}
+.exceeded-officer-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 280px;
+}
+.exceeded-dot-indicator {
+    width: 8px;
+    height: 8px;
+    background-color: var(--red);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.18);
+    flex-shrink: 0;
+}
+.exceeded-name {
+    font-size: 13.5px;
+    color: var(--text-main);
+    font-weight: 600;
+}
+.exceeded-gov-badge {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    background: #E2E8F0;
+    padding: 2px 8px;
+    border-radius: 6px;
+}
+.exceeded-comment-box {
+    font-size: 13px;
+    color: #334155;
+    flex-grow: 1;
+    line-height: 1.4;
+    background: #FFFFFF;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px dashed rgba(30, 41, 59, 0.12);
+}
+.comment-label {
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-right: 4px;
+}
+
+@media (max-width: 768px) {
+    .exceeded-item-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    .exceeded-officer-info {
+        width: 100%;
+        min-width: auto;
+    }
+    .exceeded-comment-box {
+        width: 100%;
+    }
+}
