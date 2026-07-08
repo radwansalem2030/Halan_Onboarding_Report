@@ -13,7 +13,7 @@
         
         <header class="dashboard-header">
             <div class="header-main">
-                <h1>New Hired Onboarding  Report</h1>
+                <h1>New Hired Onboarding Report</h1>
                 <p class="subtitle">Unified view of workforce metrics and training intelligence insights</p>
             </div>
             <div class="header-actions">
@@ -174,14 +174,25 @@
             </div>
         </div>
 
-        <div class="exceeded-standalone-row">
-            <div class="metric-card full-width-card">
+        <div class="exceeded-standalone-row" style="margin-top: 24px; width: 100%;">
+            <div class="metric-card" style="width: 100%;">
                 <div class="section-title-container">
-                    <h3>Exceeded 72 Hours Workforce Log</h3>
-                    <p class="section-subtitle">Detailed roster of pending phase officers who exceeded the 72-hour limit along with case comments</p>
+                    <h3>Exceeded 72 Hours Log</h3>
+                    <p class="section-subtitle">Comprehensive list of pending phase officers who exceeded 72 hours limit with case comments</p>
                 </div>
-                <div class="exceeded-list-container" id="exceeded-72h-list">
-                    </div>
+                <div class="exceeded-table-container" style="margin-top: 16px; overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                        <thead>
+                            <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 12px; letter-spacing: 0.05em;">
+                                <th style="padding: 12px 8px;">NAME</th>
+                                <th style="padding: 12px 8px;">GOVERNORATE</th>
+                                <th style="padding: 12px 8px;">CASE COMMENT</th>
+                            </tr>
+                        </thead>
+                        <tbody id="exceeded-72h-list-body" style="font-size: 13px; color: var(--text-main);">
+                            </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
