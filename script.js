@@ -120,7 +120,7 @@ document.addEventListener('DOMContentLoaded', () => {
         calculateGovernorateLeaderboards(rawRecords);
     }
 
-    // Dynamic Specialization Parser (Fixed Zeroing Out Bug)
+    // Dynamic Specialization Parser
     function renderPureSpecialization(data) {
         const segments = ['Loan Officer MF', 'Loan Officer CF', 'Gam3ya', 'Investment'];
         const colors = ['#6366F1', '#3B82F6', '#10B981', '#F59E0B'];
@@ -131,7 +131,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const spec = row['Specialized'] ? row['Specialized'].trim().toLowerCase() : '';
             if (!spec) return;
 
-            // Advanced Sub-string Loose Matching Engine to eliminate zeros
             if (spec.includes('cf') || spec.includes('consumer') || spec.includes('استشرافي')) {
                 valuesMap['Loan Officer CF']++;
                 totalValid++;
@@ -145,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 valuesMap['Investment']++;
                 totalValid++;
             } else {
-                // Safe Fallback fallback for clean totals allocation
                 valuesMap['Loan Officer MF']++;
                 totalValid++;
             }
@@ -314,12 +312,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 🔴 الدالة الجديدة الخاصة بعرض جدول الـ 72 ساعة والتعليقات
+    // 🔴 الدالة المعدلة: تفرز أبجدياً + تحسب توتال أعداد كل محافظة وتظهره بشكل احترافي
     function renderExceeded72hList(dataset) {
         const tbody = document.getElementById('exceeded-72h-list-body');
         if (!tbody) return;
         tbody.innerHTML = '';
 
+        // 1. فلترة الموظفين المتجاوزين لـ 72 ساعة
         const exceededPeople = dataset.filter(r => {
             const notTrained = !r['Training Status'] || r['Training Status'].trim() === '';
             const hasExceeded = r['72 hours'] && r['72 hours'].includes('Exceeded');
@@ -331,18 +330,40 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
+        // 2. حساب إجمالي عدد الحالات لكل محافظة (توتال الأعداد)
+        const govCounts = {};
+        exceededPeople.forEach(p => {
+            const gov = p['Governorate'] || 'Unknown';
+            govCounts[gov] = (govCounts[gov] || 0) + 1;
+        });
+
+        // 3. عمل ترتيب أبجدي (A-Z) بناءً على اسم المحافظة لتظهر الحالات تحت بعضها
+        exceededPeople.sort((a, b) => {
+            const govA = (a['Governorate'] || 'Unknown').trim();
+            const govB = (b['Governorate'] || 'Unknown').trim();
+            return govA.localeCompare(govB, undefined, { numeric: true, sensitivity: 'base' });
+        });
+
+        // 4. بناء الجدول وعرض البيانات والعدادات الشيك
         exceededPeople.forEach(person => {
             const name = person['Name'] || person['Officer Name'] || person['Employee Name'] || 'Workforce Officer';
-            const gov = person['Governorate'] || '-';
+            const gov = person['Governorate'] || 'Unknown';
+            const totalGovCases = govCounts[gov] || 0;
             const comment = person['Comment'] || person['comment'] || person['Comments'] || 'No case comment recorded';
 
             const tr = document.createElement('tr');
             tr.style.borderBottom = '1px solid var(--border-color)';
             tr.style.transition = 'background-color 0.2s';
             
+            // هنا بيعرض اسم المحافظة وبجوارها بادج دائري أنيق يوضح الإجمالي
             tr.innerHTML = `
                 <td style="padding: 14px 8px; font-weight: 600; color: var(--text-main);">${name}</td>
-                <td style="padding: 14px 8px; color: var(--text-muted); font-weight: 500;">${gov}</td>
+                <td style="padding: 14px 8px; display: flex; align-items: center; gap: 8px;">
+                    <span style="color: var(--text-main); font-weight: 600;">${gov}</span>
+                    <span style="background: rgba(99, 102, 241, 0.08); color: var(--brand-purple); font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(99, 102, 241, 0.2);">
+                        ${totalGovCases} cases
+                    </span>
+                </td>
                 <td style="padding: 14px 8px; color: var(--red); font-weight: 500; line-height: 1.4;">${comment}</td>
             `;
             
@@ -362,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(csvText => {
             const dataset = parseCSVDataEngine(csvText);
             processMetricsPipeline(dataset);
-            renderExceeded72hList(dataset); // 🔴 تم استدعاء الدالة الجديدة هنا بنجاح
+            renderExceeded72hList(dataset);
             nodeUpdateBadge.textContent = "Data Synced Live";
         })
         .catch(err => {
