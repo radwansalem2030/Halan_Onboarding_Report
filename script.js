@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const nodeTop5List = document.getElementById('top5-gov-list');
     const nodeBottom5List = document.getElementById('bottom5-gov-list');
     const nodeUpdateBadge = document.getElementById('data-update-badge');
+    const nodeExceededList = document.getElementById('exceeded-72h-list'); // ربط الحاوية الجديدة
     
     // Radials Elements
     const nodeRadialTrained = document.getElementById('radial-progress-bar');
@@ -118,6 +119,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPureSpecialization(rawRecords);
         renderPremiumLineChart(rawRecords);
         calculateGovernorateLeaderboards(rawRecords);
+        renderExceededListDOM(exceededSubset); // استدعاء دالة بناء جدول المتجاوزين لـ 72 ساعة تلقائياً
     }
 
     // Dynamic Specialization Parser (Fixed Zeroing Out Bug)
@@ -260,7 +262,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         svgCode += `</svg>`;
-        nodeLineChartContainer.innerHTML = svgCode;
+        nodeLineChartContainer.innerHTML = svg Code;
     }
 
     // Leaderboards Processing
@@ -311,6 +313,37 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="leader-pct-value">${rec.rate.toFixed(0)}%</div>
             `;
             domAnchor.appendChild(row);
+        });
+    }
+
+    // بناء الهيكل الداخلي لقائمة الـ 72 ساعة وقراءة الـ Comment بذكاء ديناميكي كامل مرن
+    function renderExceededListDOM(list) {
+        if (!nodeExceededList) return;
+        nodeExceededList.innerHTML = '';
+        if (list.length === 0) {
+            nodeExceededList.innerHTML = `<div style="font-size:12px; color:var(--text-muted); padding:24px 0; text-align:center;">No records found matching this criteria.</div>`;
+            return;
+        }
+        list.forEach((rec) => {
+            // محرك فحص ذكي لاستخراج الاسم بأي صيغة عمود محتملة بالملف
+            const name = rec['Name'] || rec['Officer Name'] || rec['Employee Name'] || rec['Full Name'] || 'Workforce Officer';
+            // محرك فحص ذكي لاستخراج حقل الـ Comment أو الـ Comments وعرضه فوراً
+            const comment = rec['Comment'] || rec['Comments'] || rec['comment'] || 'No case comment recorded';
+            const gov = rec['Governorate'] || '';
+            
+            const item = document.createElement('div');
+            item.className = 'exceeded-item-row';
+            item.innerHTML = `
+                <div class="exceeded-officer-info">
+                    <span class="exceeded-dot-indicator"></span>
+                    <strong class="exceeded-name">${name}</strong>
+                    ${gov ? `<span class="exceeded-gov-badge">${gov}</span>` : ''}
+                </div>
+                <div class="exceeded-comment-box" title="${comment}">
+                    <span class="comment-label">Comment:</span> ${comment}
+                </div>
+            `;
+            nodeExceededList.appendChild(item);
         });
     }
 
