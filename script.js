@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const nodeTop5List = document.getElementById('top5-gov-list');
     const nodeBottom5List = document.getElementById('bottom5-gov-list');
     const nodeUpdateBadge = document.getElementById('data-update-badge');
+    const monthFilterSelect = document.getElementById('month-filter');
     
     // Radials Elements
     const nodeRadialTrained = document.getElementById('radial-progress-bar');
@@ -26,6 +27,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const nodeSpecBar = document.getElementById('spec-segmented-bar');
     const nodeSpecLegend = document.getElementById('spec-segmented-legend');
     const nodeLineChartContainer = document.getElementById('pure-svg-line-chart-container');
+
+    // Dataset Globals
+    let globalDataset = [];
 
     // Safe Parser Engine
     function parseCSVDataEngine(textString) {
@@ -51,6 +55,59 @@ document.addEventListener('DOMContentLoaded', () => {
         return compiledRecords;
     }
 
+    // Helper Engine to extract standard YYYY-MM key from Hiring Date
+    function parseMonthKey(hDate) {
+        if (!hDate) return '';
+        let token = hDate.trim();
+        if (token.includes('-')) {
+            const chunks = token.split('-');
+            if (chunks[0].length === 4) return `${chunks[0]}-${chunks[1].padStart(2, '0')}`;
+        } else if (token.includes('/')) {
+            const chunks = token.split('/');
+            // format MM/DD/YYYY
+            if (chunks[2] && chunks[2].length === 4) return `${chunks[2]}-${chunks[0].padStart(2, '0')}`;
+        }
+        return '';
+    }
+
+    // Dynamic Filter UI Builder
+    function populateMonthFilter(dataset) {
+        const monthsSet = new Set();
+        dataset.forEach(row => {
+            const key = parseMonthKey(row['Hiring Date']);
+            if (key) monthsSet.add(key);
+        });
+
+        const sortedKeys = Array.from(monthsSet).sort();
+        monthFilterSelect.innerHTML = '<option value="all">All Months</option>';
+
+        sortedKeys.forEach(key => {
+            const [year, month] = key.split('-');
+            const dateObj = new Date(year, month - 1);
+            const label = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' }); // e.g. July 2026
+            
+            const opt = document.createElement('option');
+            opt.value = key;
+            opt.textContent = label;
+            monthFilterSelect.appendChild(opt);
+        });
+    }
+
+    // Pipeline Orchestrator on Filter Event
+    function applyDynamicFiltering() {
+        const chosenValue = monthFilterSelect.value;
+        let scopedData = globalDataset;
+
+        if (chosenValue !== 'all') {
+            scopedData = globalDataset.filter(row => parseMonthKey(row['Hiring Date']) === chosenValue);
+        }
+
+        processMetricsPipeline(scopedData);
+        renderExceeded72hList(scopedData);
+    }
+
+    monthFilterSelect.addEventListener('change', applyDynamicFiltering);
+
     // Core Processing Engine
     function processMetricsPipeline(rawRecords) {
         const totalNewHired = rawRecords.length;
@@ -60,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const resignedCount = resignedSubset.length;
         const resignedPct = totalNewHired > 0 ? (resignedCount / totalNewHired) * 100 : 0;
 
-        // 2. Kept Eligible Logic in Background for Percentages Accuracies
+        // 2. Kept Eligible Logic
         const eligibleOfficersCount = totalNewHired - resignedCount;
 
         // 3. Trained Status
@@ -91,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const signedCount = trainedSubset.filter(r => r['Survey Result'] && r['Survey Result'].trim().toLowerCase() === 'signed').length;
         const notSignedCount = trainedCount - signedCount;
 
-        // Populate Text Nodes
+        // Populate UI Nodes
         txtTotalHired.textContent = totalNewHired.toLocaleString();
         txtResignedCount.textContent = resignedCount.toLocaleString();
         txtResignedPct.textContent = resignedPct.toFixed(1) + ' %';
@@ -114,9 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
         txtSignedCount.textContent = signedCount.toLocaleString();
         txtNotSignedCount.textContent = notSignedCount.toLocaleString();
 
-        // Render Graphics Modules
+        // Render Dynamic UI Layout Subcomponents
         renderPureSpecialization(rawRecords);
-        renderPremiumLineChart(rawRecords);
         calculateGovernorateLeaderboards(rawRecords);
     }
 
@@ -177,22 +233,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Timeline SVG Line Engine
+    // Master Historical SVG Timeline Chart Engine (Stays Global)
     function renderPremiumLineChart(data) {
         const timeRegistry = {};
         data.forEach(row => {
-            const hDate = row['Hiring Date'] ? row['Hiring Date'].trim() : '';
-            if (!hDate) return;
-            let token = hDate;
-            if (hDate.includes('-')) {
-                const chunks = hDate.split('-');
-                if (chunks[0].length === 4) token = `${chunks[0]}-${chunks[1].padStart(2, '0')}`;
-            } else if (hDate.includes('/')) {
-                const chunks = hDate.split('/');
-                if (chunks[2] && chunks[2].length === 4) token = `${chunks[2]}-${chunks[0].padStart(2, '0')}`;
-            }
-            if (token.length >= 7) {
-                const key = token.substring(0, 7);
+            const key = parseMonthKey(row['Hiring Date']);
+            if (key) {
                 timeRegistry[key] = (timeRegistry[key] || 0) + 1;
             }
         });
@@ -312,13 +358,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 🔴 الدالة المعدلة: تفرز أبجدياً + تحسب توتال أعداد كل محافظة وتظهره بشكل احترافي
+    // Exceeded 72h Table Logger Component
     function renderExceeded72hList(dataset) {
         const tbody = document.getElementById('exceeded-72h-list-body');
         if (!tbody) return;
         tbody.innerHTML = '';
 
-        // 1. فلترة الموظفين المتجاوزين لـ 72 ساعة
         const exceededPeople = dataset.filter(r => {
             const notTrained = !r['Training Status'] || r['Training Status'].trim() === '';
             const hasExceeded = r['72 hours'] && r['72 hours'].includes('Exceeded');
@@ -330,21 +375,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        // 2. حساب إجمالي عدد الحالات لكل محافظة (توتال الأعداد)
         const govCounts = {};
         exceededPeople.forEach(p => {
             const gov = p['Governorate'] || 'Unknown';
             govCounts[gov] = (govCounts[gov] || 0) + 1;
         });
 
-        // 3. عمل ترتيب أبجدي (A-Z) بناءً على اسم المحافظة لتظهر الحالات تحت بعضها
         exceededPeople.sort((a, b) => {
             const govA = (a['Governorate'] || 'Unknown').trim();
             const govB = (b['Governorate'] || 'Unknown').trim();
             return govA.localeCompare(govB, undefined, { numeric: true, sensitivity: 'base' });
         });
 
-        // 4. بناء الجدول وعرض البيانات والعدادات الشيك
         exceededPeople.forEach(person => {
             const name = person['Name'] || person['Officer Name'] || person['Employee Name'] || 'Workforce Officer';
             const gov = person['Governorate'] || 'Unknown';
@@ -355,7 +397,6 @@ document.addEventListener('DOMContentLoaded', () => {
             tr.style.borderBottom = '1px solid var(--border-color)';
             tr.style.transition = 'background-color 0.2s';
             
-            // هنا بيعرض اسم المحافظة وبجوارها بادج دائري أنيق يوضح الإجمالي
             tr.innerHTML = `
                 <td style="padding: 14px 8px; font-weight: 600; color: var(--text-main);">${name}</td>
                 <td style="padding: 14px 8px; display: flex; align-items: center; gap: 8px;">
@@ -381,9 +422,16 @@ document.addEventListener('DOMContentLoaded', () => {
             return res.text();
         })
         .then(csvText => {
-            const dataset = parseCSVDataEngine(csvText);
-            processMetricsPipeline(dataset);
-            renderExceeded72hList(dataset);
+            globalDataset = parseCSVDataEngine(csvText);
+            
+            // Initialize Core UI Controls
+            populateMonthFilter(globalDataset);
+            renderPremiumLineChart(globalDataset); // Line Chart holds standard global baseline overview
+            
+            // Render Initial Dynamic Data State (All Months Default)
+            processMetricsPipeline(globalDataset);
+            renderExceeded72hList(globalDataset);
+            
             nodeUpdateBadge.textContent = "Data Synced Live";
         })
         .catch(err => {
