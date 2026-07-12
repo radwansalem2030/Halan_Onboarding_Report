@@ -17,6 +17,10 @@
                 <p class="subtitle">Unified view of workforce metrics and training intelligence insights</p>
             </div>
             <div class="header-actions">
+                <select id="month-filter" class="premium-select">
+                    <option value="all">All Months</option>
+                </select>
+                
                 <div class="status-pill">
                     <span class="status-indicator live"></span>
                     <span id="data-update-badge">Syncing data.csv...</span>
@@ -159,7 +163,7 @@
         <div class="leaderboards-grid">
             <div class="metric-card">
                 <div class="section-title-container">
-                    <h3>Top 5 Governorates</h3>
+                    <h3>Top 5 Governorate Ratios</h3>
                     <p class="section-subtitle">Highest training completion ratios</p>
                 </div>
                 <div class="leaderboard-list" id="top5-gov-list"></div>
@@ -167,7 +171,7 @@
 
             <div class="metric-card">
                 <div class="section-title-container">
-                    <h3>Bottom 5 Governorates</h3>
+                    <h3>Bottom 5 Governorate Ratios</h3>
                     <p class="section-subtitle">Lowest training completion ratios</p>
                 </div>
                 <div class="leaderboard-list" id="bottom5-gov-list"></div>
