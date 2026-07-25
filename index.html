@@ -11,6 +11,7 @@
 <body>
     <div class="dashboard-container">
         
+        <!-- Header Section -->
         <header class="dashboard-header">
             <div class="header-main">
                 <h1>New Hired Onboarding Report</h1>
@@ -28,178 +29,505 @@
             </div>
         </header>
 
-        <div class="metrics-grid">
+        <!-- Executive Navigation Tabs -->
+        <nav class="nav-tabs-container">
+            <button class="nav-tab-btn active" data-tab="tab-overview">
+                <span class="tab-icon">📊</span>
+                <span class="tab-label">ONBOARDING OVERVIEW</span>
+            </button>
+            <button class="nav-tab-btn" data-tab="tab-analytics">
+                <span class="tab-icon">📈</span>
+                <span class="tab-label">ONBOARDING ANALYTICS</span>
+            </button>
+            <button class="nav-tab-btn" data-tab="tab-supervisor">
+                <span class="tab-icon">👔</span>
+                <span class="tab-label">SUPERVISOR PERFORMANCE</span>
+            </button>
+        </nav>
+
+        <!-- ========================================================================== -->
+        <!-- TAB 1: ONBOARDING OVERVIEW                                                 -->
+        <!-- ========================================================================== -->
+        <div id="tab-overview" class="tab-content active">
             
-            <div class="metric-card main-kpi">
-                <div class="card-header">
-                    <div class="label-group">
-                        <span class="card-icon-wrapper human">👥</span>
-                        <span class="card-label">TOTAL NEW HIRED</span>
-                    </div>
-                </div>
-                <div class="card-body-split">
-                    <div class="value-block">
-                        <span class="main-value" id="total-hired-val">0</span>
-                        <div class="nested-stats">
-                            <span class="stat-badge text-danger">Resigned: <strong id="resigned-count-val">0</strong></span>
-                            <span class="stat-subtext" id="resigned-pct-val">0%</span>
+            <div class="metrics-grid">
+                
+                <div class="metric-card main-kpi">
+                    <div class="card-header">
+                        <div class="label-group">
+                            <span class="card-icon-wrapper human">👥</span>
+                            <span class="card-label">TOTAL NEW HIRED</span>
                         </div>
                     </div>
-                    <div class="pure-distribution-wrapper">
-                        <span class="card-label-sub">SPECIALIZATION SPLIT</span>
-                        <div class="segmented-bar" id="spec-segmented-bar"></div>
-                        <div class="segmented-legend" id="spec-segmented-legend"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="metric-card radial-kpi-card">
-                <div class="card-header">
-                    <div class="label-group">
-                        <span class="card-icon-wrapper trained">✨</span>
-                        <span class="card-label">TRAINED STATUS</span>
-                    </div>
-                </div>
-                <div class="card-body-radial">
-                    <div class="radial-left-content">
-                        <span class="main-value" id="trained-count-val">0</span>
-                        <div class="card-description-text">Trained Officers</div>
-                    </div>
-                    <div class="progress-circle-container">
-                        <svg viewBox="0 0 36 36" class="circular-chart">
-                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path id="radial-progress-bar" class="circle circle-purple" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        </svg>
-                        <div class="radial-center-text text-purple" id="trained-pct-val">0%</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="metric-card radial-kpi-card">
-                <div class="card-header">
-                    <div class="label-group">
-                        <span class="card-icon-wrapper progress-icon">⚡</span>
-                        <span class="card-label">IN PROGRESS</span>
-                    </div>
-                </div>
-                <div class="card-body-radial">
-                    <div class="radial-left-content">
-                        <span class="main-value text-orange-main" id="inprogress-val">0</span>
-                        <div class="card-description-text">Under Training</div>
-                    </div>
-                    <div class="progress-circle-container">
-                        <svg viewBox="0 0 36 36" class="circular-chart">
-                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path id="inprogress-radial-bar" class="circle circle-orange" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        </svg>
-                        <div class="radial-center-text text-orange-main" id="inprogress-pct-val">0%</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="metric-card radial-kpi-card">
-                <div class="card-header">
-                    <div class="label-group">
-                        <span class="card-icon-wrapper pending-icon">⏳</span>
-                        <span class="card-label">NOT TRAINED</span>
-                    </div>
-                </div>
-                <div class="card-body-radial">
-                    <div class="radial-left-content">
-                        <span class="main-value text-muted" id="nottrained-val">0</span>
-                        <div class="card-description-text">Pending Phase</div>
-                    </div>
-                    <div class="progress-circle-container">
-                        <svg viewBox="0 0 36 36" class="circular-chart">
-                            <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path id="nottrained-radial-bar" class="circle circle-gray" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                        </svg>
-                        <div class="radial-center-text text-muted" id="nottrained-pct-val">0%</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="middle-charts-layout">
-            <div class="metric-card chart-container main-trend-box">
-                <div class="section-title-container">
-                    <h3>Performance Trend</h3>
-                    <p class="section-subtitle">Timeline velocity of monthly fresh recruit onboarding</p>
-                </div>
-                <div class="pure-line-chart-wrapper">
-                    <div id="pure-svg-line-chart-container" class="svg-chart-render"></div>
-                </div>
-            </div>
-
-            <div class="metric-card split-insight-card">
-                <div class="insight-column">
-                    <span class="card-label">EXCEEDED 72 HOURS</span>
-                    <div class="insight-value-group">
-                        <span class="main-value text-danger" id="exceeded-72-val">0</span>
-                        <span class="rate-badge" id="exceeded-72-pct-val">0%</span>
-                    </div>
-                    <p class="explanation-text">Strictly out of the Not Trained workforce pool.</p>
-                </div>
-                <div class="insight-divider"></div>
-                <div class="insight-column">
-                    <span class="card-label">CONTRACT SIGNED STATUS</span>
-                    <div class="signed-metrics-list">
-                        <div class="signed-item">
-                            <span class="dot dot-success"></span>
-                            <span class="item-name">Signed Contracts:</span>
-                            <strong id="signed-count-val">0</strong>
+                    <div class="card-body-split">
+                        <div class="value-block">
+                            <span class="main-value" id="total-hired-val">0</span>
+                            <div class="nested-stats">
+                                <span class="stat-badge text-danger">Resigned: <strong id="resigned-count-val">0</strong></span>
+                                <span class="stat-subtext" id="resigned-pct-val">0%</span>
+                            </div>
                         </div>
-                        <div class="signed-item">
-                            <span class="dot dot-warning"></span>
-                            <span class="item-name">Not Signed:</span>
-                            <strong id="notsigned-count-val">0</strong>
+                        <div class="pure-distribution-wrapper">
+                            <span class="card-label-sub">SPECIALIZATION SPLIT</span>
+                            <div class="segmented-bar" id="spec-segmented-bar"></div>
+                            <div class="segmented-legend" id="spec-segmented-legend"></div>
                         </div>
                     </div>
-                    <p class="explanation-text">Validation restricted to 100% Trained officers.</p>
+                </div>
+
+                <div class="metric-card radial-kpi-card">
+                    <div class="card-header">
+                        <div class="label-group">
+                            <span class="card-icon-wrapper trained">✨</span>
+                            <span class="card-label">TRAINED STATUS</span>
+                        </div>
+                    </div>
+                    <div class="card-body-radial">
+                        <div class="radial-left-content">
+                            <span class="main-value" id="trained-count-val">0</span>
+                            <div class="card-description-text">Trained Officers</div>
+                        </div>
+                        <div class="progress-circle-container">
+                            <svg viewBox="0 0 36 36" class="circular-chart">
+                                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="radial-progress-bar" class="circle circle-purple" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="radial-center-text text-purple" id="trained-pct-val">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card radial-kpi-card">
+                    <div class="card-header">
+                        <div class="label-group">
+                            <span class="card-icon-wrapper progress-icon">⚡</span>
+                            <span class="card-label">IN PROGRESS</span>
+                        </div>
+                    </div>
+                    <div class="card-body-radial">
+                        <div class="radial-left-content">
+                            <span class="main-value text-orange-main" id="inprogress-val">0</span>
+                            <div class="card-description-text">Under Training</div>
+                        </div>
+                        <div class="progress-circle-container">
+                            <svg viewBox="0 0 36 36" class="circular-chart">
+                                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="inprogress-radial-bar" class="circle circle-orange" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="radial-center-text text-orange-main" id="inprogress-pct-val">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="metric-card radial-kpi-card">
+                    <div class="card-header">
+                        <div class="label-group">
+                            <span class="card-icon-wrapper pending-icon">⏳</span>
+                            <span class="card-label">NOT TRAINED</span>
+                        </div>
+                    </div>
+                    <div class="card-body-radial">
+                        <div class="radial-left-content">
+                            <span class="main-value text-muted" id="nottrained-val">0</span>
+                            <div class="card-description-text">Pending Phase</div>
+                        </div>
+                        <div class="progress-circle-container">
+                            <svg viewBox="0 0 36 36" class="circular-chart">
+                                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                                <path id="nottrained-radial-bar" class="circle circle-gray" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            </svg>
+                            <div class="radial-center-text text-muted" id="nottrained-pct-val">0%</div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="middle-charts-layout">
+                <div class="metric-card chart-container main-trend-box">
+                    <div class="section-title-container">
+                        <h3>Performance Trend</h3>
+                        <p class="section-subtitle">Timeline velocity of monthly fresh recruit onboarding</p>
+                    </div>
+                    <div class="pure-line-chart-wrapper">
+                        <div id="pure-svg-line-chart-container" class="svg-chart-render"></div>
+                    </div>
+                </div>
+
+                <div class="metric-card split-insight-card">
+                    <div class="insight-column">
+                        <span class="card-label">EXCEEDED 72 HOURS</span>
+                        <div class="insight-value-group">
+                            <span class="main-value text-danger" id="exceeded-72-val">0</span>
+                            <span class="rate-badge" id="exceeded-72-pct-val">0%</span>
+                        </div>
+                        <p class="explanation-text">Percentage calculated against Effective Population.</p>
+                    </div>
+                    <div class="insight-divider"></div>
+                    <div class="insight-column">
+                        <span class="card-label">DECLARATION COMPLIANCE</span>
+                        <div class="signed-metrics-list">
+                            <div class="signed-item">
+                                <span class="dot dot-success"></span>
+                                <span class="item-name">Declaration Signed:</span>
+                                <strong id="signed-count-val">0</strong>
+                            </div>
+                            <div class="signed-item">
+                                <span class="dot dot-warning"></span>
+                                <span class="item-name">Declaration Pending:</span>
+                                <strong id="notsigned-count-val">0</strong>
+                            </div>
+                        </div>
+                        <p class="explanation-text">Validation restricted to 100% Trained officers.</p>
+                    </div>
                 </div>
             </div>
+
+            <div class="leaderboards-grid">
+                <div class="metric-card">
+                    <div class="section-title-container">
+                        <h3>Top 5 Governorate Ratios</h3>
+                        <p class="section-subtitle">Highest training completion ratios</p>
+                    </div>
+                    <div class="leaderboard-list" id="top5-gov-list"></div>
+                </div>
+
+                <div class="metric-card">
+                    <div class="section-title-container">
+                        <h3>Bottom 5 Governorate Ratios</h3>
+                        <p class="section-subtitle">Lowest training completion ratios</p>
+                    </div>
+                    <div class="leaderboard-list" id="bottom5-gov-list"></div>
+                </div>
+            </div>
+
         </div>
 
-        <div class="leaderboards-grid">
-            <div class="metric-card">
-                <div class="section-title-container">
-                    <h3>Top 5 Governorate Ratios</h3>
-                    <p class="section-subtitle">Highest training completion ratios</p>
-                </div>
-                <div class="leaderboard-list" id="top5-gov-list"></div>
+        <!-- ========================================================================== -->
+        <!-- TAB 2: ONBOARDING ANALYTICS                                                -->
+        <!-- ========================================================================== -->
+        <div id="tab-analytics" class="tab-content">
+            
+            <!-- Opening Section -->
+            <div class="analytics-header-block">
+                <h2>ONBOARDING ANALYTICS</h2>
+                <p class="subtitle">Deeper analysis of hiring, training performance and operational differences across governorates.</p>
             </div>
 
-            <div class="metric-card">
-                <div class="section-title-container">
-                    <h3>Bottom 5 Governorate Ratios</h3>
-                    <p class="section-subtitle">Lowest training completion ratios</p>
+            <!-- COMPACT ONBOARDING FLOW -->
+            <div class="analytics-section">
+                <div class="metric-card compact-flow-card">
+                    <div class="section-title-container">
+                        <h3>Onboarding Flow</h3>
+                        <p class="section-subtitle">Quick view of the current onboarding journey</p>
+                    </div>
+                    <div class="flow-strip-container" id="flow-strip-wrapper">
+                        <!-- Populated dynamically via JS -->
+                    </div>
                 </div>
-                <div class="leaderboard-list" id="bottom5-gov-list"></div>
             </div>
-        </div>
 
-        <div class="exceeded-standalone-row" style="margin-top: 24px; width: 100%;">
-            <div class="metric-card" style="width: 100%;">
-                <div class="section-title-container">
-                    <h3>Exceeded 72 Hours Log</h3>
-                    <p class="section-subtitle">Comprehensive list of pending phase officers who exceeded 72 hours limit with case comments</p>
+            <!-- HIRING ACTIVITY AND WORKLOAD -->
+            <div class="analytics-section">
+                <div class="middle-charts-layout">
+                    <div class="metric-card chart-container">
+                        <div class="section-title-container">
+                            <h3>Daily Hiring Trend</h3>
+                            <p class="section-subtitle" id="daily-hiring-subtitle">New hires by hiring date</p>
+                        </div>
+                        <div id="daily-hiring-chart" class="svg-chart-render" style="height: 220px; position: relative;"></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="section-title-container">
+                            <h3>Hiring Summary</h3>
+                            <p class="section-subtitle">Key hiring indicators</p>
+                        </div>
+                        <div class="capacity-stats-list">
+                            <div class="capacity-stat-item">
+                                <span class="cap-label">Total Hired</span>
+                                <strong class="cap-val" id="cap-total-hired">0</strong>
+                            </div>
+                            <div class="capacity-stat-item">
+                                <span class="cap-label">Active Governorates</span>
+                                <strong class="cap-val" id="cap-active-govs">0</strong>
+                            </div>
+                            <div class="capacity-stat-item">
+                                <span class="cap-label">Average Hires / Day</span>
+                                <strong class="cap-val" id="cap-avg-daily">0</strong>
+                            </div>
+                            <div class="capacity-stat-item peak-highlight">
+                                <span class="cap-label">Peak Hiring Day</span>
+                                <strong class="cap-val text-purple" id="cap-peak-day">N/A</strong>
+                            </div>
+                            <div class="capacity-stat-item">
+                                <span class="cap-label">Hires on Peak Day</span>
+                                <strong class="cap-val" id="cap-peak-cnt">0</strong>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="exceeded-table-container" style="margin-top: 16px; overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; text-align: left;">
-                        <thead>
-                            <tr style="border-bottom: 2px solid var(--border-color); color: var(--text-muted); font-size: 12px; letter-spacing: 0.05em;">
-                                <th style="padding: 12px 8px;">NAME</th>
-                                <th style="padding: 12px 8px;">GOVERNORATE</th>
-                                <th style="padding: 12px 8px;">CASE COMMENT</th>
-                            </tr>
-                        </thead>
-                        <tbody id="exceeded-72h-list-body" style="font-size: 13px; color: var(--text-main);">
+            </div>
+
+            <!-- GOVERNORATE ONBOARDING PERFORMANCE MAP -->
+            <div class="analytics-section">
+                <div class="metric-card">
+                    <div class="section-title-container">
+                        <h3>GOVERNORATE PERFORMANCE MAP</h3>
+                        <p class="section-subtitle">Training completion compared with onboarding population</p>
+                    </div>
+                    
+                    <div class="map-and-callouts-grid">
+                        <div class="matrix-quadrant-wrapper">
+                            <div id="scatter-plot-container" class="svg-chart-render" style="height: 350px; position: relative;"></div>
+                            <div class="chart-disclaimer-note">
+                                Reference lines represent the current dataset median and are used for relative comparison, not performance targets.
+                            </div>
+                        </div>
+
+                        <div class="callouts-side-column">
+                            <div class="callout-card">
+                                <span class="callout-label">Largest Onboarding Population</span>
+                                <strong class="callout-main-text" id="callout-largest-gov">-</strong>
+                                <span class="callout-sub-text" id="callout-largest-pop">0 active employees</span>
+                            </div>
+
+                            <div class="callout-card">
+                                <span class="callout-label">Highest Completion at Scale</span>
+                                <strong class="callout-main-text" id="callout-scale-gov">-</strong>
+                                <span class="callout-sub-text" id="callout-scale-rate">0% completion</span>
+                            </div>
+
+                            <div class="callout-card">
+                                <span class="callout-label">High Volume / Lower Completion</span>
+                                <strong class="callout-main-text" id="callout-highlow-gov">-</strong>
+                                <span class="callout-sub-text" id="callout-highlow-info">0 active employees</span>
+                            </div>
+
+                            <div class="callout-card">
+                                <span class="callout-label">Highest Not Trained Volume</span>
+                                <strong class="callout-main-text" id="callout-nottrained-gov">-</strong>
+                                <span class="callout-sub-text" id="callout-nottrained-cnt">0 employees</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- DETAILED TABLE -->
+            <div class="analytics-section">
+                <div class="metric-card">
+                    <div class="section-title-container">
+                        <h3>GOVERNORATE PERFORMANCE</h3>
+                        <p class="section-subtitle">Detailed onboarding status by governorate</p>
+                    </div>
+                    
+                    <div class="matrix-table-container">
+                        <table class="premium-matrix-table" id="gov-matrix-table">
+                            <thead>
+                                <tr>
+                                    <th data-sort="gov">Governorate ↕</th>
+                                    <th data-sort="hired">Hired ↕</th>
+                                    <th data-sort="resigned">Resigned ↕</th>
+                                    <th data-sort="eff">Active ↕</th>
+                                    <th data-sort="trained">Trained ↕</th>
+                                    <th data-sort="prog">In Progress ↕</th>
+                                    <th data-sort="not">Not Trained ↕</th>
+                                    <th data-sort="sla">72h Breach ↕</th>
+                                    <th data-sort="quest">Questionnaire Overdue ↕</th>
+                                    <th data-sort="decl">Declaration Pending ↕</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gov-matrix-tbody">
+                                <!-- Populated dynamically -->
                             </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
             </div>
+
+            <!-- RESIGNATIONS ANALYSIS -->
+            <div class="analytics-section">
+                <div class="leaderboards-grid">
+                    <div class="metric-card">
+                        <div class="section-title-container">
+                            <h3>RESIGNATIONS BY GOVERNORATE</h3>
+                            <p class="section-subtitle">Where resignations are concentrated</p>
+                        </div>
+                        <div class="leaderboard-list" id="resignation-gov-list"></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="section-title-container">
+                            <h3>RESIGNATIONS BY SPECIALIZATION</h3>
+                            <p class="section-subtitle">Resignations across job roles</p>
+                        </div>
+                        <div class="leaderboard-list" id="resignation-spec-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXECUTIVE INSIGHTS -->
+            <div class="analytics-section">
+                <div class="metric-card insights-wrapper-card">
+                    <div class="section-title-container">
+                        <h3>KEY INSIGHTS</h3>
+                        <p class="section-subtitle">What stands out in the current onboarding data</p>
+                    </div>
+                    <div class="insights-grid-container" id="executive-insights-grid">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================================== -->
+        <!-- TAB 3: SUPERVISOR PERFORMANCE                                              -->
+        <!-- ========================================================================== -->
+        <div id="tab-supervisor" class="tab-content">
+            
+            <div class="analytics-header-block">
+                <h2>SUPERVISOR PERFORMANCE</h2>
+                <p class="subtitle">Operational scale, evaluation coverage, and result analysis across supervision team.</p>
+            </div>
+
+            <!-- 2. MANAGEMENT OVERVIEW EXECUTIVE SUMMARY -->
+            <div class="analytics-section">
+                <div class="sup-executive-summary-strip" id="sup-exec-summary">
+                    <!-- Dynamic Compact Grid Cards -->
+                </div>
+            </div>
+
+            <!-- 3. SUPERVISOR PERFORMANCE MAP & 4. ANALYTICAL HIGHLIGHTS -->
+            <div class="analytics-section">
+                <div class="metric-card">
+                    <div class="section-title-container">
+                        <h3>SUPERVISOR PERFORMANCE MAP</h3>
+                        <p class="section-subtitle">Average Final Result compared with supervisor workload</p>
+                    </div>
+
+                    <div class="map-and-callouts-grid">
+                        <div class="matrix-quadrant-wrapper">
+                            <div id="sup-performance-map-container" class="svg-chart-render" style="height: 380px; position: relative;"></div>
+                            <div class="chart-disclaimer-note">
+                                Reference lines represent current dataset medians (Workload & Result Medians) for relative comparison, not fixed targets.
+                            </div>
+                        </div>
+
+                        <div class="callouts-side-column" id="sup-analytical-highlights">
+                            <!-- Populated dynamically: 4 Analytical Highlights -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. PERFORMANCE & WORKLOAD DISTRIBUTION -->
+            <div class="analytics-section">
+                <div class="leaderboards-grid">
+                    <div class="metric-card">
+                        <div class="section-title-container">
+                            <h3>PERFORMANCE DISTRIBUTION</h3>
+                            <p class="section-subtitle">Distribution of Supervisor Average Final Results</p>
+                        </div>
+                        <div id="sup-perf-dist-container" class="distribution-bars-wrapper">
+                            <!-- Dynamic Distribution Ranges -->
+                        </div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="section-title-container">
+                            <h3>WORKLOAD DISTRIBUTION</h3>
+                            <p class="section-subtitle">Distribution of Unique Officer Workload</p>
+                        </div>
+                        <div id="sup-workload-dist-container" class="distribution-bars-wrapper">
+                            <!-- Dynamic Workload Distribution Ranges -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. SUPERVISION BY GOVERNORATE & 7. SUPERVISOR GAP -->
+            <div class="analytics-section">
+                <div class="metric-card">
+                    <div class="section-title-container">
+                        <h3>SUPERVISION BY GOVERNORATE</h3>
+                        <p class="section-subtitle">Operational volume, evaluation coverage, and internal supervisor result gaps</p>
+                    </div>
+                    <div class="matrix-table-container">
+                        <table class="premium-matrix-table" id="sup-gov-matrix-table">
+                            <thead>
+                                <tr>
+                                    <th data-sup-gov-sort="gov">Governorate ↕</th>
+                                    <th data-sup-gov-sort="supervisors">Supervisors ↕</th>
+                                    <th data-sup-gov-sort="officers">Officers ↕</th>
+                                    <th data-sup-gov-sort="branches">Branches ↕</th>
+                                    <th data-sup-gov-sort="evaluated">Evaluated ↕</th>
+                                    <th data-sup-gov-sort="coverage">Coverage % ↕</th>
+                                    <th data-sup-gov-sort="avgResult">Avg Final Result ↕</th>
+                                    <th data-sup-gov-sort="gap">Supervisor Result Gap ↕</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sup-gov-matrix-tbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 8. SUPERVISOR DETAILS TABLE -->
+            <div class="analytics-section">
+                <div class="metric-card">
+                    <div class="section-title-container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <h3>SUPERVISOR DETAILS</h3>
+                            <p class="section-subtitle">Comprehensive metrics per individual supervisor</p>
+                        </div>
+                        <select id="sup-table-gov-filter" class="premium-select" style="min-width: 180px;">
+                            <option value="all">All Governorates</option>
+                        </select>
+                    </div>
+
+                    <div class="matrix-table-container">
+                        <table class="premium-matrix-table" id="sup-details-table">
+                            <thead>
+                                <tr>
+                                    <th data-sup-detail-sort="supervisor">Supervisor ↕</th>
+                                    <th data-sup-detail-sort="gov">Governorate ↕</th>
+                                    <th data-sup-detail-sort="officers">Officers ↕</th>
+                                    <th data-sup-detail-sort="branches">Branches ↕</th>
+                                    <th data-sup-detail-sort="evaluated">Evaluated ↕</th>
+                                    <th data-sup-detail-sort="coverage">Coverage % ↕</th>
+                                    <th data-sup-detail-sort="avgResult">Avg Final Result ↕</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sup-details-tbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 9. KEY INSIGHTS -->
+            <div class="analytics-section">
+                <div class="metric-card insights-wrapper-card">
+                    <div class="section-title-container">
+                        <h3>SUPERVISOR INSIGHTS</h3>
+                        <p class="section-subtitle">Data-driven findings on workload, performance, and coverage</p>
+                    </div>
+                    <div class="insights-grid-container" id="sup-insights-grid">
+                        <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+
         </div>
 
     </div>
+
+    <!-- Universal Dynamic Chart Tooltip Overlay -->
+    <div id="dashboard-tooltip" class="custom-dashboard-tooltip"></div>
 </body>
 </html>

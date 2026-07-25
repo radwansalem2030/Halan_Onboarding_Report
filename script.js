@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // UI Elements Binder
+    // UI Elements Binder - Tab 1
     const txtTotalHired = document.getElementById('total-hired-val');
     const txtResignedCount = document.getElementById('resigned-count-val');
     const txtResignedPct = document.getElementById('resigned-pct-val');
@@ -18,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const nodeBottom5List = document.getElementById('bottom5-gov-list');
     const nodeUpdateBadge = document.getElementById('data-update-badge');
     const monthFilterSelect = document.getElementById('month-filter');
+    const tooltipNode = document.getElementById('dashboard-tooltip');
     
     // Radials Elements
     const nodeRadialTrained = document.getElementById('radial-progress-bar');
@@ -30,6 +31,52 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Dataset Globals
     let globalDataset = [];
+    let supervisorDataset = [];
+    let currentGovMatrixSort = { key: 'eff', dir: 'desc' };
+    let currentSupGovSort = { key: 'officers', dir: 'desc' };
+    // الترتيب المبدئي: المحافظة أولاً أبجديًا
+    let currentSupDetailSort = { key: 'gov', dir: 'asc' };
+
+    // Initialize Navigation Tab Switching Logic
+    const tabButtons = document.querySelectorAll('.nav-tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabButtons.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetTab = btn.getAttribute('data-tab');
+            tabButtons.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+
+            btn.classList.add('active');
+            const targetNode = document.getElementById(targetTab);
+            if (targetNode) targetNode.classList.add('active');
+        });
+    });
+
+    // Universal Tooltip Controls
+    function showTooltip(evt, htmlContent) {
+        if (!tooltipNode) return;
+        tooltipNode.innerHTML = htmlContent;
+        tooltipNode.style.display = 'block';
+        
+        const padding = 12;
+        let x = evt.clientX + padding;
+        let y = evt.clientY + padding;
+
+        if (x + tooltipNode.offsetWidth > window.innerWidth - padding) {
+            x = evt.clientX - tooltipNode.offsetWidth - padding;
+        }
+        if (y + tooltipNode.offsetHeight > window.innerHeight - padding) {
+            y = evt.clientY - tooltipNode.offsetHeight - padding;
+        }
+
+        tooltipNode.style.left = `${Math.max(padding, x)}px`;
+        tooltipNode.style.top = `${Math.max(padding, y)}px`;
+    }
+
+    function hideTooltip() {
+        if (tooltipNode) tooltipNode.style.display = 'none';
+    }
 
     // Safe Parser Engine
     function parseCSVDataEngine(textString) {
@@ -64,7 +111,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (chunks[0].length === 4) return `${chunks[0]}-${chunks[1].padStart(2, '0')}`;
         } else if (token.includes('/')) {
             const chunks = token.split('/');
-            // format MM/DD/YYYY
             if (chunks[2] && chunks[2].length === 4) return `${chunks[2]}-${chunks[0].padStart(2, '0')}`;
         }
         return '';
@@ -84,13 +130,123 @@ document.addEventListener('DOMContentLoaded', () => {
         sortedKeys.forEach(key => {
             const [year, month] = key.split('-');
             const dateObj = new Date(year, month - 1);
-            const label = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' }); // e.g. July 2026
+            const label = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
             
             const opt = document.createElement('option');
             opt.value = key;
             opt.textContent = label;
             monthFilterSelect.appendChild(opt);
         });
+    }
+
+    // Central Helper for Questionnaire Exceeded Rule Correct Logic
+    function isQuestionnaireExceeded(row) {
+        if (!row || typeof row !== 'object') return false;
+
+        let statusVal = '';
+        for (const k of Object.keys(row)) {
+            const cleanK = k.trim().toLowerCase();
+            if (cleanK.includes('training status') || cleanK.includes('trainingstatus') || cleanK === 'training') {
+                statusVal = String(row[k] || '').trim();
+                break;
+            }
+        }
+        if (!statusVal.includes('100%')) return false;
+
+        let questVal = '';
+        for (const k of Object.keys(row)) {
+            const cleanK = k.trim().toLowerCase();
+            if (cleanK.includes('questionnaire')) {
+                questVal = String(row[k] || '').trim();
+                break;
+            }
+        }
+        const isBlankQuest = (questVal === '' || questVal.toLowerCase() === 'null' || questVal.toLowerCase() === 'undefined');
+        if (!isBlankQuest) return false;
+
+        let test10dVal = '';
+        for (const k of Object.keys(row)) {
+            const cleanK = k.trim().toLowerCase();
+            if (cleanK.includes('10') && (cleanK.includes('working') || cleanK.includes('days') || cleanK.includes('day'))) {
+                test10dVal = String(row[k] || '').trim().toLowerCase();
+                break;
+            }
+        }
+        if (!test10dVal) {
+            for (const k of Object.keys(row)) {
+                const cleanK = k.trim().toLowerCase();
+                if (cleanK.includes('working days') || cleanK.includes('10 working') || cleanK.includes('10 days')) {
+                    test10dVal = String(row[k] || '').trim().toLowerCase();
+                    break;
+                }
+            }
+        }
+
+        const isExceeded = test10dVal.includes('exceeded') && !test10dVal.includes('not');
+        return isExceeded;
+    }
+
+    // Single Unified Calculator for Central Metrics
+    function calculateCentralMetrics(rawRecords) {
+        const totalNewHired = rawRecords.length;
+        const resignedSubset = rawRecords.filter(r => {
+            const st = (r['Training Status'] || '').trim().toLowerCase();
+            return st === 'resigned';
+        });
+        const resignedCount = resignedSubset.length;
+        const resignedPct = totalNewHired > 0 ? (resignedCount / totalNewHired) * 100 : 0;
+
+        const effectivePopulation = totalNewHired - resignedCount;
+
+        const trainedSubset = rawRecords.filter(r => (r['Training Status'] || '').includes('100%'));
+        const trainedCount = trainedSubset.length;
+        const trainedPct = effectivePopulation > 0 ? (trainedCount / effectivePopulation) * 100 : 0;
+
+        const inProgressSubset = rawRecords.filter(r => {
+            const st = (r['Training Status'] || '').trim();
+            return st !== '' && !st.includes('100%') && st.toLowerCase() !== 'resigned';
+        });
+        const inProgressCount = inProgressSubset.length;
+        const inProgressPct = effectivePopulation > 0 ? (inProgressCount / effectivePopulation) * 100 : 0;
+
+        const notTrainedSubset = rawRecords.filter(r => !r['Training Status'] || r['Training Status'].trim() === '');
+        const notTrainedCount = notTrainedSubset.length;
+        const notTrainedPct = effectivePopulation > 0 ? (notTrainedCount / effectivePopulation) * 100 : 0;
+
+        const slaBreachSubset = rawRecords.filter(r => 
+            (!r['Training Status'] || r['Training Status'].trim() === '') && 
+            r['72 hours'] && r['72 hours'].includes('Exceeded')
+        );
+        const sla72hBreachCount = slaBreachSubset.length;
+        const sla72hBreachRate = effectivePopulation > 0 ? (sla72hBreachCount / effectivePopulation) * 100 : 0;
+
+        const questOverdueSubset = rawRecords.filter(r => isQuestionnaireExceeded(r));
+        const questOverdueCount = questOverdueSubset.length;
+        const questOverdueRate = effectivePopulation > 0 ? (questOverdueCount / effectivePopulation) * 100 : 0;
+
+        const signedCount = trainedSubset.filter(r => r['Survey Result'] && r['Survey Result'].trim().toLowerCase() === 'signed').length;
+        const declPendingCount = trainedCount - signedCount;
+        const declPendingRate = effectivePopulation > 0 ? (declPendingCount / effectivePopulation) * 100 : 0;
+
+        return {
+            totalNewHired,
+            resignedCount,
+            resignedPct,
+            effectivePopulation,
+            trainedCount,
+            trainedPct,
+            inProgressCount,
+            inProgressPct,
+            notTrainedCount,
+            notTrainedPct,
+            sla72hBreachCount,
+            sla72hBreachRate,
+            questOverdueCount,
+            questOverdueRate,
+            signedCount,
+            declPendingCount,
+            declPendingRate
+        };
     }
 
     // Pipeline Orchestrator on Filter Event
@@ -102,76 +258,41 @@ document.addEventListener('DOMContentLoaded', () => {
             scopedData = globalDataset.filter(row => parseMonthKey(row['Hiring Date']) === chosenValue);
         }
 
-        processMetricsPipeline(scopedData);
-        renderExceeded72hList(scopedData);
+        const metrics = calculateCentralMetrics(scopedData);
+
+        // Tab 1 Pipeline Processing
+        processMetricsPipeline(scopedData, metrics);
+
+        // Tab 2 Analytics Pipeline Processing
+        processTab2AnalyticsPipeline(scopedData, metrics);
     }
 
     monthFilterSelect.addEventListener('change', applyDynamicFiltering);
 
-    // Core Processing Engine
-    function processMetricsPipeline(rawRecords) {
-        const totalNewHired = rawRecords.length;
-
-        // 1. Resigned
-        const resignedSubset = rawRecords.filter(r => r['Training Status'] === 'Resigned');
-        const resignedCount = resignedSubset.length;
-        const resignedPct = totalNewHired > 0 ? (resignedCount / totalNewHired) * 100 : 0;
-
-        // 2. Kept Eligible Logic
-        const eligibleOfficersCount = totalNewHired - resignedCount;
-
-        // 3. Trained Status
-        const trainedSubset = rawRecords.filter(r => r['Training Status'] === '100% - Trained');
-        const trainedCount = trainedSubset.length;
-        const trainedPct = eligibleOfficersCount > 0 ? (trainedCount / eligibleOfficersCount) * 100 : 0;
-
-        // 4. In Progress Status
-        const inProgressSubset = rawRecords.filter(r => 
-            r['Training Status'] !== '' && 
-            r['Training Status'] !== '100% - Trained' && 
-            r['Training Status'] !== 'Resigned'
-        );
-        const inProgressCount = inProgressSubset.length;
-        const inProgressPct = eligibleOfficersCount > 0 ? (inProgressCount / eligibleOfficersCount) * 100 : 0;
-
-        // 5. Not Trained Status
-        const notTrainedSubset = rawRecords.filter(r => !r['Training Status'] || r['Training Status'].trim() === '');
-        const notTrainedCount = notTrainedSubset.length;
-        const notTrainedPct = eligibleOfficersCount > 0 ? (notTrainedCount / eligibleOfficersCount) * 100 : 0;
-
-        // 6. Exceeded 72 Hours
-        const exceededSubset = notTrainedSubset.filter(r => r['72 hours'] && r['72 hours'].includes('Exceeded'));
-        const exceededCount = exceededSubset.length;
-        const exceededPct = notTrainedCount > 0 ? (exceededCount / notTrainedCount) * 100 : 0;
-
-        // 7. Contracts Metrics
-        const signedCount = trainedSubset.filter(r => r['Survey Result'] && r['Survey Result'].trim().toLowerCase() === 'signed').length;
-        const notSignedCount = trainedCount - signedCount;
-
-        // Populate UI Nodes
-        txtTotalHired.textContent = totalNewHired.toLocaleString();
-        txtResignedCount.textContent = resignedCount.toLocaleString();
-        txtResignedPct.textContent = resignedPct.toFixed(1) + ' %';
+    // Core Processing Engine for Tab 1
+    function processMetricsPipeline(rawRecords, metrics) {
+        txtTotalHired.textContent = metrics.totalNewHired.toLocaleString();
+        txtResignedCount.textContent = metrics.resignedCount.toLocaleString();
+        txtResignedPct.textContent = metrics.resignedPct.toFixed(1) + ' %';
         
-        txtTrainedCount.textContent = trainedCount.toLocaleString();
-        txtTrainedPct.textContent = trainedPct.toFixed(1) + '%';
-        nodeRadialTrained.setAttribute('stroke-dasharray', `${trainedPct.toFixed(0)}, 100`);
+        txtTrainedCount.textContent = metrics.trainedCount.toLocaleString();
+        txtTrainedPct.textContent = metrics.trainedPct.toFixed(1) + '%';
+        if(nodeRadialTrained) nodeRadialTrained.setAttribute('stroke-dasharray', `${metrics.trainedPct.toFixed(0)}, 100`);
 
-        txtInProgress.textContent = inProgressCount.toLocaleString();
-        txtInProgressPct.textContent = inProgressPct.toFixed(1) + '%';
-        nodeRadialInProgress.setAttribute('stroke-dasharray', `${inProgressPct.toFixed(0)}, 100`);
+        txtInProgress.textContent = metrics.inProgressCount.toLocaleString();
+        txtInProgressPct.textContent = metrics.inProgressPct.toFixed(1) + '%';
+        if(nodeRadialInProgress) nodeRadialInProgress.setAttribute('stroke-dasharray', `${metrics.inProgressPct.toFixed(0)}, 100`);
 
-        txtNotTrained.textContent = notTrainedCount.toLocaleString();
-        txtNotTrainedPct.textContent = notTrainedPct.toFixed(1) + '%';
-        nodeRadialNotTrained.setAttribute('stroke-dasharray', `${notTrainedPct.toFixed(0)}, 100`);
+        txtNotTrained.textContent = metrics.notTrainedCount.toLocaleString();
+        txtNotTrainedPct.textContent = metrics.notTrainedPct.toFixed(1) + '%';
+        if(nodeRadialNotTrained) nodeRadialNotTrained.setAttribute('stroke-dasharray', `${metrics.notTrainedPct.toFixed(0)}, 100`);
 
-        txtExceeded72.textContent = exceededCount.toLocaleString();
-        txtExceeded72Pct.textContent = exceededPct.toFixed(0) + '%';
+        txtExceeded72.textContent = metrics.sla72hBreachCount.toLocaleString();
+        txtExceeded72Pct.textContent = metrics.sla72hBreachRate.toFixed(1) + '%';
 
-        txtSignedCount.textContent = signedCount.toLocaleString();
-        txtNotSignedCount.textContent = notSignedCount.toLocaleString();
+        txtSignedCount.textContent = metrics.signedCount.toLocaleString();
+        txtNotSignedCount.textContent = metrics.declPendingCount.toLocaleString();
 
-        // Render Dynamic UI Layout Subcomponents
         renderPureSpecialization(rawRecords);
         calculateGovernorateLeaderboards(rawRecords);
     }
@@ -205,6 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        if(!nodeSpecBar || !nodeSpecLegend) return;
         nodeSpecBar.innerHTML = '';
         nodeSpecLegend.innerHTML = '';
 
@@ -233,8 +355,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Master Historical SVG Timeline Chart Engine (Stays Global)
+    // Master Historical SVG Timeline Chart Engine
     function renderPremiumLineChart(data) {
+        if(!nodeLineChartContainer) return;
         const timeRegistry = {};
         data.forEach(row => {
             const key = parseMonthKey(row['Hiring Date']);
@@ -307,7 +430,7 @@ document.addEventListener('DOMContentLoaded', () => {
         nodeLineChartContainer.innerHTML = svgCode;
     }
 
-    // Leaderboards Processing
+    // Leaderboards Processing - Tab 1
     function calculateGovernorateLeaderboards(data) {
         const processingMap = {};
         data.forEach(row => {
@@ -317,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (row['Training Status'] !== 'Resigned') {
                 processingMap[gov].eligible++;
-                if (row['Training Status'] === '100% - Trained') {
+                if ((row['Training Status'] || '').includes('100%')) {
                     processingMap[gov].trained++;
                 }
             }
@@ -338,6 +461,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderLeaderboardDOM(domAnchor, list, color) {
+        if(!domAnchor) return;
         domAnchor.innerHTML = '';
         if (list.length === 0) {
             domAnchor.innerHTML = `<div style="font-size:11px; color:var(--text-muted); padding:8px 0;">No logs available</div>`;
@@ -358,64 +482,1408 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Exceeded 72h Table Logger Component
-    function renderExceeded72hList(dataset) {
-        const tbody = document.getElementById('exceeded-72h-list-body');
-        if (!tbody) return;
-        tbody.innerHTML = '';
+    // ==========================================================================
+    // TAB 2: ANALYTICS CORE PROCESSING PIPELINE
+    // ==========================================================================
 
-        const exceededPeople = dataset.filter(r => {
-            const notTrained = !r['Training Status'] || r['Training Status'].trim() === '';
-            const hasExceeded = r['72 hours'] && r['72 hours'].includes('Exceeded');
-            return notTrained && hasExceeded;
+    function processTab2AnalyticsPipeline(data, centralMetrics) {
+        renderCompactOnboardingFlow(centralMetrics);
+        renderDailyHiringAnalysis(data, centralMetrics.totalNewHired);
+        renderGovMatrixAndScatter(data);
+        renderResignationAnalysis(data);
+        renderExecutiveInsights(data, centralMetrics);
+    }
+
+    function renderCompactOnboardingFlow(m) {
+        const wrapper = document.getElementById('flow-strip-wrapper');
+        if (!wrapper) return;
+
+        const activePct = m.totalNewHired > 0 ? ((m.effectivePopulation / m.totalNewHired) * 100).toFixed(1) : '0.0';
+
+        wrapper.innerHTML = `
+            <div class="flow-step-item">
+                <span class="flow-step-pct">100%</span>
+                <span class="flow-step-title">TOTAL HIRED</span>
+                <span class="flow-step-sub">${m.totalNewHired.toLocaleString()} employees</span>
+            </div>
+
+            <div class="flow-arrow-separator">→</div>
+
+            <div class="flow-step-item">
+                <span class="flow-step-pct text-danger">${m.resignedPct.toFixed(1)}%</span>
+                <span class="flow-step-title">RESIGNED</span>
+                <span class="flow-step-sub">${m.resignedCount.toLocaleString()} of total hired</span>
+            </div>
+
+            <div class="flow-arrow-separator">→</div>
+
+            <div class="flow-step-item">
+                <span class="flow-step-pct text-purple">${activePct}%</span>
+                <span class="flow-step-title">ACTIVE POPULATION</span>
+                <span class="flow-step-sub">${m.effectivePopulation.toLocaleString()} remaining</span>
+            </div>
+
+            <div class="flow-arrow-separator">→</div>
+
+            <div class="flow-group-box">
+                <span class="flow-group-title">TRAINING STATUS (% of Active)</span>
+                <div class="flow-group-row">
+                    <div class="flow-sub-stat">
+                        <span class="stat-pct text-success">${m.trainedPct.toFixed(1)}%</span>
+                        <span class="stat-lbl">Trained (${m.trainedCount})</span>
+                    </div>
+                    <div class="flow-sub-stat">
+                        <span class="stat-pct text-orange-main">${m.inProgressPct.toFixed(1)}%</span>
+                        <span class="stat-lbl">In Progress (${m.inProgressCount})</span>
+                    </div>
+                    <div class="flow-sub-stat">
+                        <span class="stat-pct text-muted">${m.notTrainedPct.toFixed(1)}%</span>
+                        <span class="stat-lbl">Not Trained (${m.notTrainedCount})</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-arrow-separator">→</div>
+
+            <div class="flow-group-box">
+                <span class="flow-group-title">FOLLOW-UP (% of Active Base)</span>
+                <div class="flow-group-row">
+                    <div class="flow-sub-stat">
+                        <span class="stat-pct text-danger">${m.sla72hBreachRate.toFixed(1)}%</span>
+                        <span class="stat-lbl">72h Breach (${m.sla72hBreachCount})</span>
+                    </div>
+                    <div class="flow-sub-stat">
+                        <span class="stat-pct text-warning">${m.questOverdueRate.toFixed(1)}%</span>
+                        <span class="stat-lbl">Quest. Overdue (${m.questOverdueCount})</span>
+                    </div>
+                    <div class="flow-sub-stat">
+                        <span class="stat-pct">${m.declPendingRate.toFixed(1)}%</span>
+                        <span class="stat-lbl">Decl. Pending (${m.declPendingCount})</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    function formatShortDate(dateStr) {
+        if (!dateStr) return '';
+        let d = new Date(dateStr);
+        if (isNaN(d.getTime())) {
+            const parts = dateStr.split(/[-/]/);
+            if (parts.length === 3) {
+                if (parts[0].length === 4) d = new Date(parts[0], parts[1] - 1, parts[2]);
+                else d = new Date(parts[2], parts[0] - 1, parts[1]);
+            }
+        }
+        if (isNaN(d.getTime())) return dateStr;
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+    }
+
+    function formatFullDate(dateStr) {
+        if (!dateStr) return '';
+        let d = new Date(dateStr);
+        if (isNaN(d.getTime())) {
+            const parts = dateStr.split(/[-/]/);
+            if (parts.length === 3) {
+                if (parts[0].length === 4) d = new Date(parts[0], parts[1] - 1, parts[2]);
+                else d = new Date(parts[2], parts[0] - 1, parts[1]);
+            }
+        }
+        if (isNaN(d.getTime())) return dateStr;
+        return {
+            dateStr: d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
+            dayOfWeek: d.toLocaleDateString('en-US', { weekday: 'long' })
+        };
+    }
+
+    function renderDailyHiringAnalysis(data, totalHired) {
+        const dailyMap = {};
+        const govSet = new Set();
+
+        data.forEach(r => {
+            const dateStr = r['Hiring Date'] ? r['Hiring Date'].trim() : '';
+            if (dateStr) dailyMap[dateStr] = (dailyMap[dateStr] || 0) + 1;
+            if (r['Governorate']) govSet.add(r['Governorate'].trim());
         });
 
-        if (exceededPeople.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="3" style="padding: 20px; text-align: center; color: var(--text-muted); font-style: italic;">No records found matching criteria.</td></tr>`;
+        const sortedDates = Object.keys(dailyMap).sort();
+        let peakDay = 'N/A';
+        let peakCount = 0;
+
+        sortedDates.forEach(d => {
+            if (dailyMap[d] > peakCount) {
+                peakCount = dailyMap[d];
+                peakDay = d;
+            }
+        });
+
+        const avgDaily = sortedDates.length > 0 ? (totalHired / sortedDates.length) : 0;
+
+        const subTitleEl = document.getElementById('daily-hiring-subtitle');
+        if (subTitleEl) {
+            subTitleEl.textContent = `New hires by hiring date • Avg ${avgDaily.toFixed(1)} hires/day`;
+        }
+
+        document.getElementById('cap-total-hired').textContent = totalHired.toLocaleString();
+        document.getElementById('cap-active-govs').textContent = govSet.size;
+        document.getElementById('cap-avg-daily').textContent = avgDaily.toFixed(1);
+        document.getElementById('cap-peak-day').textContent = formatShortDate(peakDay);
+        document.getElementById('cap-peak-cnt').textContent = peakCount.toLocaleString();
+
+        const chartBox = document.getElementById('daily-hiring-chart');
+        if (!chartBox) return;
+
+        if (sortedDates.length === 0) {
+            chartBox.innerHTML = '<div style="text-align:center; padding-top:80px; font-size:12px; color:var(--text-muted)">No hiring date data available</div>';
             return;
         }
 
-        const govCounts = {};
-        exceededPeople.forEach(p => {
-            const gov = p['Governorate'] || 'Unknown';
-            govCounts[gov] = (govCounts[gov] || 0) + 1;
-        });
+        const maxIntake = Math.max(...Object.values(dailyMap), 1);
+        const svgW = 600; const svgH = 220;
+        const pL = 40; const pR = 25; const pT = 35; const pB = 30;
+        const cW = svgW - pL - pR; const cH = svgH - pT - pB;
 
-        exceededPeople.sort((a, b) => {
-            const govA = (a['Governorate'] || 'Unknown').trim();
-            const govB = (b['Governorate'] || 'Unknown').trim();
-            return govA.localeCompare(govB, undefined, { numeric: true, sensitivity: 'base' });
-        });
+        const totalBars = sortedDates.length;
+        const barStep = cW / totalBars;
+        const barWidth = Math.max(4, barStep - 4);
 
-        exceededPeople.forEach(person => {
-            const name = person['Name'] || person['Officer Name'] || person['Employee Name'] || 'Workforce Officer';
-            const gov = person['Governorate'] || 'Unknown';
-            const totalGovCases = govCounts[gov] || 0;
-            const comment = person['Comment'] || person['comment'] || person['Comments'] || 'No case comment recorded';
+        let svg = `<svg viewBox="0 0 ${svgW} ${svgH}" width="100%" height="100%">`;
+        
+        const avgY = pT + cH - ((avgDaily / maxIntake) * cH);
+        svg += `<line x1="${pL}" y1="${avgY}" x2="${pL + cW}" y2="${avgY}" stroke="var(--brand-purple)" stroke-dasharray="4,4" stroke-width="1.5"/>`;
+        svg += `<line x1="${pL}" y1="${pT + cH}" x2="${pL + cW}" y2="${pT + cH}" stroke="var(--border-color)" stroke-width="1"/>`;
 
-            const tr = document.createElement('tr');
-            tr.style.borderBottom = '1px solid var(--border-color)';
-            tr.style.transition = 'background-color 0.2s';
-            
-            tr.innerHTML = `
-                <td style="padding: 14px 8px; font-weight: 600; color: var(--text-main);">${name}</td>
-                <td style="padding: 14px 8px; display: flex; align-items: center; gap: 8px;">
-                    <span style="color: var(--text-main); font-weight: 600;">${gov}</span>
-                    <span style="background: rgba(99, 102, 241, 0.08); color: var(--brand-purple); font-size: 11px; padding: 2px 8px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(99, 102, 241, 0.2);">
-                        ${totalGovCases} cases
-                    </span>
-                </td>
-                <td style="padding: 14px 8px; color: var(--red); font-weight: 500; line-height: 1.4;">${comment}</td>
+        const labelInterval = Math.ceil(totalBars / 8);
+
+        sortedDates.forEach((d, idx) => {
+            const cnt = dailyMap[d];
+            const x = pL + (idx * barStep) + (barStep - barWidth) / 2;
+            const barH = (cnt / maxIntake) * cH;
+            const y = pT + cH - barH;
+            const isPeak = d === peakDay;
+            const barColor = isPeak ? 'var(--brand-purple)' : '#CBD5E1';
+
+            const fullD = formatFullDate(d);
+            const pctTotal = ((cnt / totalHired) * 100).toFixed(1);
+
+            const ttHtml = `
+                <div class="tt-title">${fullD.dateStr} (${fullD.dayOfWeek})</div>
+                <div class="tt-row"><span>Hires:</span> <strong>${cnt}</strong></div>
+                <div class="tt-row"><span>Share of Total:</span> <strong>${pctTotal}%</strong></div>
             `;
-            
-            tr.addEventListener('mouseover', () => tr.style.backgroundColor = '#F8FAFC');
-            tr.addEventListener('mouseout', () => tr.style.backgroundColor = 'transparent');
-            
-            tbody.appendChild(tr);
+
+            svg += `<rect x="${x}" y="${y}" width="${barWidth}" height="${barH}" fill="${barColor}" rx="2" class="interactive-bar" style="cursor:pointer; transition: opacity 0.2s;" data-tt="${encodeURIComponent(ttHtml)}"></rect>`;
+
+            if (isPeak) {
+                svg += `
+                    <rect x="${Math.max(pL, x + barWidth/2 - 40)}" y="${Math.max(8, y - 22)}" width="80" height="18" fill="var(--brand-purple)" rx="4"/>
+                    <text x="${Math.max(pL + 40, x + barWidth/2)}" y="${Math.max(20, y - 10)}" fill="#FFFFFF" font-size="9" font-weight="700" text-anchor="middle">${cnt} Hires (Peak)</text>
+                `;
+            }
+
+            if (idx % labelInterval === 0 || idx === totalBars - 1) {
+                svg += `<text x="${x + barWidth/2}" y="${pT + cH + 16}" fill="var(--text-muted)" font-size="9" font-weight="500" text-anchor="middle">${formatShortDate(d)}</text>`;
+            }
+        });
+
+        svg += `</svg>`;
+        chartBox.innerHTML = svg;
+
+        chartBox.querySelectorAll('.interactive-bar').forEach(rect => {
+            const content = decodeURIComponent(rect.getAttribute('data-tt'));
+            rect.addEventListener('mouseenter', (e) => { rect.style.opacity = '0.7'; showTooltip(e, content); });
+            rect.addEventListener('mousemove', (e) => { showTooltip(e, content); });
+            rect.addEventListener('mouseleave', () => { rect.style.opacity = '1'; hideTooltip(); });
+            rect.addEventListener('click', (e) => { showTooltip(e, content); });
         });
     }
 
-    // Dynamic Live Loader
+    function calculateMedian(arr) {
+        if (arr.length === 0) return 0;
+        const sorted = [...arr].sort((a, b) => a - b);
+        const mid = Math.floor(sorted.length / 2);
+        return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
+    }
+
+    function renderGovMatrixAndScatter(data) {
+        const govMap = {};
+
+        data.forEach(r => {
+            const gov = r['Governorate'] ? r['Governorate'].trim() : 'Unknown';
+            if (!govMap[gov]) {
+                govMap[gov] = {
+                    hired: 0, resigned: 0, effective: 0,
+                    trained: 0, inProgress: 0, notTrained: 0,
+                    slaBreach: 0, questOverdue: 0, declPending: 0
+                };
+            }
+
+            govMap[gov].hired++;
+            const status = (r['Training Status'] || '').trim();
+
+            if (status.toLowerCase() === 'resigned') {
+                govMap[gov].resigned++;
+            } else {
+                govMap[gov].effective++;
+                if (status.includes('100%')) {
+                    govMap[gov].trained++;
+                    if (!r['Survey Result'] || r['Survey Result'].trim().toLowerCase() !== 'signed') {
+                        govMap[gov].declPending++;
+                    }
+                } else if (status !== '') {
+                    govMap[gov].inProgress++;
+                } else {
+                    govMap[gov].notTrained++;
+                    if (r['72 hours'] && r['72 hours'].includes('Exceeded')) {
+                        govMap[gov].slaBreach++;
+                    }
+                }
+
+                if (isQuestionnaireExceeded(r)) {
+                    govMap[gov].questOverdue++;
+                }
+            }
+        });
+
+        const matrixArray = [];
+        const volumes = [];
+        const rates = [];
+
+        for (const g in govMap) {
+            const item = govMap[g];
+            const eff = item.effective;
+            const trPct = eff > 0 ? (item.trained / eff) * 100 : 0;
+            const prPct = eff > 0 ? (item.inProgress / eff) * 100 : 0;
+            const ntPct = eff > 0 ? (item.notTrained / eff) * 100 : 0;
+            const resPct = item.hired > 0 ? (item.resigned / item.hired) * 100 : 0;
+
+            matrixArray.push({
+                gov: g, hired: item.hired, resigned: item.resigned, resPct: resPct, eff: eff,
+                trained: item.trained, trPct: trPct,
+                inProgress: item.inProgress, prPct: prPct,
+                notTrained: item.notTrained, ntPct: ntPct,
+                slaBreach: item.slaBreach, questOverdue: item.questOverdue, declPending: item.declPending
+            });
+
+            if (eff > 0) {
+                volumes.push(eff);
+                rates.push(trPct);
+            }
+        }
+
+        const medianVol = calculateMedian(volumes);
+        const medianRate = calculateMedian(rates);
+
+        renderScatterPlot(matrixArray, medianVol, medianRate);
+        renderPerformanceCallouts(matrixArray, medianVol, medianRate);
+        renderGovTableDOM(matrixArray);
+    }
+
+    function renderPerformanceCallouts(array, medianVol, medianRate) {
+        if (array.length === 0) return;
+
+        const largest = [...array].sort((a,b) => b.eff - a.eff)[0];
+        document.getElementById('callout-largest-gov').textContent = largest ? largest.gov : '-';
+        document.getElementById('callout-largest-pop').textContent = largest ? `${largest.eff.toLocaleString()} active employees` : '0';
+
+        const scaleGroup = array.filter(a => a.eff >= medianVol);
+        const highestScale = scaleGroup.sort((a,b) => b.trPct - a.trPct)[0];
+        document.getElementById('callout-scale-gov').textContent = highestScale ? highestScale.gov : '-';
+        document.getElementById('callout-scale-rate').textContent = highestScale ? `${highestScale.trPct.toFixed(1)}% completion (${highestScale.eff} active)` : '-';
+
+        const highLowGroup = array.filter(a => a.eff >= medianVol && a.trPct < medianRate);
+        const highLow = highLowGroup.sort((a,b) => b.eff - a.eff)[0];
+        document.getElementById('callout-highlow-gov').textContent = highLow ? highLow.gov : 'None matching';
+        document.getElementById('callout-highlow-info').textContent = highLow ? `${highLow.trPct.toFixed(1)}% completion (${highLow.eff} active)` : 'No governorates match profile';
+
+        const highestNotTrained = [...array].sort((a,b) => b.notTrained - a.notTrained)[0];
+        document.getElementById('callout-nottrained-gov').textContent = highestNotTrained ? highestNotTrained.gov : '-';
+        document.getElementById('callout-nottrained-cnt').textContent = highestNotTrained ? `${highestNotTrained.notTrained} employees (${highestNotTrained.ntPct.toFixed(1)}%)` : '0';
+    }
+
+    function renderScatterPlot(matrixArray, medVol, medRate) {
+        const box = document.getElementById('scatter-plot-container');
+        if (!box) return;
+
+        const svgW = 600; const svgH = 350;
+        const pL = 65; const pR = 35; const pT = 45; const pB = 45;
+        const cW = svgW - pL - pR; const cH = svgH - pT - pB;
+
+        const maxVol = Math.max(...matrixArray.map(m => m.eff), 1);
+
+        const yPlotMin = pT + 30;
+        const yPlotMax = pT + cH - 15;
+        const yPlotH = yPlotMax - yPlotMin;
+
+        const medX = pL + ((medVol / maxVol) * cW);
+        const medY = yPlotMax - ((medRate / 100) * yPlotH);
+
+        let svg = `<svg viewBox="0 0 ${svgW} ${svgH}" width="100%" height="100%">`;
+        
+        svg += `<line x1="${pL}" y1="${pT + cH}" x2="${pL + cW}" y2="${pT + cH}" stroke="var(--border-color)"/>`;
+        svg += `<line x1="${pL}" y1="${pT}" x2="${pL}" y2="${pT + cH}" stroke="var(--border-color)"/>`;
+
+        svg += `<text x="${pL + cW/2}" y="${pT + cH + 32}" fill="var(--text-muted)" font-size="9.5" font-weight="700" text-anchor="middle">ONBOARDING POPULATION (Lower Volume → Higher Volume)</text>`;
+        svg += `<text x="${14}" y="${pT + cH/2}" fill="var(--text-muted)" font-size="9.5" font-weight="700" text-anchor="middle" transform="rotate(-90 14 ${pT + cH/2})">TRAINING COMPLETION % (Lower → Higher)</text>`;
+
+        svg += `<line x1="${medX}" y1="${pT + 22}" x2="${medX}" y2="${pT + cH - 20}" stroke="#CBD5E1" stroke-dasharray="4,4"/>`;
+        svg += `<line x1="${pL}" y1="${medY}" x2="${pL + cW}" y2="${medY}" stroke="#CBD5E1" stroke-dasharray="4,4"/>`;
+
+        svg += `<text x="${pL + 6}" y="${pT + 12}" fill="#0F172A" font-size="8.5" font-weight="700">HIGHER COMPLETION</text>`;
+        svg += `<text x="${pL + 6}" y="${pT + 21}" fill="var(--text-muted)" font-size="7.5" font-weight="500">Lower Volume</text>`;
+
+        svg += `<text x="${pL + cW - 6}" y="${pT + 12}" fill="#0F172A" font-size="8.5" font-weight="700" text-anchor="end">HIGHER COMPLETION</text>`;
+        svg += `<text x="${pL + cW - 6}" y="${pT + 21}" fill="var(--text-muted)" font-size="7.5" font-weight="500" text-anchor="end">Higher Volume</text>`;
+
+        svg += `<text x="${pL + 6}" y="${pT + cH - 12}" fill="#0F172A" font-size="8.5" font-weight="700">LOWER COMPLETION</text>`;
+        svg += `<text x="${pL + 6}" y="${pT + cH - 4}" fill="var(--text-muted)" font-size="7.5" font-weight="500">Lower Volume</text>`;
+
+        svg += `<text x="${pL + cW - 6}" y="${pT + cH - 12}" fill="#0F172A" font-size="8.5" font-weight="700" text-anchor="end">LOWER COMPLETION</text>`;
+        svg += `<text x="${pL + cW - 6}" y="${pT + cH - 4}" fill="var(--text-muted)" font-size="7.5" font-weight="500" text-anchor="end">Higher Volume</text>`;
+
+        const sortedByVol = [...matrixArray].sort((a,b) => b.eff - a.eff);
+        const sortedByRate = [...matrixArray].sort((a,b) => b.trPct - a.trPct);
+
+        const highlightSet = new Set();
+        if (sortedByVol[0]) highlightSet.add(sortedByVol[0].gov);
+        if (sortedByVol[1]) highlightSet.add(sortedByVol[1].gov);
+        if (sortedByRate[0]) highlightSet.add(sortedByRate[0].gov);
+        if (sortedByRate[sortedByRate.length - 1]) highlightSet.add(sortedByRate[sortedByRate.length - 1].gov);
+
+        const pointCoords = [];
+        matrixArray.forEach(item => {
+            if (item.eff === 0) return;
+            const cx = pL + ((item.eff / maxVol) * cW);
+            const cy = yPlotMax - ((item.trPct / 100) * yPlotH);
+            pointCoords.push({ ...item, cx, cy, isHighlight: highlightSet.has(item.gov) });
+        });
+
+        const placedLabels = [];
+
+        pointCoords.forEach(item => {
+            const ttContent = `
+                <div class="tt-title">${item.gov}</div>
+                <div class="tt-row"><span>Hired:</span> <strong>${item.hired}</strong></div>
+                <div class="tt-row"><span>Active Population:</span> <strong>${item.eff}</strong></div>
+                <div class="tt-row"><span>Trained:</span> <strong>${item.trained} (${item.trPct.toFixed(1)}%)</strong></div>
+                <div class="tt-row"><span>In Progress:</span> <strong>${item.inProgress} (${item.prPct.toFixed(1)}%)</strong></div>
+                <div class="tt-row"><span>Not Trained:</span> <strong>${item.notTrained} (${item.ntPct.toFixed(1)}%)</strong></div>
+                <div class="tt-row"><span>Resigned:</span> <strong>${item.resigned} (${item.resPct.toFixed(1)}%)</strong></div>
+            `;
+
+            svg += `
+                <circle cx="${item.cx}" cy="${item.cy}" r="${item.isHighlight ? '6' : '4.5'}" 
+                        fill="${item.isHighlight ? 'var(--brand-purple)' : '#94A3B8'}" 
+                        stroke="#FFFFFF" stroke-width="1.5" class="gov-map-dot"
+                        style="cursor:pointer; transition: transform 0.2s, fill 0.2s;"
+                        data-tt="${encodeURIComponent(ttContent)}">
+                </circle>
+            `;
+
+            if (item.isHighlight) {
+                const candidates = [
+                    { dx: 0, dy: -10, anchor: 'middle' },
+                    { dx: 0, dy: 14, anchor: 'middle' },
+                    { dx: 10, dy: 3, anchor: 'start' },
+                    { dx: -10, dy: 3, anchor: 'end' },
+                    { dx: 8, dy: -8, anchor: 'start' },
+                    { dx: -8, dy: -8, anchor: 'end' },
+                    { dx: 8, dy: 10, anchor: 'start' },
+                    { dx: -8, dy: 10, anchor: 'end' }
+                ];
+
+                let bestCand = candidates[0];
+                let maxMinDist = -1;
+
+                for (const cand of candidates) {
+                    const lx = item.cx + cand.dx;
+                    const ly = item.cy + cand.dy;
+
+                    if (lx < pL + 15 || lx > pL + cW - 15 || ly < pT + 25 || ly > pT + cH - 15) continue;
+
+                    let minDist = 9999;
+                    for (const pt of pointCoords) {
+                        const d = Math.hypot(pt.cx - lx, pt.cy - ly);
+                        if (d < minDist) minDist = d;
+                    }
+                    for (const lbl of placedLabels) {
+                        const d = Math.hypot(lbl.x - lx, lbl.y - ly);
+                        if (d < minDist) minDist = d;
+                    }
+
+                    if (minDist > maxMinDist) {
+                        maxMinDist = minDist;
+                        bestCand = cand;
+                    }
+                }
+
+                const finalX = Math.max(pL + 15, Math.min(pL + cW - 15, item.cx + bestCand.dx));
+                const finalY = Math.max(pT + 25, Math.min(pT + cH - 15, item.cy + bestCand.dy));
+
+                placedLabels.push({ x: finalX, y: finalY, name: item.gov });
+                svg += `<text x="${finalX}" y="${finalY}" font-size="8.5" fill="var(--text-main)" text-anchor="${bestCand.anchor}" font-weight="700" style="pointer-events:none;" stroke="#FFFFFF" stroke-width="3" paint-order="stroke fill" stroke-linejoin="round">${item.gov}</text>`;
+            }
+        });
+
+        const popMedY = pT + cH - 18;
+        svg += `
+            <rect x="${medX + 2}" y="${popMedY - 8}" width="95" height="11" fill="var(--card-bg)" opacity="0.92" rx="2"/>
+            <text x="${medX + 4}" y="${popMedY}" font-size="8" fill="var(--brand-purple)" font-weight="700">Population Median: ${medVol.toFixed(0)}</text>
+        `;
+
+        const compMedY = Math.max(pT + 30, Math.min(pT + cH - 25, medY - 4));
+        svg += `
+            <rect x="${pL + 4}" y="${compMedY - 8}" width="105" height="11" fill="var(--card-bg)" opacity="0.92" rx="2"/>
+            <text x="${pL + 6}" y="${compMedY}" font-size="8" fill="var(--brand-purple)" font-weight="700" text-anchor="start">Completion Median: ${medRate.toFixed(1)}%</text>
+        `;
+
+        svg += `</svg>`;
+        box.innerHTML = svg;
+
+        box.querySelectorAll('.gov-map-dot').forEach(dot => {
+            const content = decodeURIComponent(dot.getAttribute('data-tt'));
+            dot.addEventListener('mouseenter', (e) => {
+                dot.setAttribute('r', '8.5');
+                dot.setAttribute('fill', 'var(--brand-purple)');
+                showTooltip(e, content);
+            });
+            dot.addEventListener('mousemove', (e) => { showTooltip(e, content); });
+            dot.addEventListener('mouseleave', () => {
+                dot.setAttribute('r', dot.nextElementSibling && dot.nextElementSibling.tagName === 'text' ? '6' : '4.5');
+                dot.setAttribute('fill', dot.nextElementSibling && dot.nextElementSibling.tagName === 'text' ? 'var(--brand-purple)' : '#94A3B8');
+                hideTooltip();
+            });
+            dot.addEventListener('click', (e) => { showTooltip(e, content); });
+        });
+    }
+
+    function renderGovTableDOM(array) {
+        const tbody = document.getElementById('gov-matrix-tbody');
+        if (!tbody) return;
+
+        const k = currentGovMatrixSort.key;
+        const dir = currentGovMatrixSort.dir === 'asc' ? 1 : -1;
+
+        array.sort((a, b) => {
+            let valA = a[k];
+            let valB = b[k];
+            if (typeof valA === 'string') return valA.localeCompare(valB) * dir;
+            return (valA - valB) * dir;
+        });
+
+        tbody.innerHTML = '';
+        array.forEach(r => {
+            const isSmall = r.eff > 0 && r.eff < 5;
+            const smallBadge = isSmall ? `<span class="small-pop-badge">Small Base</span>` : '';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${r.gov}</strong> ${smallBadge}</td>
+                <td>${r.hired}</td>
+                <td class="text-danger">${r.resigned}</td>
+                <td><strong>${r.eff}</strong></td>
+                <td><strong>${r.trPct.toFixed(1)}%</strong> (${r.trained})</td>
+                <td class="text-orange-main">${r.prPct.toFixed(1)}% (${r.inProgress})</td>
+                <td class="text-muted">${r.ntPct.toFixed(1)}% (${r.notTrained})</td>
+                <td class="text-danger">${r.slaBreach}</td>
+                <td class="text-warning">${r.questOverdue}</td>
+                <td>${r.declPending}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.querySelectorAll('#gov-matrix-table th').forEach(th => {
+            th.onclick = () => {
+                const sortKey = th.getAttribute('data-sort');
+                if (currentGovMatrixSort.key === sortKey) {
+                    currentGovMatrixSort.dir = currentGovMatrixSort.dir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentGovMatrixSort.key = sortKey;
+                    currentGovMatrixSort.dir = 'desc';
+                }
+                renderGovTableDOM(array);
+            };
+        });
+    }
+
+    function renderResignationAnalysis(data) {
+        const govMap = {};
+        const specMap = {};
+
+        data.forEach(r => {
+            const g = r['Governorate'] ? r['Governorate'].trim() : 'Unknown';
+            const s = r['Specialized'] ? r['Specialized'].trim() : 'General';
+            const isResigned = (r['Training Status'] || '').trim().toLowerCase() === 'resigned';
+
+            if (!govMap[g]) govMap[g] = { total: 0, resigned: 0 };
+            if (!specMap[s]) specMap[s] = { total: 0, resigned: 0 };
+
+            govMap[g].total++;
+            specMap[s].total++;
+
+            if (isResigned) {
+                govMap[g].resigned++;
+                specMap[s].resigned++;
+            }
+        });
+
+        const govList = Object.keys(govMap)
+            .filter(g => govMap[g].resigned > 0)
+            .map(g => ({
+                name: g,
+                cnt: govMap[g].resigned,
+                rate: (govMap[g].resigned / govMap[g].total) * 100
+            }))
+            .sort((a,b) => b.cnt - a.cnt);
+
+        const specList = Object.keys(specMap)
+            .filter(s => specMap[s].resigned > 0)
+            .map(s => ({
+                name: s,
+                cnt: specMap[s].resigned,
+                rate: (specMap[s].resigned / specMap[s].total) * 100
+            }))
+            .sort((a,b) => b.cnt - a.cnt);
+
+        renderSimpleLeaderboard(document.getElementById('resignation-gov-list'), govList, 'var(--red)');
+        renderSimpleLeaderboard(document.getElementById('resignation-spec-list'), specList, 'var(--orange)');
+    }
+
+    function renderSimpleLeaderboard(anchor, list, color) {
+        if (!anchor) return;
+        anchor.innerHTML = '';
+        if (list.length === 0) {
+            anchor.innerHTML = `<div style="font-size:11px; color:var(--text-muted); padding:8px 0;">No resignations logged</div>`;
+            return;
+        }
+
+        list.slice(0, 5).forEach((item, idx) => {
+            const row = document.createElement('div');
+            row.className = 'leader-row-item';
+            row.innerHTML = `
+                <div class="leader-rank-badge">${idx + 1}</div>
+                <div class="leader-region-name" title="${item.name}">${item.name}</div>
+                <div class="leader-track-bar">
+                    <div class="leader-fill-bar" style="width: ${Math.min(item.rate, 100)}%; background-color: ${color};"></div>
+                </div>
+                <div class="leader-pct-value" style="width:70px; text-align:right;">${item.cnt} (${item.rate.toFixed(1)}%)</div>
+            `;
+            anchor.appendChild(row);
+        });
+    }
+
+    function renderExecutiveInsights(data, metrics) {
+        const container = document.getElementById('executive-insights-grid');
+        if (!container) return;
+
+        const candidates = [];
+
+        const dailyMap = {};
+        data.forEach(r => {
+            const d = r['Hiring Date'] ? r['Hiring Date'].trim() : '';
+            if (d) dailyMap[d] = (dailyMap[d] || 0) + 1;
+        });
+        const sortedDays = Object.keys(dailyMap).sort((a,b) => dailyMap[b] - dailyMap[a]);
+        if (sortedDays.length > 0 && metrics.totalNewHired > 0) {
+            const peakD = sortedDays[0];
+            const peakC = dailyMap[peakD];
+            const peakPct = ((peakC / metrics.totalNewHired) * 100).toFixed(1);
+            const avg = (metrics.totalNewHired / Object.keys(dailyMap).length).toFixed(1);
+
+            candidates.push({
+                priority: 1,
+                title: `Hiring concentrated on ${formatShortDate(peakD)}`,
+                tag: "Hiring Intake",
+                text: `${peakC} employees were hired on ${formatShortDate(peakD)}, representing ${peakPct}% of total hiring and over ${(peakC / avg).toFixed(1)}× the daily average (${avg} hires/day).`
+            });
+        }
+
+        const govCounts = {};
+        data.forEach(r => {
+            if ((r['Training Status'] || '').trim().toLowerCase() !== 'resigned') {
+                const g = r['Governorate'] ? r['Governorate'].trim() : 'Unknown';
+                govCounts[g] = (govCounts[g] || 0) + 1;
+            }
+        });
+        const topGovByPop = Object.keys(govCounts).sort((a,b) => govCounts[b] - govCounts[a])[0];
+        if (topGovByPop && metrics.effectivePopulation > 0) {
+            const cnt = govCounts[topGovByPop];
+            const pct = ((cnt / metrics.effectivePopulation) * 100).toFixed(1);
+            candidates.push({
+                priority: 2,
+                title: `${topGovByPop} carries the largest active onboarding population`,
+                tag: "Workforce Scale",
+                text: `${topGovByPop} accounts for ${cnt} active employees, representing ${pct}% of the total effective onboarding population.`
+            });
+        }
+
+        const ntGovMap = {};
+        data.forEach(r => {
+            if (!r['Training Status'] || r['Training Status'].trim() === '') {
+                const g = r['Governorate'] ? r['Governorate'].trim() : 'Unknown';
+                ntGovMap[g] = (ntGovMap[g] || 0) + 1;
+            }
+        });
+        const topNtGov = Object.keys(ntGovMap).sort((a,b) => ntGovMap[b] - ntGovMap[a])[0];
+        if (topNtGov) {
+            const ntCnt = ntGovMap[topNtGov];
+            const totalInGov = govCounts[topNtGov] || 1;
+            const share = ((ntCnt / totalInGov) * 100).toFixed(1);
+            candidates.push({
+                priority: 3,
+                title: `Not-trained cases are concentrated in specific governorates`,
+                tag: "Training Backlog",
+                text: `${topNtGov} records ${ntCnt} not-trained employees, representing ${share}% of its active onboarding workforce.`
+            });
+        }
+
+        if (metrics.sla72hBreachCount > 0) {
+            candidates.push({
+                priority: 4,
+                title: `72h SLA breaches affect initial onboarding stage`,
+                tag: "SLA Overview",
+                text: `Currently ${metrics.sla72hBreachCount} recruits (${metrics.sla72hBreachRate.toFixed(1)}% of effective population) remain in the 72h breach state.`
+            });
+        }
+
+        container.innerHTML = '';
+        candidates.slice(0, 4).forEach(ins => {
+            const card = document.createElement('div');
+            card.className = 'insight-card-item';
+            card.innerHTML = `
+                <div class="insight-head">
+                    <span class="insight-title">${ins.title}</span>
+                    <span class="insight-tag">${ins.tag}</span>
+                </div>
+                <p class="insight-body-text">${ins.text}</p>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // ==========================================================================
+    // TAB 3: SUPERVISOR PERFORMANCE CORE PIPELINE
+    // ==========================================================================
+
+    function findColumnName(sampleRow, candidates) {
+        if (!sampleRow) return '';
+        const keys = Object.keys(sampleRow);
+        for (const cand of candidates) {
+            const found = keys.find(k => k.trim().toLowerCase() === cand.toLowerCase() || k.trim().toLowerCase().includes(cand.toLowerCase()));
+            if (found) return found;
+        }
+        return '';
+    }
+
+    function parseFinalResult(valStr) {
+        if (valStr === undefined || valStr === null) return null;
+        let str = String(valStr).trim();
+        if (str === '' || str.toLowerCase() === 'null' || str.toLowerCase() === 'undefined') return null;
+        
+        str = str.replace('%', '').trim();
+        let num = parseFloat(str);
+        if (isNaN(num)) return null;
+
+        if (num <= 1.0 && num > 0) {
+            num = num * 100;
+        }
+        return num;
+    }
+
+    function aggregateSupervisorData(rawRecords) {
+        if (rawRecords.length === 0) return { supervisors: [], rawValids: [] };
+
+        const sample = rawRecords[0];
+        const supCol = findColumnName(sample, ['Supervisor Name', 'Supervisor', 'Direct Manager', 'Manager']);
+        const govCol = findColumnName(sample, ['Governorate', 'Gov', 'Region', 'Branch Governorate']);
+        const officerCol = findColumnName(sample, ['Officer HR Code', 'HR Code', 'Officer Code', 'Officer Name', 'Employee ID']);
+        const branchCol = findColumnName(sample, ['Branch Name', 'Branch', 'Branch Code']);
+        const resultCol = findColumnName(sample, ['Final Result', 'KPI Result', 'Average Result', 'Result']);
+
+        const supMap = {};
+        const rawValids = [];
+
+        rawRecords.forEach(row => {
+            const supName = row[supCol] ? row[supCol].trim() : '';
+            if (!supName) return;
+
+            const gov = row[govCol] ? row[govCol].trim() : 'Unknown';
+            const officerId = row[officerCol] ? row[officerCol].trim() : null;
+            const branchId = row[branchCol] ? row[branchCol].trim() : null;
+            const rawRes = row[resultCol];
+            const parsedRes = parseFinalResult(rawRes);
+
+            if (parsedRes !== null) {
+                rawValids.push(parsedRes);
+            }
+
+            if (!supMap[supName]) {
+                supMap[supName] = {
+                    supervisor: supName,
+                    governorate: gov,
+                    officersSet: new Set(),
+                    branchesSet: new Set(),
+                    evaluatedCount: 0,
+                    validResultsSum: 0
+                };
+            }
+
+            if (officerId) supMap[supName].officersSet.add(officerId);
+            if (branchId) supMap[supName].branchesSet.add(branchId);
+
+            if (parsedRes !== null) {
+                supMap[supName].evaluatedCount++;
+                supMap[supName].validResultsSum += parsedRes;
+            }
+        });
+
+        const compiledSupervisors = Object.values(supMap).map(s => {
+            const uniqueOfficers = s.officersSet.size;
+            const uniqueBranches = s.branchesSet.size;
+            const evaluatedOfficers = s.evaluatedCount;
+            const avgFinalResult = evaluatedOfficers > 0 ? (s.validResultsSum / evaluatedOfficers) : null;
+            const evaluationCoverage = uniqueOfficers > 0 ? (evaluatedOfficers / uniqueOfficers) * 100 : 0;
+
+            return {
+                supervisor: s.supervisor,
+                governorate: s.governorate,
+                uniqueOfficers,
+                uniqueBranches,
+                evaluatedOfficers,
+                avgFinalResult,
+                evaluationCoverage
+            };
+        });
+
+        return { supervisors: compiledSupervisors, rawValids };
+    }
+
+    function processTab3SupervisorPipeline(supRecords) {
+        const { supervisors, rawValids } = aggregateSupervisorData(supRecords);
+        supervisorDataset = supervisors;
+
+        if (supervisors.length === 0) return;
+
+        renderSupervisorExecutiveSummary(supervisors, rawValids);
+        renderSupervisorPerformanceMapAndHighlights(supervisors);
+        renderPerformanceAndWorkloadDistributions(supervisors);
+        renderSupervisionByGovernorate(supervisors, supRecords);
+        populateSupervisorGovFilter(supervisors);
+        renderSupervisorDetailsTable(supervisors);
+        renderSupervisorInsights(supervisors, supRecords);
+    }
+
+    function renderSupervisorExecutiveSummary(supervisors, rawValids) {
+        const container = document.getElementById('sup-exec-summary');
+        if (!container) return;
+
+        const totalSupervisors = supervisors.length;
+        const govSet = new Set(supervisors.map(s => s.governorate));
+        const activeGovs = govSet.size;
+
+        const totalOfficers = supervisors.reduce((acc, s) => acc + s.uniqueOfficers, 0);
+        const totalBranches = supervisors.reduce((acc, s) => acc + s.uniqueBranches, 0);
+
+        const avgOfficersPerSup = totalSupervisors > 0 ? (totalOfficers / totalSupervisors) : 0;
+        const avgBranchesPerSup = totalSupervisors > 0 ? (totalBranches / totalSupervisors) : 0;
+
+        const overallAvgResult = rawValids.length > 0 ? (rawValids.reduce((a, b) => a + b, 0) / rawValids.length) : 0;
+
+        const totalEvaluated = supervisors.reduce((acc, s) => acc + s.evaluatedOfficers, 0);
+        const overallCoverage = totalOfficers > 0 ? (totalEvaluated / totalOfficers) * 100 : 0;
+
+        container.innerHTML = `
+            <div class="sup-exec-card">
+                <span class="sup-card-lbl">Total Supervisors</span>
+                <span class="sup-card-val">${totalSupervisors.toLocaleString()}</span>
+                <span class="sup-card-sub">Active managers</span>
+            </div>
+            <div class="sup-exec-card">
+                <span class="sup-card-lbl">Active Governorates</span>
+                <span class="sup-card-val">${activeGovs}</span>
+                <span class="sup-card-sub">Geographic coverage</span>
+            </div>
+            <div class="sup-exec-card">
+                <span class="sup-card-lbl">Branches Covered</span>
+                <span class="sup-card-val">${totalBranches.toLocaleString()}</span>
+                <span class="sup-card-sub">Avg ${avgBranchesPerSup.toFixed(1)} / Sup</span>
+            </div>
+            <div class="sup-exec-card">
+                <span class="sup-card-lbl">Officers Covered</span>
+                <span class="sup-card-val">${totalOfficers.toLocaleString()}</span>
+                <span class="sup-card-sub">Avg ${avgOfficersPerSup.toFixed(1)} / Sup</span>
+            </div>
+            <div class="sup-exec-card">
+                <span class="sup-card-lbl">Overall Avg Result</span>
+                <span class="sup-card-val text-purple">${overallAvgResult.toFixed(1)}%</span>
+                <span class="sup-card-sub">From ${rawValids.length} evaluations</span>
+            </div>
+            <div class="sup-exec-card">
+                <span class="sup-card-lbl">Evaluation Coverage</span>
+                <span class="sup-card-val">${overallCoverage.toFixed(1)}%</span>
+                <span class="sup-card-sub">${totalEvaluated} of ${totalOfficers} officers</span>
+            </div>
+        `;
+    }
+
+    // 3. Performance Map & 4. Analytical Highlights
+    function renderSupervisorPerformanceMapAndHighlights(supervisors) {
+        const box = document.getElementById('sup-performance-map-container');
+        const highlightsBox = document.getElementById('sup-analytical-highlights');
+        if (!box) return;
+
+        const validSups = supervisors.filter(s => s.avgFinalResult !== null);
+        if (validSups.length === 0) {
+            box.innerHTML = '<div style="text-align:center; padding-top:80px; font-size:12px; color:var(--text-muted)">No valid supervisor performance results available</div>';
+            return;
+        }
+
+        const workloads = validSups.map(s => s.uniqueOfficers);
+        const results = validSups.map(s => s.avgFinalResult);
+
+        const workloadMedian = calculateMedian(workloads);
+        const resultMedian = calculateMedian(results);
+
+        const maxWorkload = Math.max(...workloads, 1);
+        const minResult = Math.min(...results, 0);
+        
+        const minScaleY = Math.max(0, Math.floor(minResult / 10) * 10 - 5);
+        const maxScaleY = 105; 
+
+        const svgW = 600; const svgH = 380;
+        const pL = 65; const pR = 35; const pT = 60; const pB = 45;
+        const cW = svgW - pL - pR; const cH = svgH - pT - pB;
+
+        const medX = pL + ((workloadMedian / maxWorkload) * cW);
+        const medY = pT + cH - (((resultMedian - minScaleY) / (maxScaleY - minScaleY)) * cH);
+
+        let svg = `<svg viewBox="0 0 ${svgW} ${svgH}" width="100%" height="100%">`;
+
+        svg += `<line x1="${pL}" y1="${pT + cH}" x2="${pL + cW}" y2="${pT + cH}" stroke="var(--border-color)"/>`;
+        svg += `<line x1="${pL}" y1="${pT}" x2="${pL}" y2="${pT + cH}" stroke="var(--border-color)"/>`;
+
+        svg += `<line x1="${medX}" y1="${pT}" x2="${medX}" y2="${pT + cH}" stroke="#CBD5E1" stroke-dasharray="4,4"/>`;
+        svg += `<line x1="${pL}" y1="${medY}" x2="${pL + cW}" y2="${medY}" stroke="#CBD5E1" stroke-dasharray="4,4"/>`;
+
+        svg += `<text x="${pL + 4}" y="${pT - 28}" fill="#0F172A" font-size="9" font-weight="700">HIGHER RESULT / LOWER WORKLOAD</text>`;
+        svg += `<text x="${pL + cW - 4}" y="${pT - 28}" fill="#0F172A" font-size="9" font-weight="700" text-anchor="end">HIGHER RESULT / HIGHER WORKLOAD</text>`;
+        svg += `<text x="${pL + 4}" y="${pT + cH + 16}" fill="#0F172A" font-size="8.5" font-weight="700">LOWER RESULT / LOWER WORKLOAD</text>`;
+        svg += `<text x="${pL + cW - 4}" y="${pT + cH + 16}" fill="#0F172A" font-size="8.5" font-weight="700" text-anchor="end">LOWER RESULT / HIGHER WORKLOAD</text>`;
+
+        svg += `<text x="${pL + cW/2}" y="${pT + cH + 36}" fill="var(--text-muted)" font-size="9.5" font-weight="700" text-anchor="middle">WORKLOAD: UNIQUE OFFICERS HANDLED</text>`;
+        svg += `<text x="${14}" y="${pT + cH/2}" fill="var(--text-muted)" font-size="9.5" font-weight="700" text-anchor="middle" transform="rotate(-90 14 ${pT + cH/2})">AVERAGE FINAL RESULT %</text>`;
+
+        const sortedByWk = [...validSups].sort((a,b) => b.uniqueOfficers - a.uniqueOfficers);
+        const sortedByResLow = [...validSups].sort((a,b) => a.avgFinalResult - b.avgFinalResult);
+
+        const highlightSet = new Set();
+        if (sortedByWk[0]) highlightSet.add(sortedByWk[0].supervisor);
+        if (sortedByWk[1]) highlightSet.add(sortedByWk[1].supervisor);
+        if (sortedByResLow[0]) highlightSet.add(sortedByResLow[0].supervisor);
+
+        const pointCoords = [];
+        validSups.forEach(s => {
+            const cx = pL + ((s.uniqueOfficers / maxWorkload) * cW);
+            const cy = pT + cH - (((s.avgFinalResult - minScaleY) / (maxScaleY - minScaleY)) * cH);
+            pointCoords.push({ ...s, cx, cy, isHighlight: highlightSet.has(s.supervisor) });
+        });
+
+        pointCoords.forEach(item => {
+            const ttContent = `
+                <div class="tt-title">${item.supervisor}</div>
+                <div class="tt-row"><span>Governorate:</span> <strong>${item.governorate}</strong></div>
+                <div class="tt-row"><span>Officers:</span> <strong>${item.uniqueOfficers}</strong></div>
+                <div class="tt-row"><span>Branches:</span> <strong>${item.uniqueBranches}</strong></div>
+                <div class="tt-row"><span>Evaluated Officers:</span> <strong>${item.evaluatedOfficers}</strong></div>
+                <div class="tt-row"><span>Evaluation Coverage:</span> <strong>${item.evaluationCoverage.toFixed(1)}%</strong></div>
+                <div class="tt-row"><span>Avg Final Result:</span> <strong>${item.avgFinalResult.toFixed(1)}%</strong></div>
+            `;
+
+            svg += `
+                <circle cx="${item.cx}" cy="${item.cy}" r="${item.isHighlight ? '6' : '4.5'}" 
+                        fill="${item.isHighlight ? 'var(--brand-purple)' : '#94A3B8'}" 
+                        stroke="#FFFFFF" stroke-width="1.5" class="sup-map-dot"
+                        style="cursor:pointer; transition: transform 0.2s, fill 0.2s;"
+                        data-tt="${encodeURIComponent(ttContent)}">
+                </circle>
+            `;
+
+            if (item.isHighlight) {
+                let anchor = 'start';
+                let dx = 8;
+                let dy = 3;
+
+                if (item.cx > pL + cW - 120) {
+                    anchor = 'end';
+                    dx = -8;
+                }
+                if (item.cy < pT + 30) {
+                    dy = 12;
+                }
+
+                svg += `<text x="${item.cx + dx}" y="${item.cy + dy}" font-size="8.5" fill="var(--text-main)" text-anchor="${anchor}" font-weight="700" style="pointer-events:none;" stroke="#FFFFFF" stroke-width="3.5" paint-order="stroke fill" stroke-linejoin="round">${item.supervisor}</text>`;
+            }
+        });
+
+        const medWkTextX = Math.min(medX + 4, pL + cW - 110);
+        svg += `
+            <rect x="${medWkTextX - 2}" y="${pT - 12}" width="105" height="11" fill="var(--card-bg)" opacity="0.9" rx="2"/>
+            <text x="${medWkTextX}" y="${pT - 4}" font-size="8" fill="var(--brand-purple)" font-weight="700">Workload Median: ${workloadMedian.toFixed(0)}</text>
+        `;
+
+        const resMedY = Math.max(pT + 12, Math.min(pT + cH - 15, medY - 4));
+        svg += `
+            <rect x="${pL + 4}" y="${resMedY - 8}" width="105" height="11" fill="var(--card-bg)" opacity="0.9" rx="2"/>
+            <text x="${pL + 6}" y="${resMedY}" font-size="8" fill="var(--brand-purple)" font-weight="700">Result Median: ${resultMedian.toFixed(1)}%</text>
+        `;
+
+        svg += `</svg>`;
+        box.innerHTML = svg;
+
+        box.querySelectorAll('.sup-map-dot').forEach(dot => {
+            const content = decodeURIComponent(dot.getAttribute('data-tt'));
+            dot.addEventListener('mouseenter', (e) => {
+                dot.setAttribute('r', '8.5');
+                dot.setAttribute('fill', 'var(--brand-purple)');
+                showTooltip(e, content);
+            });
+            dot.addEventListener('mousemove', (e) => { showTooltip(e, content); });
+            dot.addEventListener('mouseleave', () => {
+                dot.setAttribute('r', dot.nextElementSibling && dot.nextElementSibling.tagName === 'text' ? '6' : '4.5');
+                dot.setAttribute('fill', dot.nextElementSibling && dot.nextElementSibling.tagName === 'text' ? 'var(--brand-purple)' : '#94A3B8');
+                hideTooltip();
+            });
+            dot.addEventListener('click', (e) => { showTooltip(e, content); });
+        });
+
+        if (highlightsBox) {
+            const atScale = validSups.filter(s => s.uniqueOfficers >= workloadMedian);
+
+            const highestWk = [...validSups].sort((a,b) => b.uniqueOfficers - a.uniqueOfficers)[0];
+            const strongScale = [...atScale].sort((a,b) => b.avgFinalResult - a.avgFinalResult)[0];
+            const highLowScale = [...atScale].sort((a,b) => a.avgFinalResult - b.avgFinalResult)[0];
+            const highCovScale = [...atScale].sort((a,b) => b.evaluationCoverage - a.evaluationCoverage)[0];
+
+            highlightsBox.innerHTML = `
+                <div class="callout-card">
+                    <span class="callout-label">Highest Workload</span>
+                    <strong class="callout-main-text">${highestWk ? highestWk.supervisor : '-'}</strong>
+                    <span class="callout-sub-text">${highestWk ? `${highestWk.uniqueOfficers} officers managed (${highestWk.evaluatedOfficers} evaluated)` : '-'}</span>
+                </div>
+                <div class="callout-card">
+                    <span class="callout-label">Strong Result at Scale</span>
+                    <strong class="callout-main-text">${strongScale ? strongScale.supervisor : '-'}</strong>
+                    <span class="callout-sub-text">${strongScale ? `${strongScale.avgFinalResult.toFixed(1)}% result across ${strongScale.evaluatedOfficers} evaluated officers` : '-'}</span>
+                </div>
+                <div class="callout-card">
+                    <span class="callout-label">High Workload / Lower Relative Result</span>
+                    <strong class="callout-main-text">${highLowScale ? highLowScale.supervisor : '-'}</strong>
+                    <span class="callout-sub-text">${highLowScale ? `${highLowScale.avgFinalResult.toFixed(1)}% result across ${highLowScale.evaluatedOfficers} evaluated officers` : '-'}</span>
+                </div>
+                <div class="callout-card">
+                    <span class="callout-label">Highest Evaluation Coverage at Scale</span>
+                    <strong class="callout-main-text">${highCovScale ? highCovScale.supervisor : '-'}</strong>
+                    <span class="callout-sub-text">${highCovScale ? `${highCovScale.evaluationCoverage.toFixed(1)}% coverage (${highCovScale.evaluatedOfficers}/${highCovScale.uniqueOfficers} officers)` : '-'}</span>
+                </div>
+            `;
+        }
+    }
+
+    function renderPerformanceAndWorkloadDistributions(supervisors) {
+        const perfBox = document.getElementById('sup-perf-dist-container');
+        const workBox = document.getElementById('sup-workload-dist-container');
+
+        if (perfBox) {
+            const validSups = supervisors.filter(s => s.avgFinalResult !== null);
+            const ranges = [
+                { label: '90% – 100%', min: 90, max: 100.01, count: 0 },
+                { label: '80% – 89%', min: 80, max: 90, count: 0 },
+                { label: '70% – 79%', min: 70, max: 80, count: 0 },
+                { label: 'Below 70%', min: 0, max: 70, count: 0 }
+            ];
+
+            validSups.forEach(s => {
+                const res = s.avgFinalResult;
+                for (const r of ranges) {
+                    if (res >= r.min && res < r.max) {
+                        r.count++;
+                        break;
+                    }
+                }
+            });
+
+            const maxC = Math.max(...ranges.map(r => r.count), 1);
+            perfBox.innerHTML = ranges.map(r => {
+                const pct = (r.count / Math.max(validSups.length, 1)) * 100;
+                const fillW = (r.count / maxC) * 100;
+                return `
+                    <div class="dist-bar-item">
+                        <div class="dist-bar-meta">
+                            <span>${r.label}</span>
+                            <strong>${r.count} sups (${pct.toFixed(0)}%)</strong>
+                        </div>
+                        <div class="dist-bar-track">
+                            <div class="dist-bar-fill" style="width: ${fillW}%;"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        if (workBox) {
+            const officersList = supervisors.map(s => s.uniqueOfficers);
+            const med = calculateMedian(officersList);
+            const maxW = Math.max(...officersList, 0);
+
+            const wRanges = [
+                { label: '1 – 5 Officers', min: 1, max: 6, count: 0 },
+                { label: '6 – 15 Officers', min: 6, max: 16, count: 0 },
+                { label: '16 – 25 Officers', min: 16, max: 26, count: 0 },
+                { label: '26+ Officers', min: 26, max: 999, count: 0 }
+            ];
+
+            supervisors.forEach(s => {
+                const w = s.uniqueOfficers;
+                for (const r of wRanges) {
+                    if (w >= r.min && w < r.max) {
+                        r.count++;
+                        break;
+                    }
+                }
+            });
+
+            const maxWC = Math.max(...wRanges.map(r => r.count), 1);
+
+            let html = wRanges.map(r => {
+                const pct = (r.count / Math.max(supervisors.length, 1)) * 100;
+                const fillW = (r.count / maxWC) * 100;
+                return `
+                    <div class="dist-bar-item">
+                        <div class="dist-bar-meta">
+                            <span>${r.label}</span>
+                            <strong>${r.count} sups (${pct.toFixed(0)}%)</strong>
+                        </div>
+                        <div class="dist-bar-track">
+                            <div class="dist-bar-fill" style="width: ${fillW}%; background: var(--primary);"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            html += `
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
+                    Median Workload: <strong>${med.toFixed(0)} Officers/Sup</strong> • Highest Workload: <strong>${maxW} Officers</strong>
+                </div>
+            `;
+            workBox.innerHTML = html;
+        }
+    }
+
+    function renderSupervisionByGovernorate(supervisors, rawRecords) {
+        const tbody = document.getElementById('sup-gov-matrix-tbody');
+        if (!tbody) return;
+
+        const sample = rawRecords[0];
+        const resultCol = findColumnName(sample, ['Final Result', 'KPI Result', 'Average Result', 'Result']);
+        const govCol = findColumnName(sample, ['Governorate', 'Gov', 'Region', 'Branch Governorate']);
+
+        const govMap = {};
+
+        supervisors.forEach(s => {
+            const g = s.governorate;
+            if (!govMap[g]) {
+                govMap[g] = {
+                    gov: g,
+                    supervisorsCount: 0,
+                    officersCount: 0,
+                    branchesCount: 0,
+                    evaluatedCount: 0,
+                    supAverages: []
+                };
+            }
+            govMap[g].supervisorsCount++;
+            govMap[g].officersCount += s.uniqueOfficers;
+            govMap[g].branchesCount += s.uniqueBranches;
+            govMap[g].evaluatedCount += s.evaluatedOfficers;
+            if (s.avgFinalResult !== null) {
+                govMap[g].supAverages.push(s.avgFinalResult);
+            }
+        });
+
+        const rawGovValids = {};
+        rawRecords.forEach(row => {
+            const g = row[govCol] ? row[govCol].trim() : 'Unknown';
+            const parsed = parseFinalResult(row[resultCol]);
+            if (parsed !== null) {
+                if (!rawGovValids[g]) rawGovValids[g] = [];
+                rawGovValids[g].push(parsed);
+            }
+        });
+
+        const govList = Object.values(govMap).map(g => {
+            const valids = rawGovValids[g.gov] || [];
+            const avgFinalResult = valids.length > 0 ? (valids.reduce((a, b) => a + b, 0) / valids.length) : null;
+            const coverage = g.officersCount > 0 ? (g.evaluatedCount / g.officersCount) * 100 : 0;
+
+            let gap = null;
+            if (g.supAverages.length > 1) {
+                const maxAvg = Math.max(...g.supAverages);
+                const minAvg = Math.min(...g.supAverages);
+                gap = maxAvg - minAvg;
+            }
+
+            return {
+                ...g,
+                avgFinalResult,
+                coverage,
+                gap
+            };
+        });
+
+        const k = currentSupGovSort.key;
+        const dir = currentSupGovSort.dir === 'asc' ? 1 : -1;
+
+        govList.sort((a, b) => {
+            let valA = a[k] !== null ? a[k] : -1;
+            let valB = b[k] !== null ? b[k] : -1;
+            if (typeof valA === 'string') return valA.localeCompare(valB) * dir;
+            return (valA - valB) * dir;
+        });
+
+        tbody.innerHTML = '';
+        govList.forEach(r => {
+            const gapStr = r.gap !== null ? `${r.gap.toFixed(1)}%` : '<span class="text-muted">N/A (1 Sup)</span>';
+            const resStr = r.avgFinalResult !== null ? `${r.avgFinalResult.toFixed(1)}%` : 'N/A';
+
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${r.gov}</strong></td>
+                <td>${r.supervisorsCount}</td>
+                <td>${r.officersCount}</td>
+                <td>${r.branchesCount}</td>
+                <td>${r.evaluatedCount}</td>
+                <td>${r.coverage.toFixed(1)}%</td>
+                <td><strong>${resStr}</strong> <span class="sample-size-tag">n=${r.evaluatedCount}</span></td>
+                <td>${gapStr}</td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.querySelectorAll('#sup-gov-matrix-table th').forEach(th => {
+            th.onclick = () => {
+                const sortKey = th.getAttribute('data-sup-gov-sort');
+                if (currentSupGovSort.key === sortKey) {
+                    currentSupGovSort.dir = currentSupGovSort.dir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSupGovSort.key = sortKey;
+                    currentSupGovSort.dir = 'desc';
+                }
+                renderSupervisionByGovernorate(supervisors, rawRecords);
+            };
+        });
+    }
+
+    function populateSupervisorGovFilter(supervisors) {
+        const select = document.getElementById('sup-table-gov-filter');
+        if (!select) return;
+
+        const govSet = new Set(supervisors.map(s => s.governorate));
+        const sortedGovs = Array.from(govSet).sort();
+
+        select.innerHTML = '<option value="all">All Governorates</option>';
+        sortedGovs.forEach(g => {
+            const opt = document.createElement('option');
+            opt.value = g;
+            opt.textContent = g;
+            select.appendChild(opt);
+        });
+
+        select.onchange = () => {
+            renderSupervisorDetailsTable(supervisorDataset);
+        };
+    }
+
+    // 8. Supervisor Details Table (تم الربط والدعم الكامل للترتيب المزدوج: المحافظة أولاً ثم الاسم)
+    function renderSupervisorDetailsTable(supervisors) {
+        const tbody = document.getElementById('sup-details-tbody');
+        const filterSelect = document.getElementById('sup-table-gov-filter');
+        if (!tbody) return;
+
+        let scoped = [...supervisors];
+        if (filterSelect && filterSelect.value !== 'all') {
+            scoped = scoped.filter(s => s.governorate === filterSelect.value);
+        }
+
+        const k = currentSupDetailSort.key;
+        const dir = currentSupDetailSort.dir === 'asc' ? 1 : -1;
+
+        // خريطة لربط مسميات الأعمدة في الـ HTML بأسماء الخاصية الصحيحة في الكائن
+        const keyMap = {
+            'supervisor': 'supervisor',
+            'gov': 'governorate',
+            'officers': 'uniqueOfficers',
+            'branches': 'uniqueBranches',
+            'evaluated': 'evaluatedOfficers',
+            'coverage': 'evaluationCoverage',
+            'avgResult': 'avgFinalResult'
+        };
+        const actualKey = keyMap[k] || k;
+
+        scoped.sort((a, b) => {
+            // الترتيب الأساسي
+            let valA = a[actualKey] !== null && a[actualKey] !== undefined ? a[actualKey] : '';
+            let valB = b[actualKey] !== null && b[actualKey] !== undefined ? b[actualKey] : '';
+
+            let primaryCompare = 0;
+            if (typeof valA === 'string' || typeof valB === 'string') {
+                primaryCompare = String(valA).localeCompare(String(valB), undefined, { numeric: true, sensitivity: 'base' }) * dir;
+            } else {
+                primaryCompare = (valA - valB) * dir;
+            }
+
+            // إذا كان الترتيب حسب المحافظة (سواء بالضغط على العمود أو الترتيب المبدئي)
+            // وكانت المحافظتين متساويتين، بيترتبوا تلقائيًا أسامي المشرفين أبجديًا جوه نفس المحافظة
+            if (actualKey === 'governorate') {
+                if (primaryCompare !== 0) return primaryCompare;
+                return a.supervisor.localeCompare(b.supervisor, undefined, { numeric: true, sensitivity: 'base' });
+            }
+
+            return primaryCompare;
+        });
+
+        tbody.innerHTML = '';
+        scoped.forEach(s => {
+            const resStr = s.avgFinalResult !== null ? `${s.avgFinalResult.toFixed(1)}%` : 'N/A';
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${s.supervisor}</strong></td>
+                <td>${s.governorate}</td>
+                <td>${s.uniqueOfficers}</td>
+                <td>${s.uniqueBranches}</td>
+                <td>${s.evaluatedOfficers}</td>
+                <td>${s.evaluationCoverage.toFixed(1)}%</td>
+                <td><strong>${resStr}</strong> <span class="sample-size-tag">n=${s.evaluatedOfficers}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        document.querySelectorAll('#sup-details-table th').forEach(th => {
+            th.onclick = () => {
+                const sortKey = th.getAttribute('data-sup-detail-sort');
+                if (currentSupDetailSort.key === sortKey) {
+                    currentSupDetailSort.dir = currentSupDetailSort.dir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSupDetailSort.key = sortKey;
+                    currentSupDetailSort.dir = 'asc';
+                }
+                renderSupervisorDetailsTable(supervisors);
+            };
+        });
+    }
+
+    function renderSupervisorInsights(supervisors, rawRecords) {
+        const container = document.getElementById('sup-insights-grid');
+        if (!container) return;
+
+        const insights = [];
+
+        const sortedWorkload = [...supervisors].sort((a,b) => b.uniqueOfficers - a.uniqueOfficers);
+        const totalOfficers = supervisors.reduce((a,b) => a + b.uniqueOfficers, 0);
+        if (sortedWorkload.length >= 5 && totalOfficers > 0) {
+            const top5Workload = sortedWorkload.slice(0, 5).reduce((a,b) => a + b.uniqueOfficers, 0);
+            const share = ((top5Workload / totalOfficers) * 100).toFixed(1);
+            insights.push({
+                title: "Workload concentration among top supervisors",
+                tag: "Workload Concentration",
+                text: `Workload is concentrated among a small group of supervisors. The five busiest supervisors manage ${top5Workload} officers (${share}% of the operational total).`
+            });
+        }
+
+        const medWorkload = calculateMedian(supervisors.map(s => s.uniqueOfficers));
+        const highWkSups = supervisors.filter(s => s.uniqueOfficers >= medWorkload && s.avgFinalResult !== null);
+        if (highWkSups.length > 0) {
+            const topHighWkResult = highWkSups.sort((a,b) => b.avgFinalResult - a.avgFinalResult)[0];
+            insights.push({
+                title: `${topHighWkResult.supervisor} records strong results under high workload`,
+                tag: "High Volume Performance",
+                text: `${topHighWkResult.supervisor} achieves a ${topHighWkResult.avgFinalResult.toFixed(1)}% average Final Result across ${topHighWkResult.evaluatedOfficers} evaluated officers while managing a workload of ${topHighWkResult.uniqueOfficers} officers.`
+            });
+        }
+
+        const lowCovSups = supervisors.filter(s => s.evaluationCoverage < 50);
+        if (lowCovSups.length > 0) {
+            const lowest = lowCovSups.sort((a,b) => a.evaluationCoverage - b.evaluationCoverage)[0];
+            insights.push({
+                title: "Low evaluation coverage in specific supervisory units",
+                tag: "Evaluation Completeness",
+                text: `${lowest.supervisor} (${lowest.governorate}) records an evaluation coverage of ${lowest.evaluationCoverage.toFixed(1)}%, with only ${lowest.evaluatedOfficers} of ${lowest.uniqueOfficers} officers evaluated.`
+            });
+        }
+
+        const govMap = {};
+        supervisors.forEach(s => {
+            if (s.avgFinalResult !== null) {
+                if (!govMap[s.governorate]) govMap[s.governorate] = [];
+                govMap[s.governorate].push(s.avgFinalResult);
+            }
+        });
+
+        let maxGapGov = null;
+        let maxGapVal = -1;
+        for (const g in govMap) {
+            if (govMap[g].length > 1) {
+                const gap = Math.max(...govMap[g]) - Math.min(...govMap[g]);
+                if (gap > maxGapVal) {
+                    maxGapVal = gap;
+                    maxGapGov = g;
+                }
+            }
+        }
+
+        if (maxGapGov) {
+            insights.push({
+                title: `Largest Supervisor Result Gap observed in ${maxGapGov}`,
+                tag: "Internal Variation",
+                text: `${maxGapGov} exhibits a Supervisor Result Gap of ${maxGapVal.toFixed(1)}% between its highest and lowest performing supervisors.`
+            });
+        }
+
+        const smallSampleSups = supervisors.filter(s => s.evaluatedOfficers > 0 && s.evaluatedOfficers <= 3 && s.avgFinalResult !== null);
+        if (smallSampleSups.length > 0) {
+            const highSmall = smallSampleSups.sort((a,b) => b.avgFinalResult - a.avgFinalResult)[0];
+            insights.push({
+                title: "High Final Results recorded on small evaluation samples",
+                tag: "Sample Context",
+                text: `${highSmall.supervisor} shows a ${highSmall.avgFinalResult.toFixed(1)}% average Final Result, but this metric is based on a sample size of only ${highSmall.evaluatedOfficers} evaluated officers.`
+            });
+        }
+
+        container.innerHTML = '';
+        insights.slice(0, 5).forEach(ins => {
+            const card = document.createElement('div');
+            card.className = 'insight-card-item';
+            card.innerHTML = `
+                <div class="insight-head">
+                    <span class="insight-title">${ins.title}</span>
+                    <span class="insight-tag">${ins.tag}</span>
+                </div>
+                <p class="insight-body-text">${ins.text}</p>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // Dynamic Resize Listener for Chart Re-rendering
+    window.addEventListener('resize', () => {
+        if (globalDataset.length > 0) {
+            applyDynamicFiltering();
+        }
+        if (supervisorDataset.length > 0) {
+            renderSupervisorPerformanceMapAndHighlights(supervisorDataset);
+        }
+    });
+
+    // Dynamic Live Data Loader - Primary Dataset (data.csv)
     fetch('data.csv', { cache: 'no-store' })
         .then(res => {
             if (!res.ok) throw new Error("Offline CSV Data");
@@ -424,19 +1892,42 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(csvText => {
             globalDataset = parseCSVDataEngine(csvText);
             
-            // Initialize Core UI Controls
             populateMonthFilter(globalDataset);
-            renderPremiumLineChart(globalDataset); // Line Chart holds standard global baseline overview
+            renderPremiumLineChart(globalDataset);
+            applyDynamicFiltering();
             
-            // Render Initial Dynamic Data State (All Months Default)
-            processMetricsPipeline(globalDataset);
-            renderExceeded72hList(globalDataset);
-            
-            nodeUpdateBadge.textContent = "Data Synced Live";
+            if(nodeUpdateBadge) nodeUpdateBadge.textContent = "Data Synced Live";
         })
         .catch(err => {
             console.error("Pipeline Error:", err);
-            nodeUpdateBadge.textContent = "Data File Offline";
-            nodeUpdateBadge.parentElement.querySelector('.status-indicator').style.backgroundColor = 'var(--red)';
+            if(nodeUpdateBadge) {
+                nodeUpdateBadge.textContent = "Data File Offline";
+                const indicator = nodeUpdateBadge.parentElement.querySelector('.status-indicator');
+                if(indicator) indicator.style.backgroundColor = 'var(--red)';
+            }
+        });
+
+    // Dynamic Live Data Loader - Supervisor KPI Results.csv
+    fetch('Supervisor KPI Results.csv', { cache: 'no-store' })
+        .then(res => {
+            if (!res.ok) throw new Error("Offline Supervisor CSV Data");
+            return res.text();
+        })
+        .then(csvText => {
+            const rawSupRecords = parseCSVDataEngine(csvText);
+            processTab3SupervisorPipeline(rawSupRecords);
+        })
+        .catch(err => {
+            console.warn("Supervisor KPI Results.csv File Offline or Unreachable:", err);
+            const supTabNode = document.getElementById('tab-supervisor');
+            if (supTabNode) {
+                const errCard = document.createElement('div');
+                errCard.className = 'metric-card';
+                errCard.style.color = 'var(--red)';
+                errCard.style.padding = '20px';
+                errCard.style.marginTop = '20px';
+                errCard.textContent = "Unable to load 'Supervisor KPI Results.csv'. Supervisor Performance tab data is currently unavailable.";
+                supTabNode.prepend(errCard);
+            }
         });
 });
