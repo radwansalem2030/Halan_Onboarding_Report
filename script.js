@@ -32,10 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dataset Globals
     let globalDataset = [];
     let supervisorDataset = [];
+    let rawSupervisorRecordsGlobal = [];
     let currentGovMatrixSort = { key: 'eff', dir: 'desc' };
     let currentSupGovSort = { key: 'officers', dir: 'desc' };
-    // الترتيب المبدئي: المحافظة أولاً أبجديًا
     let currentSupDetailSort = { key: 'gov', dir: 'asc' };
+
+    // HQ Validation Globals
+    let hqBreakdownMode = 'gov'; // 'gov' | 'sup'
+    let hqSortConfig = { key: 'name', dir: 'asc' };
 
     // Initialize Navigation Tab Switching Logic
     const tabButtons = document.querySelectorAll('.nav-tab-btn');
@@ -833,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
         svg += `<text x="${pL + 6}" y="${pT + 21}" fill="var(--text-muted)" font-size="7.5" font-weight="500">Lower Volume</text>`;
 
         svg += `<text x="${pL + cW - 6}" y="${pT + 12}" fill="#0F172A" font-size="8.5" font-weight="700" text-anchor="end">HIGHER COMPLETION</text>`;
-        svg += `<text x="${pL + cW - 6}" y="${pT + 21}" fill="var(--text-muted)" font-size="7.5" font-weight="500" text-anchor="end">Higher Volume</text>`;
+        svg += `<text x="${pL + cW - 6}" y="${pT + cW - 6}" y="${pT + 21}" fill="var(--text-muted)" font-size="7.5" font-weight="500" text-anchor="end">Higher Volume</text>`;
 
         svg += `<text x="${pL + 6}" y="${pT + cH - 12}" fill="#0F172A" font-size="8.5" font-weight="700">LOWER COMPLETION</text>`;
         svg += `<text x="${pL + 6}" y="${pT + cH - 4}" fill="var(--text-muted)" font-size="7.5" font-weight="500">Lower Volume</text>`;
@@ -1259,12 +1263,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function processTab3SupervisorPipeline(supRecords) {
+        rawSupervisorRecordsGlobal = supRecords;
         const { supervisors, rawValids } = aggregateSupervisorData(supRecords);
         supervisorDataset = supervisors;
 
         if (supervisors.length === 0) return;
 
         renderSupervisorExecutiveSummary(supervisors, rawValids);
+        renderHQValidationSection(supRecords);
         renderSupervisorPerformanceMapAndHighlights(supervisors);
         renderPerformanceAndWorkloadDistributions(supervisors);
         renderSupervisionByGovernorate(supervisors, supRecords);
@@ -1324,6 +1330,178 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="sup-card-sub">${totalEvaluated} of ${totalOfficers} officers</span>
             </div>
         `;
+    }
+
+    // ==========================================================================
+    // NEW SECTION: HQ VALIDATION CALLS ENGINE
+    // ==========================================================================
+    function isValidHQVal(val) {
+        if (val === undefined || val === null) return false;
+        const str = String(val).trim();
+        if (str === '' || str.toLowerCase() === 'null' || str.toLowerCase() === 'undefined' || str.toLowerCase() === 'nan') return false;
+        return true;
+    }
+
+    function renderHQValidationSection(supRecords) {
+        if (!supRecords || supRecords.length === 0) return;
+
+        const sample = supRecords[0];
+        const officerCol = findColumnName(sample, ['Officer HR Code', 'HR Code', 'Officer Code', 'Officer Name', 'Employee ID']);
+        const govCol = findColumnName(sample, ['Governorate', 'Gov', 'Region', 'Branch Governorate']);
+        const supCol = findColumnName(sample, ['Supervisor Name', 'Supervisor', 'Direct Manager', 'Manager']);
+        const hqCol = findColumnName(sample, ['HQ Validation', 'Validation', 'HQ Call', 'HQ Result']);
+
+        const totalOfficersSet = new Set();
+        const calledOfficersSet = new Set();
+
+        const govMap = {};
+        const supMap = {};
+
+        supRecords.forEach(row => {
+            const officerId = row[officerCol] ? row[officerCol].trim() : null;
+            if (!officerId) return;
+
+            const gov = row[govCol] ? row[govCol].trim() : 'Unknown';
+            const sup = row[supCol] ? row[supCol].trim() : 'Unknown';
+            const hqVal = row[hqCol];
+
+            totalOfficersSet.add(officerId);
+
+            if (!govMap[gov]) govMap[gov] = { name: gov, totalOfficers: new Set(), calledOfficers: new Set() };
+            govMap[gov].totalOfficers.add(officerId);
+
+            if (!supMap[sup]) supMap[sup] = { name: sup, gov: gov, totalOfficers: new Set(), calledOfficers: new Set() };
+            supMap[sup].totalOfficers.add(officerId);
+
+            if (isValidHQVal(hqVal)) {
+                calledOfficersSet.add(officerId);
+                govMap[gov].calledOfficers.add(officerId);
+                supMap[sup].calledOfficers.add(officerId);
+            }
+        });
+
+        const totalOfficersCount = totalOfficersSet.size;
+        const calledOfficersCount = calledOfficersSet.size;
+        const coveragePct = totalOfficersCount > 0 ? (calledOfficersCount / totalOfficersCount) * 100 : 0;
+
+        const stmtNode = document.getElementById('hq-summary-statement');
+        const covNode = document.getElementById('hq-coverage-value');
+        const fillNode = document.getElementById('hq-progress-fill');
+
+        if (stmtNode) stmtNode.textContent = `${calledOfficersCount.toLocaleString()} of ${totalOfficersCount.toLocaleString()} Officers`;
+        if (covNode) covNode.textContent = `${coveragePct.toFixed(1)}% Coverage`;
+        if (fillNode) fillNode.style.width = `${Math.min(coveragePct, 100)}%`;
+
+        const btnGov = document.getElementById('hq-toggle-gov');
+        const btnSup = document.getElementById('hq-toggle-sup');
+
+        if (btnGov && btnSup) {
+            btnGov.onclick = () => {
+                hqBreakdownMode = 'gov';
+                hqSortConfig = { key: 'name', dir: 'asc' };
+                btnGov.classList.add('active');
+                btnSup.classList.remove('active');
+                renderHQTable(govMap, supMap);
+            };
+            btnSup.onclick = () => {
+                hqBreakdownMode = 'sup';
+                hqSortConfig = { key: 'name', dir: 'asc' };
+                btnSup.classList.add('active');
+                btnGov.classList.remove('active');
+                renderHQTable(govMap, supMap);
+            };
+        }
+
+        renderHQTable(govMap, supMap);
+    }
+
+    function renderHQTable(govMap, supMap) {
+        const thead = document.getElementById('hq-table-thead');
+        const tbody = document.getElementById('hq-table-tbody');
+        if (!thead || !tbody) return;
+
+        let dataList = [];
+
+        if (hqBreakdownMode === 'gov') {
+            thead.innerHTML = `
+                <tr>
+                    <th data-hq-sort="name">Governorate ↕</th>
+                    <th data-hq-sort="total">Total Unique Officers ↕</th>
+                    <th data-hq-sort="calls">HQ Validation Calls ↕</th>
+                    <th data-hq-sort="coverage">Coverage % ↕</th>
+                </tr>
+            `;
+
+            dataList = Object.values(govMap).map(g => {
+                const total = g.totalOfficers.size;
+                const calls = g.calledOfficers.size;
+                const cov = total > 0 ? (calls / total) * 100 : 0;
+                return { name: g.name, total, calls, coverage: cov };
+            });
+
+        } else {
+            thead.innerHTML = `
+                <tr>
+                    <th data-hq-sort="name">Supervisor ↕</th>
+                    <th data-hq-sort="gov">Governorate ↕</th>
+                    <th data-hq-sort="total">Total Unique Officers ↕</th>
+                    <th data-hq-sort="calls">HQ Validation Calls ↕</th>
+                    <th data-hq-sort="coverage">Coverage % ↕</th>
+                </tr>
+            `;
+
+            dataList = Object.values(supMap).map(s => {
+                const total = s.totalOfficers.size;
+                const calls = s.calledOfficers.size;
+                const cov = total > 0 ? (calls / total) * 100 : 0;
+                return { name: s.name, gov: s.gov, total, calls, coverage: cov };
+            });
+        }
+
+        const k = hqSortConfig.key;
+        const dir = hqSortConfig.dir === 'asc' ? 1 : -1;
+
+        dataList.sort((a, b) => {
+            let valA = a[k] !== undefined ? a[k] : '';
+            let valB = b[k] !== undefined ? b[k] : '';
+            if (typeof valA === 'string') return valA.localeCompare(valB, undefined, { numeric: true, sensitivity: 'base' }) * dir;
+            return (valA - valB) * dir;
+        });
+
+        tbody.innerHTML = '';
+        dataList.forEach(item => {
+            const tr = document.createElement('tr');
+            if (hqBreakdownMode === 'gov') {
+                tr.innerHTML = `
+                    <td><strong>${item.name}</strong></td>
+                    <td>${item.total}</td>
+                    <td>${item.calls}</td>
+                    <td><strong>${item.coverage.toFixed(1)}%</strong></td>
+                `;
+            } else {
+                tr.innerHTML = `
+                    <td><strong>${item.name}</strong></td>
+                    <td>${item.gov}</td>
+                    <td>${item.total}</td>
+                    <td>${item.calls}</td>
+                    <td><strong>${item.coverage.toFixed(1)}%</strong></td>
+                `;
+            }
+            tbody.appendChild(tr);
+        });
+
+        thead.querySelectorAll('th').forEach(th => {
+            th.onclick = () => {
+                const sortKey = th.getAttribute('data-hq-sort');
+                if (hqSortConfig.key === sortKey) {
+                    hqSortConfig.dir = hqSortConfig.dir === 'asc' ? 'desc' : 'asc';
+                } else {
+                    hqSortConfig.key = sortKey;
+                    hqSortConfig.dir = 'asc';
+                }
+                renderHQTable(govMap, supMap);
+            };
+        });
     }
 
     // 3. Performance Map & 4. Analytical Highlights
@@ -1703,7 +1881,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // 8. Supervisor Details Table (تم الربط والدعم الكامل للترتيب المزدوج: المحافظة أولاً ثم الاسم)
     function renderSupervisorDetailsTable(supervisors) {
         const tbody = document.getElementById('sup-details-tbody');
         const filterSelect = document.getElementById('sup-table-gov-filter');
@@ -1717,7 +1894,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const k = currentSupDetailSort.key;
         const dir = currentSupDetailSort.dir === 'asc' ? 1 : -1;
 
-        // خريطة لربط مسميات الأعمدة في الـ HTML بأسماء الخاصية الصحيحة في الكائن
         const keyMap = {
             'supervisor': 'supervisor',
             'gov': 'governorate',
@@ -1730,7 +1906,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const actualKey = keyMap[k] || k;
 
         scoped.sort((a, b) => {
-            // الترتيب الأساسي
             let valA = a[actualKey] !== null && a[actualKey] !== undefined ? a[actualKey] : '';
             let valB = b[actualKey] !== null && b[actualKey] !== undefined ? b[actualKey] : '';
 
@@ -1741,8 +1916,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 primaryCompare = (valA - valB) * dir;
             }
 
-            // إذا كان الترتيب حسب المحافظة (سواء بالضغط على العمود أو الترتيب المبدئي)
-            // وكانت المحافظتين متساويتين، بيترتبوا تلقائيًا أسامي المشرفين أبجديًا جوه نفس المحافظة
             if (actualKey === 'governorate') {
                 if (primaryCompare !== 0) return primaryCompare;
                 return a.supervisor.localeCompare(b.supervisor, undefined, { numeric: true, sensitivity: 'base' });

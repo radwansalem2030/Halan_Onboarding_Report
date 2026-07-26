@@ -399,6 +399,45 @@
                 </div>
             </div>
 
+            <!-- NEW SECTION: HQ VALIDATION CALLS -->
+            <div class="analytics-section">
+                <div class="metric-card hq-validation-card">
+                    <div class="hq-validation-header">
+                        <div>
+                            <h3 class="hq-validation-title">HQ VALIDATION CALLS</h3>
+                            <p class="hq-validation-subtitle">Recorded HQ validation activity across current officers</p>
+                        </div>
+                        <div class="hq-breakdown-toggle-group">
+                            <button id="hq-toggle-gov" class="hq-toggle-btn active">BY GOVERNORATE</button>
+                            <button id="hq-toggle-sup" class="hq-toggle-btn">BY SUPERVISOR</button>
+                        </div>
+                    </div>
+
+                    <div class="hq-summary-row">
+                        <div class="hq-summary-main">
+                            <span class="hq-main-statement" id="hq-summary-statement">0 of 0 Officers</span>
+                            <span class="hq-coverage-value" id="hq-coverage-value">0.0% Coverage</span>
+                        </div>
+                        <div class="hq-progress-container">
+                            <div class="hq-progress-track">
+                                <div class="hq-progress-fill" id="hq-progress-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="matrix-table-container hq-table-container">
+                        <table class="premium-matrix-table" id="hq-validation-table">
+                            <thead id="hq-table-thead">
+                                <!-- Dynamic Headers -->
+                            </thead>
+                            <tbody id="hq-table-tbody">
+                                <!-- Dynamic Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- 3. SUPERVISOR PERFORMANCE MAP & 4. ANALYTICAL HIGHLIGHTS -->
             <div class="analytics-section">
                 <div class="metric-card">
