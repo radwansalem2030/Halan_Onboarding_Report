@@ -837,7 +837,7 @@ document.addEventListener('DOMContentLoaded', () => {
         svg += `<text x="${pL + 6}" y="${pT + 21}" fill="var(--text-muted)" font-size="7.5" font-weight="500">Lower Volume</text>`;
 
         svg += `<text x="${pL + cW - 6}" y="${pT + 12}" fill="#0F172A" font-size="8.5" font-weight="700" text-anchor="end">HIGHER COMPLETION</text>`;
-        svg += `<text x="${pL + cW - 6}" y="${pT + cW - 6}" y="${pT + 21}" fill="var(--text-muted)" font-size="7.5" font-weight="500" text-anchor="end">Higher Volume</text>`;
+        svg += `<text x="${pL + cW - 6}" y="${pT + 21}" fill="var(--text-muted)" font-size="7.5" font-weight="500" text-anchor="end">Higher Volume</text>`;
 
         svg += `<text x="${pL + 6}" y="${pT + cH - 12}" fill="#0F172A" font-size="8.5" font-weight="700">LOWER COMPLETION</text>`;
         svg += `<text x="${pL + 6}" y="${pT + cH - 4}" fill="var(--text-muted)" font-size="7.5" font-weight="500">Lower Volume</text>`;
@@ -1199,9 +1199,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const sample = rawRecords[0];
         const supCol = findColumnName(sample, ['Supervisor Name', 'Supervisor', 'Direct Manager', 'Manager']);
-        const govCol = findColumnName(sample, ['Governorate', 'Gov', 'Region', 'Branch Governorate']);
+        const govCol = findColumnName(sample, ['Gov', 'Governorate', 'Region', 'Branch Governorate']);
         const officerCol = findColumnName(sample, ['Officer HR Code', 'HR Code', 'Officer Code', 'Officer Name', 'Employee ID']);
-        const branchCol = findColumnName(sample, ['Branch Name', 'Branch', 'Branch Code']);
+        const branchCol = findColumnName(sample, ['Branch', 'Branch Name', 'Branch Code']);
         const resultCol = findColumnName(sample, ['Final Result', 'KPI Result', 'Average Result', 'Result']);
 
         const supMap = {};
@@ -1347,9 +1347,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const sample = supRecords[0];
         const officerCol = findColumnName(sample, ['Officer HR Code', 'HR Code', 'Officer Code', 'Officer Name', 'Employee ID']);
-        const govCol = findColumnName(sample, ['Governorate', 'Gov', 'Region', 'Branch Governorate']);
+        const govCol = findColumnName(sample, ['Gov', 'Governorate', 'Region', 'Branch Governorate']);
         const supCol = findColumnName(sample, ['Supervisor Name', 'Supervisor', 'Direct Manager', 'Manager']);
-        const hqCol = findColumnName(sample, ['HQ Validation', 'Validation', 'HQ Call', 'HQ Result']);
+        
+        // Exact matching for HQ Call Result column in CSV
+        const hqCol = findColumnName(sample, ['HQ Call Result', 'HQ Call', 'HQ Validation', 'Validation']);
 
         const totalOfficersSet = new Set();
         const calledOfficersSet = new Set();
@@ -1363,7 +1365,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const gov = row[govCol] ? row[govCol].trim() : 'Unknown';
             const sup = row[supCol] ? row[supCol].trim() : 'Unknown';
-            const hqVal = row[hqCol];
+            const hqVal = hqCol ? row[hqCol] : null;
 
             totalOfficersSet.add(officerId);
 
@@ -1763,7 +1765,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const sample = rawRecords[0];
         const resultCol = findColumnName(sample, ['Final Result', 'KPI Result', 'Average Result', 'Result']);
-        const govCol = findColumnName(sample, ['Governorate', 'Gov', 'Region', 'Branch Governorate']);
+        const govCol = findColumnName(sample, ['Gov', 'Governorate', 'Region', 'Branch Governorate']);
 
         const govMap = {};
 

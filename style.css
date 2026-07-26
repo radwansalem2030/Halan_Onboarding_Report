@@ -575,7 +575,7 @@ body {
 .hq-toggle-btn {
     border: none;
     background: transparent;
-    padding: 6px 12px;
+    padding: 6px 14px;
     font-size: 11px;
     font-weight: 700;
     color: var(--text-muted);
@@ -587,7 +587,7 @@ body {
 .hq-toggle-btn.active {
     background: #FFFFFF;
     color: #0F172A;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
 }
 
 .hq-summary-row {
