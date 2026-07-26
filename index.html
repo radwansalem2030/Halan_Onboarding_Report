@@ -43,6 +43,10 @@
                 <span class="tab-icon">👔</span>
                 <span class="tab-label">SUPERVISOR PERFORMANCE</span>
             </button>
+            <button class="nav-tab-btn" data-tab="tab-cases">
+                <span class="tab-icon">📋</span>
+                <span class="tab-label">OPERATIONAL CASES</span>
+            </button>
         </nav>
 
         <!-- ========================================================================== -->
@@ -558,6 +562,132 @@
                     </div>
                     <div class="insights-grid-container" id="sup-insights-grid">
                         <!-- Populated dynamically via JS -->
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================================== -->
+        <!-- TAB 4: OPERATIONAL CASES                                                   -->
+        <!-- ========================================================================== -->
+        <div id="tab-cases" class="tab-content">
+            
+            <div class="analytics-header-block">
+                <h2>OPERATIONAL CASES</h2>
+                <p class="subtitle">Detailed onboarding cases requiring operational follow-up</p>
+            </div>
+
+            <!-- SECTION 1: 72H EXCEEDED -->
+            <div class="analytics-section">
+                <div class="metric-card op-case-module">
+                    <div class="op-section-header">
+                        <div class="op-title-group">
+                            <span class="card-icon-wrapper pending-icon">⏳</span>
+                            <div>
+                                <h3 id="sec-72h-title">72H EXCEEDED <span class="op-count-badge text-danger" id="sec-72h-badge">0 Cases</span></h3>
+                                <p class="section-subtitle" id="sec-72h-sub">Initial 72-hour onboarding phase SLA breach follow-up</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="op-controls-row">
+                        <div class="op-filter-group">
+                            <label for="filter-72h-gov">Governorate</label>
+                            <select id="filter-72h-gov" class="premium-select op-select">
+                                <option value="all">All Governorates</option>
+                            </select>
+                        </div>
+                        <div class="op-filter-group">
+                            <label for="filter-72h-sup">Supervisor</label>
+                            <select id="filter-72h-sup" class="premium-select op-select">
+                                <option value="all">All Supervisors</option>
+                            </select>
+                        </div>
+                        <div class="op-filter-group op-search-group">
+                            <label for="search-72h">Search</label>
+                            <input type="text" id="search-72h" class="premium-input op-input" placeholder="Search Officer Name or HR Code...">
+                        </div>
+                    </div>
+
+                    <div id="container-72h-cases" class="op-cases-container">
+                        <!-- Grouped Governorate display populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: QUESTIONNAIRE OVERDUE -->
+            <div class="analytics-section">
+                <div class="metric-card op-case-module">
+                    <div class="op-section-header">
+                        <div class="op-title-group">
+                            <span class="card-icon-wrapper progress-icon">⚡</span>
+                            <div>
+                                <h3 id="sec-quest-title">QUESTIONNAIRE OVERDUE <span class="op-count-badge text-warning" id="sec-quest-badge">0 Cases</span></h3>
+                                <p class="section-subtitle" id="sec-quest-sub">100% Trained officers exceeding 10 working days without completed questionnaire</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="op-controls-row">
+                        <div class="op-filter-group">
+                            <label for="filter-quest-gov">Governorate</label>
+                            <select id="filter-quest-gov" class="premium-select op-select">
+                                <option value="all">All Governorates</option>
+                            </select>
+                        </div>
+                        <div class="op-filter-group">
+                            <label for="filter-quest-sup">Supervisor</label>
+                            <select id="filter-quest-sup" class="premium-select op-select">
+                                <option value="all">All Supervisors</option>
+                            </select>
+                        </div>
+                        <div class="op-filter-group op-search-group">
+                            <label for="search-quest">Search</label>
+                            <input type="text" id="search-quest" class="premium-input op-input" placeholder="Search Officer Name or HR Code...">
+                        </div>
+                    </div>
+
+                    <div id="container-quest-cases" class="op-cases-container">
+                        <!-- Grouped Governorate display populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 3: DECLARATION PENDING -->
+            <div class="analytics-section">
+                <div class="metric-card op-case-module">
+                    <div class="op-section-header">
+                        <div class="op-title-group">
+                            <span class="card-icon-wrapper human">👥</span>
+                            <div>
+                                <h3 id="sec-decl-title">DECLARATION PENDING <span class="op-count-badge text-purple" id="sec-decl-badge">0 Cases</span></h3>
+                                <p class="section-subtitle" id="sec-decl-sub">100% Trained officers with unsigned required onboarding declaration</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="op-controls-row">
+                        <div class="op-filter-group">
+                            <label for="filter-decl-gov">Governorate</label>
+                            <select id="filter-decl-gov" class="premium-select op-select">
+                                <option value="all">All Governorates</option>
+                            </select>
+                        </div>
+                        <div class="op-filter-group">
+                            <label for="filter-decl-sup">Supervisor</label>
+                            <select id="filter-decl-sup" class="premium-select op-select">
+                                <option value="all">All Supervisors</option>
+                            </select>
+                        </div>
+                        <div class="op-filter-group op-search-group">
+                            <label for="search-decl">Search</label>
+                            <input type="text" id="search-decl" class="premium-input op-input" placeholder="Search Officer Name or HR Code...">
+                        </div>
+                    </div>
+
+                    <div id="container-decl-cases" class="op-cases-container">
+                        <!-- Grouped Governorate display populated dynamically -->
                     </div>
                 </div>
             </div>

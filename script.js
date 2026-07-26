@@ -285,9 +285,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Tab 3 Supervisor Performance Pipeline Processing (Connected to Month Filter by Hiring Date)
         processTab3SupervisorPipeline(scopedSupRecords);
+
+        // Tab 4 Operational Cases Pipeline Processing
+        processTab4CasesPipeline(scopedData, metrics);
     }
 
     monthFilterSelect.addEventListener('change', applyDynamicFiltering);
+    setupOpControlsListeners();
 
     // Core Processing Engine for Tab 1
     function processMetricsPipeline(rawRecords, metrics) {
@@ -2071,6 +2075,258 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
             container.appendChild(card);
         });
+    }
+
+    // ==========================================================================
+    // TAB 4: OPERATIONAL CASES CORE PIPELINE
+    // ==========================================================================
+
+    let opFilters = {
+        '72h': { gov: 'all', sup: 'all', search: '' },
+        'quest': { gov: 'all', sup: 'all', search: '' },
+        'decl': { gov: 'all', sup: 'all', search: '' }
+    };
+
+    function setupOpControlsListeners() {
+        ['72h', 'quest', 'decl'].forEach(sec => {
+            const govSel = document.getElementById(`filter-${sec}-gov`);
+            const supSel = document.getElementById(`filter-${sec}-sup`);
+            const searchInp = document.getElementById(`search-${sec}`);
+
+            if (govSel) {
+                govSel.addEventListener('change', () => {
+                    opFilters[sec].gov = govSel.value;
+                    opFilters[sec].sup = 'all'; // Reset supervisor on gov change to keep dropdown synced
+                    renderTab4OperationalCases(currentScopedGlobalDataset);
+                });
+            }
+
+            if (supSel) {
+                supSel.addEventListener('change', () => {
+                    opFilters[sec].sup = supSel.value;
+                    renderTab4OperationalCases(currentScopedGlobalDataset);
+                });
+            }
+
+            if (searchInp) {
+                searchInp.addEventListener('input', () => {
+                    opFilters[sec].search = searchInp.value.trim().toLowerCase();
+                    renderTab4OperationalCases(currentScopedGlobalDataset);
+                });
+            }
+        });
+    }
+
+    let currentScopedGlobalDataset = [];
+
+    function processTab4CasesPipeline(scopedData, metrics) {
+        currentScopedGlobalDataset = scopedData;
+        renderTab4OperationalCases(scopedData);
+    }
+
+    function renderTab4OperationalCases(scopedData) {
+        // Derive exact populations using existing business logic
+        const cases72h = scopedData.filter(r => 
+            (!r['Training Status'] || r['Training Status'].trim() === '') && 
+            r['72 hours'] && r['72 hours'].includes('Exceeded')
+        );
+
+        const casesQuest = scopedData.filter(r => isQuestionnaireExceeded(r));
+
+        const casesDecl = scopedData.filter(r => {
+            const status = (r['Training Status'] || '').trim();
+            if (!status.includes('100%')) return false;
+            const signed = r['Survey Result'] && r['Survey Result'].trim().toLowerCase() === 'signed';
+            return !signed;
+        });
+
+        renderOpSection('72h', cases72h, '72H EXCEEDED', 'sec-72h-badge', 'container-72h-cases', true);
+        renderOpSection('quest', casesQuest, 'QUESTIONNAIRE OVERDUE', 'sec-quest-badge', 'container-quest-cases', false);
+        renderOpSection('decl', casesDecl, 'DECLARATION PENDING', 'sec-decl-badge', 'container-decl-cases', false);
+    }
+
+    function renderOpSection(secKey, population, titlePrefix, badgeId, containerId, includeHiringDate) {
+        const badgeNode = document.getElementById(badgeId);
+        const containerNode = document.getElementById(containerId);
+        const govSel = document.getElementById(`filter-${secKey}-gov`);
+        const supSel = document.getElementById(`filter-${secKey}-sup`);
+
+        if (!containerNode) return;
+
+        // Total population count matching global Month filter (reconciles with Tab 1 / Tab 2)
+        const totalCount = population.length;
+        if (badgeNode) {
+            badgeNode.textContent = `${totalCount} ${totalCount === 1 ? 'Case' : 'Cases'}`;
+        }
+
+        // 1. Dynamic Dropdown Population
+        // Populate Governorates present in this section's population sorted alphabetically
+        const govsInSec = Array.from(new Set(population.map(r => (r['Governorate'] || '').trim()).filter(g => g !== ''))).sort((a,b) => a.localeCompare(b));
+        
+        let currentGov = opFilters[secKey].gov;
+        if (currentGov !== 'all' && !govsInSec.includes(currentGov)) {
+            currentGov = 'all';
+            opFilters[secKey].gov = 'all';
+        }
+
+        if (govSel) {
+            govSel.innerHTML = '<option value="all">All Governorates</option>';
+            govsInSec.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g;
+                opt.textContent = g;
+                govSel.appendChild(opt);
+            });
+            govSel.value = currentGov;
+        }
+
+        // Populate Supervisors relevant to selected Governorate (or all if 'all' selected)
+        let supPopulation = population;
+        if (currentGov !== 'all') {
+            supPopulation = population.filter(r => (r['Governorate'] || '').trim() === currentGov);
+        }
+        const supsInSec = Array.from(new Set(supPopulation.map(r => (r['Supervisor'] || '').trim()).filter(s => s !== ''))).sort((a,b) => a.localeCompare(b));
+
+        let currentSup = opFilters[secKey].sup;
+        if (currentSup !== 'all' && !supsInSec.includes(currentSup)) {
+            currentSup = 'all';
+            opFilters[secKey].sup = 'all';
+        }
+
+        if (supSel) {
+            supSel.innerHTML = '<option value="all">All Supervisors</option>';
+            supsInSec.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                supSel.appendChild(opt);
+            });
+            supSel.value = currentSup;
+        }
+
+        // 2. Apply Local Filters (Governorate, Supervisor, Search)
+        const searchVal = opFilters[secKey].search;
+        let filteredCases = population.filter(r => {
+            const g = (r['Governorate'] || '').trim();
+            const s = (r['Supervisor'] || '').trim();
+            const name = (r['Officer Name'] || '').trim().toLowerCase();
+            const hrCode = (r['HR Code'] || '').trim().toLowerCase();
+
+            if (currentGov !== 'all' && g !== currentGov) return false;
+            if (currentSup !== 'all' && s !== currentSup) return false;
+
+            if (searchVal !== '') {
+                const matchesName = name.includes(searchVal);
+                const matchesHR = hrCode.includes(searchVal);
+                if (!matchesName && !matchesHR) return false;
+            }
+
+            return true;
+        });
+
+        // Handle Empty States
+        if (population.length === 0) {
+            containerNode.innerHTML = `<div class="op-empty-state">No cases found for the selected period.</div>`;
+            return;
+        }
+
+        if (filteredCases.length === 0) {
+            containerNode.innerHTML = `<div class="op-empty-state">No cases match the selected filters.</div>`;
+            return;
+        }
+
+        // 3. Default Hierarchy Sorting: Governorate A-Z -> Supervisor A-Z -> Branch A-Z -> Officer Name A-Z
+        filteredCases.sort((a, b) => {
+            const govA = (a['Governorate'] || '').trim();
+            const govB = (b['Governorate'] || '').trim();
+            const cGov = govA.localeCompare(govB);
+            if (cGov !== 0) return cGov;
+
+            const supA = (a['Supervisor'] || '').trim();
+            const supB = (b['Supervisor'] || '').trim();
+            const cSup = supA.localeCompare(supB);
+            if (cSup !== 0) return cSup;
+
+            const brA = (a['Branch'] || '').trim();
+            const brB = (b['Branch'] || '').trim();
+            const cBr = brA.localeCompare(brB);
+            if (cBr !== 0) return cBr;
+
+            const nameA = (a['Officer Name'] || '').trim();
+            const nameB = (b['Officer Name'] || '').trim();
+            return nameA.localeCompare(nameB);
+        });
+
+        // 4. Visual Grouping by Governorate
+        const govGroups = {};
+        filteredCases.forEach(r => {
+            const g = (r['Governorate'] || '').trim() || 'Unknown';
+            if (!govGroups[g]) govGroups[g] = [];
+            govGroups[g].push(r);
+        });
+
+        const sortedGroupGovs = Object.keys(govGroups).sort((a,b) => a.localeCompare(b));
+
+        let html = '';
+        sortedGroupGovs.forEach(govName => {
+            const groupList = govGroups[govName];
+            const count = groupList.length;
+            const countText = `${count} ${count === 1 ? 'Case' : 'Cases'}`;
+
+            html += `
+                <div class="op-gov-group">
+                    <div class="op-gov-header">
+                        <div class="op-gov-title-wrapper">
+                            <span class="op-gov-name">${govName}</span>
+                            <span class="op-gov-chip">${countText}</span>
+                        </div>
+                    </div>
+                    <div class="op-table-wrapper">
+                        <table class="op-cases-table">
+                            <thead>
+                                <tr>
+                                    <th>Officer Name</th>
+                                    <th>Specialization</th>
+                                    <th>Branch</th>
+                                    <th>Supervisor</th>
+                                    ${includeHiringDate ? '<th>Hiring Date</th>' : '<th>Training Status</th>'}
+                                </tr>
+                            </thead>
+                            <tbody>
+            `;
+
+            groupList.forEach(r => {
+                const name = r['Officer Name'] ? r['Officer Name'].trim() : 'N/A';
+                const hrCode = r['HR Code'] ? r['HR Code'].trim() : '';
+                const spec = r['Specialized'] ? r['Specialized'].trim() : 'N/A';
+                const branch = r['Branch'] ? r['Branch'].trim() : 'N/A';
+                const supervisor = r['Supervisor'] ? r['Supervisor'].trim() : 'N/A';
+                const dateOrStatus = includeHiringDate 
+                    ? (r['Hiring Date'] ? r['Hiring Date'].trim() : 'N/A')
+                    : (r['Training Status'] ? r['Training Status'].trim() : '100% - Trained');
+
+                const hrCodeHtml = hrCode ? `<span class="op-hr-code">(${hrCode})</span>` : '';
+
+                html += `
+                    <tr>
+                        <td><strong>${name}</strong> ${hrCodeHtml}</td>
+                        <td>${spec}</td>
+                        <td>${branch}</td>
+                        <td>${supervisor}</td>
+                        <td>${dateOrStatus}</td>
+                    </tr>
+                `;
+            });
+
+            html += `
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        });
+
+        containerNode.innerHTML = html;
     }
 
     // Dynamic Resize Listener for Chart Re-rendering

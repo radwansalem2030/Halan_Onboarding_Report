@@ -721,3 +721,201 @@ body {
     .sup-executive-summary-strip { grid-template-columns: repeat(2, 1fr); }
     .hq-summary-main { flex-direction: column; align-items: flex-start; gap: 4px; }
 }
+
+/* ==========================================================================
+   TAB 4: OPERATIONAL CASES STYLES
+   ========================================================================== */
+.op-case-module {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.op-section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 16px;
+}
+
+.op-title-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.op-title-group h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0F172A;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.op-count-badge {
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 12px;
+    background: rgba(15, 23, 42, 0.05);
+}
+
+.op-controls-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+    background: #F8FAFC;
+    padding: 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-color);
+}
+
+.op-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+    min-width: 180px;
+}
+
+.op-search-group {
+    flex: 1.5;
+    min-width: 240px;
+}
+
+.op-filter-group label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.premium-input {
+    background-color: var(--card-bg);
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 9px 14px;
+    border-radius: var(--radius-md);
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    outline: none;
+    box-shadow: var(--shadow-premium);
+    transition: border-color 0.2s, box-shadow 0.2s;
+    width: 100%;
+}
+
+.premium-input:focus {
+    border-color: var(--brand-purple);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.op-cases-container {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.op-gov-group {
+    background: #FFFFFF;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+}
+
+.op-gov-header {
+    background: #F8FAFC;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.op-gov-title-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.op-gov-name {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0F172A;
+}
+
+.op-gov-chip {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 12px;
+    background: var(--brand-purple-light);
+    color: var(--brand-purple);
+}
+
+.op-table-wrapper {
+    overflow-x: auto;
+}
+
+.op-cases-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    text-align: left;
+}
+
+.op-cases-table th {
+    background: #FFFFFF;
+    padding: 10px 14px;
+    color: var(--text-muted);
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-color);
+    white-space: nowrap;
+}
+
+.op-cases-table td {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-main);
+    white-space: nowrap;
+}
+
+.op-cases-table tr:last-child td {
+    border-bottom: none;
+}
+
+.op-cases-table tr:hover {
+    background-color: #F8FAFC;
+}
+
+.op-empty-state {
+    padding: 32px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 500;
+    background: #F8FAFC;
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-color);
+}
+
+.op-hr-code {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-left: 6px;
+}
+
+@media (max-width: 768px) {
+    .op-controls-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .op-filter-group {
+        min-width: 100%;
+    }
+}
