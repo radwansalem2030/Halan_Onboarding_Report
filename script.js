@@ -120,15 +120,22 @@ document.addEventListener('DOMContentLoaded', () => {
         return '';
     }
 
-    // Dynamic Filter UI Builder
-    function populateMonthFilter(dataset) {
+    // Dynamic Filter UI Builder (Consolidates months from both datasets)
+    function populateMonthFilter() {
         const monthsSet = new Set();
-        dataset.forEach(row => {
+        
+        globalDataset.forEach(row => {
+            const key = parseMonthKey(row['Hiring Date']);
+            if (key) monthsSet.add(key);
+        });
+
+        rawSupervisorRecordsGlobal.forEach(row => {
             const key = parseMonthKey(row['Hiring Date']);
             if (key) monthsSet.add(key);
         });
 
         const sortedKeys = Array.from(monthsSet).sort();
+        const currentSelected = monthFilterSelect.value;
         monthFilterSelect.innerHTML = '<option value="all">All Months</option>';
 
         sortedKeys.forEach(key => {
@@ -141,6 +148,10 @@ document.addEventListener('DOMContentLoaded', () => {
             opt.textContent = label;
             monthFilterSelect.appendChild(opt);
         });
+
+        if (currentSelected && Array.from(monthFilterSelect.options).some(o => o.value === currentSelected)) {
+            monthFilterSelect.value = currentSelected;
+        }
     }
 
     // Central Helper for Questionnaire Exceeded Rule Correct Logic
@@ -257,9 +268,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyDynamicFiltering() {
         const chosenValue = monthFilterSelect.value;
         let scopedData = globalDataset;
+        let scopedSupRecords = rawSupervisorRecordsGlobal;
 
         if (chosenValue !== 'all') {
             scopedData = globalDataset.filter(row => parseMonthKey(row['Hiring Date']) === chosenValue);
+            scopedSupRecords = rawSupervisorRecordsGlobal.filter(row => parseMonthKey(row['Hiring Date']) === chosenValue);
         }
 
         const metrics = calculateCentralMetrics(scopedData);
@@ -269,6 +282,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Tab 2 Analytics Pipeline Processing
         processTab2AnalyticsPipeline(scopedData, metrics);
+
+        // Tab 3 Supervisor Performance Pipeline Processing (Connected to Month Filter by Hiring Date)
+        processTab3SupervisorPipeline(scopedSupRecords);
     }
 
     monthFilterSelect.addEventListener('change', applyDynamicFiltering);
@@ -1263,11 +1279,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function processTab3SupervisorPipeline(supRecords) {
-        rawSupervisorRecordsGlobal = supRecords;
         const { supervisors, rawValids } = aggregateSupervisorData(supRecords);
         supervisorDataset = supervisors;
-
-        if (supervisors.length === 0) return;
 
         renderSupervisorExecutiveSummary(supervisors, rawValids);
         renderHQValidationSection(supRecords);
@@ -1343,7 +1356,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderHQValidationSection(supRecords) {
-        if (!supRecords || supRecords.length === 0) return;
+        const stmtNode = document.getElementById('hq-summary-statement');
+        const covNode = document.getElementById('hq-coverage-value');
+        const fillNode = document.getElementById('hq-progress-fill');
+
+        if (!supRecords || supRecords.length === 0) {
+            if (stmtNode) stmtNode.textContent = `0 of 0 Officers`;
+            if (covNode) covNode.textContent = `0.0% Coverage`;
+            if (fillNode) fillNode.style.width = `0%`;
+            renderHQTable({}, {});
+            return;
+        }
 
         const sample = supRecords[0];
         const officerCol = findColumnName(sample, ['Officer HR Code', 'HR Code', 'Officer Code', 'Officer Name', 'Employee ID']);
@@ -1385,10 +1408,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const totalOfficersCount = totalOfficersSet.size;
         const calledOfficersCount = calledOfficersSet.size;
         const coveragePct = totalOfficersCount > 0 ? (calledOfficersCount / totalOfficersCount) * 100 : 0;
-
-        const stmtNode = document.getElementById('hq-summary-statement');
-        const covNode = document.getElementById('hq-coverage-value');
-        const fillNode = document.getElementById('hq-progress-fill');
 
         if (stmtNode) stmtNode.textContent = `${calledOfficersCount.toLocaleString()} of ${totalOfficersCount.toLocaleString()} Officers`;
         if (covNode) covNode.textContent = `${coveragePct.toFixed(1)}% Coverage`;
@@ -1514,7 +1533,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const validSups = supervisors.filter(s => s.avgFinalResult !== null);
         if (validSups.length === 0) {
-            box.innerHTML = '<div style="text-align:center; padding-top:80px; font-size:12px; color:var(--text-muted)">No valid supervisor performance results available</div>';
+            box.innerHTML = '<div style="text-align:center; padding-top:80px; font-size:12px; color:var(--text-muted)">No valid supervisor performance results available for selected month</div>';
+            if (highlightsBox) highlightsBox.innerHTML = '<div style="font-size:12px; color:var(--text-muted); padding:20px 0;">No matching supervisor data</div>';
             return;
         }
 
@@ -1762,6 +1782,11 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderSupervisionByGovernorate(supervisors, rawRecords) {
         const tbody = document.getElementById('sup-gov-matrix-tbody');
         if (!tbody) return;
+
+        if (!rawRecords || rawRecords.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">No records for selected month</td></tr>';
+            return;
+        }
 
         const sample = rawRecords[0];
         const resultCol = findColumnName(sample, ['Final Result', 'KPI Result', 'Average Result', 'Result']);
@@ -2067,7 +2092,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(csvText => {
             globalDataset = parseCSVDataEngine(csvText);
             
-            populateMonthFilter(globalDataset);
+            populateMonthFilter();
             renderPremiumLineChart(globalDataset);
             applyDynamicFiltering();
             
@@ -2089,8 +2114,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return res.text();
         })
         .then(csvText => {
-            const rawSupRecords = parseCSVDataEngine(csvText);
-            processTab3SupervisorPipeline(rawSupRecords);
+            rawSupervisorRecordsGlobal = parseCSVDataEngine(csvText);
+            
+            populateMonthFilter();
+            applyDynamicFiltering();
         })
         .catch(err => {
             console.warn("Supervisor KPI Results.csv File Offline or Unreachable:", err);
