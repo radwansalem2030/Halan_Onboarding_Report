@@ -432,9 +432,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // REQUIREMENT 1: Daily Performance Trend Engine
+// Daily Premium Smooth Area Line Chart Engine — Onboarding Overview
     function renderPremiumLineChart(data) {
         if (!nodeLineChartContainer) return;
 
+        // Daily aggregation from actual Hiring Date records
         const dailyRegistry = {};
         data.forEach(row => {
             const rawDate = row['Hiring Date'] ? row['Hiring Date'].trim() : '';
@@ -464,9 +466,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const maxVal = Math.max(...countsArray, 1);
 
         const svgW = 600; const svgH = 160;
-        const pL = 40; const pR = 30; const pT = 25; const pB = 30;
+        const pL = 45; const pR = 30; const pT = 25; const pB = 35;
         const chartW = svgW - pL - pR; const chartH = svgH - pT - pB;
-        
+
         const totalPoints = sortedDates.length;
         const stepX = totalPoints > 1 ? chartW / (totalPoints - 1) : chartW;
 
@@ -478,47 +480,70 @@ document.addEventListener('DOMContentLoaded', () => {
             points.push({ x, y, val, dateStr: dStr });
         });
 
-        let linePathD = ""; let areaPathD = "";
-        if (points.length > 0) {
-            linePathD = `M ${points[0].x} ${points[0].y}`;
-            areaPathD = `M ${points[0].x} ${pT + chartH} L ${points[0].x} ${points[0].y}`;
-            for (let i = 1; i < points.length; i++) {
-                linePathD += ` L ${points[i].x} ${points[i].y}`;
-                areaPathD += ` L ${points[i].x} ${points[i].y}`;
+        // Smooth Bezier Curve Path calculation
+        let lineD = "";
+        let areaD = "";
+
+        if (points.length === 1) {
+            lineD = `M ${points[0].x} ${points[0].y} L ${points[0].x + 10} ${points[0].y}`;
+            areaD = `M ${points[0].x} ${pT + chartH} L ${points[0].x} ${points[0].y} L ${points[0].x + 10} ${points[0].y} L ${points[0].x + 10} ${pT + chartH} Z`;
+        } else {
+            lineD = `M ${points[0].x} ${points[0].y}`;
+            areaD = `M ${points[0].x} ${pT + chartH} L ${points[0].x} ${points[0].y}`;
+
+            for (let i = 0; i < points.length - 1; i++) {
+                const p0 = points[i];
+                const p1 = points[i + 1];
+                const cpX1 = p0.x + (p1.x - p0.x) / 2;
+                const cpY1 = p0.y;
+                const cpX2 = p0.x + (p1.x - p0.x) / 2;
+                const cpY2 = p1.y;
+
+                lineD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
+                areaD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
             }
-            areaPathD += ` L ${points[points.length - 1].x} ${pT + chartH} Z`;
+            areaD += ` L ${points[points.length - 1].x} ${pT + chartH} Z`;
         }
 
         let svgCode = `
-            <svg viewBox="0 0 ${svgW} ${svgH}" width="100%" height="100%">
+            <svg viewBox="0 0 ${svgW} ${svgH}" width="100%" height="100%" style="overflow: visible;">
                 <defs>
-                    <linearGradient id="chart-gradient-daily" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="var(--brand-purple)" stop-opacity="0.25"/>
-                        <stop offset="100%" stop-color="var(--brand-purple)" stop-opacity="0.00"/>
+                    <linearGradient id="premium-area-gradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="var(--brand-purple)" stop-opacity="0.32"/>
+                        <stop offset="100%" stop-color="var(--brand-purple)" stop-opacity="0.01"/>
                     </linearGradient>
                 </defs>
-                <line x1="${pL}" y1="${pT + chartH}" x2="${pL + chartW}" y2="${pT + chartH}" class="chart-axis-line" />
-                <path d="${areaPathD}" fill="url(#chart-gradient-daily)" opacity="0.2" />
-                <path d="${linePathD}" class="trend-line" />
+
+                <!-- Soft Grid Lines -->
+                <line x1="${pL}" y1="${pT}" x2="${pL + chartW}" y2="${pT}" stroke="var(--border-color)" stroke-dasharray="3,3" stroke-opacity="0.5"/>
+                <line x1="${pL}" y1="${pT + chartH / 2}" x2="${pL + chartW}" y2="${pT + chartH / 2}" stroke="var(--border-color)" stroke-dasharray="3,3" stroke-opacity="0.5"/>
+                <line x1="${pL}" y1="${pT + chartH}" x2="${pL + chartW}" y2="${pT + chartH}" stroke="var(--border-color)" stroke-width="1.2"/>
+
+                <!-- Smooth Gradient Area & Line -->
+                <path d="${areaD}" fill="url(#premium-area-gradient)"/>
+                <path d="${lineD}" fill="none" stroke="var(--brand-purple)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
         `;
 
-        const labelInterval = Math.max(1, Math.ceil(totalPoints / 8));
+        const labelInterval = Math.max(1, Math.ceil(totalPoints / 7));
 
         points.forEach((pt, idx) => {
             const fullD = formatFullDate(pt.dateStr);
             const ttHtml = `
                 <div class="tt-title">${fullD.dateStr} (${fullD.dayOfWeek})</div>
-                <div class="tt-row"><span>New Hires:</span> <strong>${pt.val}</strong></div>
+                <div class="tt-row"><span>Daily New Hires:</span> <strong>${pt.val}</strong></div>
             `;
 
             svgCode += `
-                <circle cx="${pt.x}" cy="${pt.y}" r="3.5" class="chart-dot interactive-dot" style="cursor:pointer;" data-tt="${encodeURIComponent(ttHtml)}" />
+                <circle cx="${pt.x}" cy="${pt.y}" r="4" 
+                        fill="var(--card-bg)" stroke="var(--brand-purple)" stroke-width="2.5" 
+                        class="chart-dot interactive-dot" style="cursor:pointer; transition: transform 0.2s, r 0.2s;" 
+                        data-tt="${encodeURIComponent(ttHtml)}"></circle>
             `;
 
             if (idx % labelInterval === 0 || idx === totalPoints - 1) {
                 const shortLabel = formatShortDate(pt.dateStr);
                 svgCode += `
-                    <text x="${pt.x}" y="${pT + chartH + 16}" class="chart-text-lbl">${shortLabel}</text>
+                    <text x="${pt.x}" y="${pT + chartH + 18}" class="chart-text-lbl" text-anchor="middle">${shortLabel}</text>
                 `;
             }
         });
@@ -526,11 +551,18 @@ document.addEventListener('DOMContentLoaded', () => {
         svgCode += `</svg>`;
         nodeLineChartContainer.innerHTML = svgCode;
 
+        // Interactive tooltips
         nodeLineChartContainer.querySelectorAll('.interactive-dot').forEach(dot => {
             const content = decodeURIComponent(dot.getAttribute('data-tt'));
-            dot.addEventListener('mouseenter', (e) => { showTooltip(e, content); });
+            dot.addEventListener('mouseenter', (e) => { 
+                dot.setAttribute('r', '6'); 
+                showTooltip(e, content); 
+            });
             dot.addEventListener('mousemove', (e) => { showTooltip(e, content); });
-            dot.addEventListener('mouseleave', () => { hideTooltip(); });
+            dot.addEventListener('mouseleave', () => { 
+                dot.setAttribute('r', '4'); 
+                hideTooltip(); 
+            });
         });
     }
 
