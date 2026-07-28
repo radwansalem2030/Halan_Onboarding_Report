@@ -180,6 +180,41 @@ body {
 .main-trend-box { justify-content: flex-start; gap: 16px; }
 .split-insight-card { display: flex; flex-direction: column; gap: 16px; }
 .insight-column { display: flex; flex-direction: column; gap: 6px; }
+.clickable-72h-card {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-radius: var(--radius-md);
+    padding: 8px;
+    margin: -8px;
+}
+.clickable-72h-card:hover {
+    background-color: #F8FAFC;
+}
+.reason-doc-breakdown {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+.reason-chip {
+    font-size: 10.5px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.reason-chip.with-reason {
+    background: rgba(16, 185, 129, 0.08);
+    color: #065F46;
+}
+.reason-chip.without-reason {
+    background: rgba(239, 68, 68, 0.08);
+    color: #991B1B;
+}
+
 .insight-divider { height: 1px; background-color: var(--border-color); width: 100%; }
 .insight-value-group { display: flex; align-items: baseline; gap: 10px; }
 .rate-badge { font-size: 11px; font-weight: 700; color: var(--red); background: rgba(239, 68, 68, 0.08); padding: 2px 8px; border-radius: 6px; }
@@ -267,9 +302,6 @@ body {
     min-width: 130px;
     flex: 1;
 }
-.flow-step-item.group-item {
-    background: rgba(248, 250, 252, 0.7);
-}
 .flow-step-pct {
     font-size: 18px;
     font-weight: 700;
@@ -332,6 +364,159 @@ body {
     font-size: 9.5px;
     color: var(--text-muted);
     font-weight: 600;
+}
+
+/* Compact Governorate Performance Grid Styles */
+.gov-perf-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+.gov-perf-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+.gov-perf-card {
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.gov-perf-card:hover {
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+.gov-perf-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+.gov-perf-card-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0F172A;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.gov-perf-card-main {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+}
+.gov-perf-card-pct {
+    font-size: 18px;
+    font-weight: 700;
+    color: #0F172A;
+    line-height: 1;
+}
+.gov-perf-card-track {
+    width: 100%;
+    height: 4px;
+    background: #E2E8F0;
+    border-radius: 2px;
+    overflow: hidden;
+}
+.gov-perf-card-fill {
+    height: 100%;
+    background: var(--brand-purple);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+.gov-perf-card-sub {
+    font-size: 10.5px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+/* Resignation Other Summary & View All */
+.resignation-other-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed var(--border-color);
+}
+.resignation-other-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.resignation-other-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0F172A;
+}
+.resignation-other-val {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+.btn-resignation-toggle {
+    background: transparent;
+    border: none;
+    color: var(--brand-purple);
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background-color 0.2s;
+}
+.btn-resignation-toggle:hover {
+    background: var(--brand-purple-light);
+}
+
+/* Operational Insights 2x2 Grid */
+.insights-grid-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+    margin-top: 16px;
+}
+.op-insight-card {
+    background: #F8FAFC;
+    border-left: 4px solid var(--brand-purple);
+    border-top: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.op-insight-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.op-insight-icon {
+    font-size: 16px;
+}
+.op-insight-title {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: #0F172A;
+    line-height: 1.3;
+}
+.op-insight-bullets {
+    list-style-type: disc;
+    padding-left: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text-main);
+    line-height: 1.4;
+}
+.op-insight-bullets li strong {
+    color: #0F172A;
 }
 
 /* Capacity Stats List */
@@ -447,30 +632,6 @@ body {
     margin-left: 4px;
 }
 
-/* Executive Insights */
-.insights-grid-container {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-top: 16px;
-}
-.insight-card-item {
-    background: #F8FAFC;
-    border-left: 4px solid var(--brand-purple);
-    border-top: 1px solid var(--border-color);
-    border-right: 1px solid var(--border-color);
-    border-bottom: 1px solid var(--border-color);
-    border-radius: 8px;
-    padding: 14px 18px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.insight-head { display: flex; align-items: center; justify-content: space-between; }
-.insight-title { font-size: 13px; font-weight: 700; color: #0F172A; }
-.insight-tag { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 12px; background: rgba(99, 102, 241, 0.1); color: var(--brand-purple); }
-.insight-body-text { font-size: 12px; color: var(--text-main); line-height: 1.5; }
-
 /* Interactive Custom Chart Tooltip */
 .custom-dashboard-tooltip {
     position: fixed;
@@ -532,6 +693,271 @@ body {
 .sup-exec-card .sup-card-sub {
     font-size: 10.5px;
     color: var(--text-muted);
+}
+
+/* FOUR KPI CARDS IN ONE ROW ON DESKTOP */
+.kpi-executive-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+.kpi-exec-card {
+    position: relative;
+    padding: 20px 24px;
+    min-height: 155px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-premium);
+}
+.kpi-exec-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+.kpi-exec-val-row {
+    display: flex;
+    align-items: baseline;
+    margin-top: 4px;
+}
+.kpi-exec-sub {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    line-height: 1.3;
+    max-width: 65%;
+}
+.kpi-exec-denom {
+    font-size: 10.5px;
+    color: var(--text-main);
+    margin-top: 4px;
+    font-weight: 500;
+}
+.kpi-exec-denom strong {
+    color: #0F172A;
+}
+.kpi-sparkline-wrapper {
+    position: absolute;
+    right: 20px;
+    bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+}
+.sparkline-grain-tag {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+}
+
+/* PERFORMANCE × WORKLOAD SEGMENTATION GRID */
+.seg-grid-2x2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+.seg-card {
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.seg-card-green { border-top: 3px solid var(--primary); }
+.seg-card-blue { border-top: 3px solid var(--brand-purple); }
+.seg-card-orange { border-top: 3px solid var(--orange); }
+.seg-card-gray { border-top: 3px solid #94A3B8; }
+
+.seg-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.seg-card-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: #0F172A;
+    letter-spacing: 0.03em;
+}
+.seg-card-count {
+    font-size: 12px;
+    font-weight: 700;
+}
+.seg-card-sub {
+    font-size: 10.5px;
+    color: var(--text-muted);
+}
+.seg-sup-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+}
+.seg-sup-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11.5px;
+    background: #FFFFFF;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+}
+.seg-sup-name {
+    font-weight: 600;
+    color: var(--text-main);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 170px;
+}
+.seg-sup-val {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+.seg-empty-txt {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+    padding: 4px 0;
+}
+
+/* RANKING RANGE FILTERS */
+.ranking-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.ranking-filter-btn {
+    border: 1px solid var(--border-color);
+    background: #F8FAFC;
+    padding: 5px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.ranking-filter-btn:hover {
+    background: #F1F5F9;
+    color: var(--text-main);
+}
+.ranking-filter-btn.active {
+    background: var(--brand-purple);
+    color: #FFFFFF;
+    border-color: var(--brand-purple);
+    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.25);
+}
+
+/* Supervisor Performance Ranking View */
+.sup-ranking-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: 480px;
+    overflow-y: auto;
+    padding-right: 6px;
+}
+.sup-ranking-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.sup-ranking-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #F8FAFC;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    padding: 10px 14px;
+}
+.sup-ranking-rank {
+    width: 24px;
+    height: 24px;
+    background: #E2E8F0;
+    color: var(--text-main);
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.sup-ranking-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex-grow: 1;
+}
+.sup-ranking-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.sup-ranking-name {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #0F172A;
+}
+.sup-ranking-gov {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+}
+.sup-ranking-bar-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.sup-ranking-bar-track {
+    flex-grow: 1;
+    height: 8px;
+    background: #E2E8F0;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.sup-ranking-bar-fill {
+    height: 100%;
+    background: var(--brand-purple);
+    border-radius: 4px;
+}
+.sup-ranking-val-pct {
+    font-size: 12px;
+    font-weight: 700;
+    color: #0F172A;
+    width: 45px;
+    text-align: right;
+}
+.sup-ranking-sample-context {
+    font-size: 10.5px;
+    color: var(--text-muted);
+}
+.sup-ranking-sample-context strong {
+    color: #0F172A;
+}
+
+/* Tag style for insights */
+.insight-tag {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--brand-purple);
+    background: var(--brand-purple-light);
+    padding: 2px 8px;
+    border-radius: 6px;
+    text-transform: uppercase;
+    width: fit-content;
 }
 
 /* HQ VALIDATION CALLS SECTION STYLES */
@@ -687,14 +1113,31 @@ body {
     margin-left: 4px;
 }
 
-#sup-performance-map-container {
-    height: 400px !important;
-    position: relative;
+/* Comments styling in Operational Cases */
+.op-comment-text {
+    font-size: 11.5px;
+    color: #0F172A;
+    font-weight: 500;
+}
+.op-comment-muted {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
 }
 
 /* Responsive Adjustments */
+@media (max-width: 1100px) {
+    .gov-perf-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .kpi-executive-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
 @media (max-width: 992px) {
     .map-and-callouts-grid { grid-template-columns: 1fr; }
+    .seg-grid-2x2 { grid-template-columns: 1fr; }
     .flow-strip-container {
         flex-direction: column;
         align-items: stretch;
@@ -719,11 +1162,14 @@ body {
     .header-actions { flex-direction: column-reverse; align-items: flex-start; width: 100%; gap: 12px; }
     .premium-select { width: 100%; background-position: right 16px center; }
     .sup-executive-summary-strip { grid-template-columns: repeat(2, 1fr); }
+    .kpi-executive-cards-grid { grid-template-columns: 1fr; }
     .hq-summary-main { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .gov-perf-grid { grid-template-columns: 1fr; }
+    .insights-grid-container { grid-template-columns: 1fr; }
 }
 
 /* ==========================================================================
-   TAB 4: OPERATIONAL CASES STYLES
+   TAB 5: OPERATIONAL CASES STYLES
    ========================================================================== */
 .op-case-module {
     padding: 24px;

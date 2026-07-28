@@ -43,6 +43,10 @@
                 <span class="tab-icon">👔</span>
                 <span class="tab-label">SUPERVISOR PERFORMANCE</span>
             </button>
+            <button class="nav-tab-btn" data-tab="tab-hq-calls">
+                <span class="tab-icon">📞</span>
+                <span class="tab-label">HQ VALIDATION CALLS</span>
+            </button>
             <button class="nav-tab-btn" data-tab="tab-cases">
                 <span class="tab-icon">📋</span>
                 <span class="tab-label">OPERATIONAL CASES</span>
@@ -150,8 +154,8 @@
             <div class="middle-charts-layout">
                 <div class="metric-card chart-container main-trend-box">
                     <div class="section-title-container">
-                        <h3>Performance Trend</h3>
-                        <p class="section-subtitle">Timeline velocity of monthly fresh recruit onboarding</p>
+                        <h3>Daily Hiring Performance Trend</h3>
+                        <p class="section-subtitle">Timeline velocity of daily fresh recruit onboarding</p>
                     </div>
                     <div class="pure-line-chart-wrapper">
                         <div id="pure-svg-line-chart-container" class="svg-chart-render"></div>
@@ -159,13 +163,21 @@
                 </div>
 
                 <div class="metric-card split-insight-card">
-                    <div class="insight-column">
-                        <span class="card-label">EXCEEDED 72 HOURS</span>
+                    <div class="insight-column clickable-72h-card" id="exceeded-72h-action-card" title="Click to view Operational Cases for 72h Breaches">
+                        <div class="insight-header-row" style="display:flex; justify-content:space-between; align-items:center;">
+                            <span class="card-label">EXCEEDED 72 HOURS</span>
+                            <span class="action-nav-arrow" style="font-size:12px; font-weight:700; color:var(--brand-purple);">View Cases →</span>
+                        </div>
                         <div class="insight-value-group">
                             <span class="main-value text-danger" id="exceeded-72-val">0</span>
                             <span class="rate-badge" id="exceeded-72-pct-val">0%</span>
                         </div>
-                        <p class="explanation-text">Percentage calculated against Effective Population.</p>
+                        <!-- Dynamic Reason Documentation Breakdown -->
+                        <div class="reason-doc-breakdown" id="exceeded-72-reason-breakdown">
+                            <span class="reason-chip with-reason">With Reason: <strong id="val-with-reason">0</strong></span>
+                            <span class="reason-chip without-reason">Without Reason: <strong id="val-without-reason">0</strong></span>
+                        </div>
+                        <p class="explanation-text" style="margin-top:4px;">Percentage calculated against Effective Population.</p>
                     </div>
                     <div class="insight-divider"></div>
                     <div class="insight-column">
@@ -212,7 +224,6 @@
         <!-- ========================================================================== -->
         <div id="tab-analytics" class="tab-content">
             
-            <!-- Opening Section -->
             <div class="analytics-header-block">
                 <h2>ONBOARDING ANALYTICS</h2>
                 <p class="subtitle">Deeper analysis of hiring, training performance and operational differences across governorates.</p>
@@ -225,9 +236,7 @@
                         <h3>Onboarding Flow</h3>
                         <p class="section-subtitle">Quick view of the current onboarding journey</p>
                     </div>
-                    <div class="flow-strip-container" id="flow-strip-wrapper">
-                        <!-- Populated dynamically via JS -->
-                    </div>
+                    <div class="flow-strip-container" id="flow-strip-wrapper"></div>
                 </div>
             </div>
 
@@ -273,20 +282,20 @@
                 </div>
             </div>
 
-            <!-- GOVERNORATE ONBOARDING PERFORMANCE MAP -->
+            <!-- GOVERNORATE TRAINING PERFORMANCE -->
             <div class="analytics-section">
                 <div class="metric-card">
-                    <div class="section-title-container">
-                        <h3>GOVERNORATE PERFORMANCE MAP</h3>
-                        <p class="section-subtitle">Training completion compared with onboarding population</p>
+                    <div class="section-title-container" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <h3>GOVERNORATE TRAINING PERFORMANCE</h3>
+                            <p class="section-subtitle">Training completion and active workforce by governorate</p>
+                        </div>
+                        <button id="btn-toggle-gov-perf" class="btn-resignation-toggle" style="align-self: center;">View All Governorates</button>
                     </div>
                     
                     <div class="map-and-callouts-grid">
                         <div class="matrix-quadrant-wrapper">
-                            <div id="scatter-plot-container" class="svg-chart-render" style="height: 350px; position: relative;"></div>
-                            <div class="chart-disclaimer-note">
-                                Reference lines represent the current dataset median and are used for relative comparison, not performance targets.
-                            </div>
+                            <div id="gov-training-performance-container" class="gov-perf-list-wrapper"></div>
                         </div>
 
                         <div class="callouts-side-column">
@@ -342,9 +351,7 @@
                                     <th data-sort="decl">Declaration Pending ↕</th>
                                 </tr>
                             </thead>
-                            <tbody id="gov-matrix-tbody">
-                                <!-- Populated dynamically -->
-                            </tbody>
+                            <tbody id="gov-matrix-tbody"></tbody>
                         </table>
                     </div>
                 </div>
@@ -371,16 +378,14 @@
                 </div>
             </div>
 
-            <!-- EXECUTIVE INSIGHTS -->
+            <!-- OPERATIONAL INSIGHTS -->
             <div class="analytics-section">
                 <div class="metric-card insights-wrapper-card">
                     <div class="section-title-container">
-                        <h3>KEY INSIGHTS</h3>
-                        <p class="section-subtitle">What stands out in the current onboarding data</p>
+                        <h3>OPERATIONAL INSIGHTS</h3>
+                        <p class="section-subtitle">Observations from current onboarding performance</p>
                     </div>
-                    <div class="insights-grid-container" id="executive-insights-grid">
-                        <!-- Populated dynamically via JS -->
-                    </div>
+                    <div class="insights-grid-container" id="executive-insights-grid"></div>
                 </div>
             </div>
 
@@ -396,86 +401,58 @@
                 <p class="subtitle">Operational scale, evaluation coverage, and result analysis across supervision team.</p>
             </div>
 
-            <!-- 2. MANAGEMENT OVERVIEW EXECUTIVE SUMMARY -->
+            <!-- OPERATIONAL SCOPE CONTEXT STRIP -->
             <div class="analytics-section">
-                <div class="sup-executive-summary-strip" id="sup-exec-summary">
-                    <!-- Dynamic Compact Grid Cards -->
-                </div>
+                <div class="sup-executive-summary-strip" id="sup-op-scope-strip"></div>
             </div>
 
-            <!-- NEW SECTION: HQ VALIDATION CALLS -->
+            <!-- FOUR EXECUTIVE PERFORMANCE KPI CARDS WITH REAL SPARKLINES -->
             <div class="analytics-section">
-                <div class="metric-card hq-validation-card">
-                    <div class="hq-validation-header">
-                        <div>
-                            <h3 class="hq-validation-title">HQ VALIDATION CALLS</h3>
-                            <p class="hq-validation-subtitle">Recorded HQ validation activity across current officers</p>
-                        </div>
-                        <div class="hq-breakdown-toggle-group">
-                            <button id="hq-toggle-gov" class="hq-toggle-btn active">BY GOVERNORATE</button>
-                            <button id="hq-toggle-sup" class="hq-toggle-btn">BY SUPERVISOR</button>
-                        </div>
-                    </div>
-
-                    <div class="hq-summary-row">
-                        <div class="hq-summary-main">
-                            <span class="hq-main-statement" id="hq-summary-statement">0 of 0 Officers</span>
-                            <span class="hq-coverage-value" id="hq-coverage-value">0.0% Coverage</span>
-                        </div>
-                        <div class="hq-progress-container">
-                            <div class="hq-progress-track">
-                                <div class="hq-progress-fill" id="hq-progress-fill" style="width: 0%;"></div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="matrix-table-container hq-table-container">
-                        <table class="premium-matrix-table" id="hq-validation-table">
-                            <thead id="hq-table-thead">
-                                <!-- Dynamic Headers -->
-                            </thead>
-                            <tbody id="hq-table-tbody">
-                                <!-- Dynamic Rows -->
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+                <div class="kpi-executive-cards-grid" id="sup-primary-kpi-grid"></div>
             </div>
 
-            <!-- 3. SUPERVISOR PERFORMANCE MAP & 4. ANALYTICAL HIGHLIGHTS -->
+            <!-- PERFORMANCE × WORKLOAD SEGMENTATION & HIGHLIGHTS -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container">
-                        <h3>SUPERVISOR PERFORMANCE MAP</h3>
-                        <p class="section-subtitle">Average Final Result compared with supervisor workload</p>
+                        <h3>PERFORMANCE × WORKLOAD</h3>
+                        <p class="section-subtitle">Supervisory classification based on dynamic median workload and performance thresholds</p>
                     </div>
 
                     <div class="map-and-callouts-grid">
                         <div class="matrix-quadrant-wrapper">
-                            <div id="sup-performance-map-container" class="svg-chart-render" style="height: 380px; position: relative;"></div>
-                            <div class="chart-disclaimer-note">
-                                Reference lines represent current dataset medians (Workload & Result Medians) for relative comparison, not fixed targets.
-                            </div>
+                            <div id="sup-performance-segmentation-container" class="sup-segmentation-grid"></div>
                         </div>
 
-                        <div class="callouts-side-column" id="sup-analytical-highlights">
-                            <!-- Populated dynamically: 4 Analytical Highlights -->
-                        </div>
+                        <div class="callouts-side-column" id="sup-analytical-highlights"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- 5. PERFORMANCE & WORKLOAD DISTRIBUTION -->
+            <!-- SUPERVISOR PERFORMANCE RANKING WITH RANGE FILTERS -->
+            <div class="analytics-section">
+                <div class="metric-card">
+                    <div class="section-title-container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                        <div>
+                            <h3>SUPERVISOR PERFORMANCE RANKING</h3>
+                            <p class="section-subtitle">Ranked supervisory average final results with workload sample context</p>
+                        </div>
+                        <div id="ranking-range-filters" class="ranking-filter-bar"></div>
+                    </div>
+
+                    <div id="sup-performance-ranking-container" class="sup-ranking-wrapper" style="margin-top: 16px;"></div>
+                </div>
+            </div>
+
+            <!-- PERFORMANCE & WORKLOAD DISTRIBUTION -->
             <div class="analytics-section">
                 <div class="leaderboards-grid">
                     <div class="metric-card">
                         <div class="section-title-container">
                             <h3>PERFORMANCE DISTRIBUTION</h3>
-                            <p class="section-subtitle">Distribution of Supervisor Average Final Results</p>
+                            <p class="section-subtitle">Distribution of Supervisor Average Final Results (Click range to filter ranking)</p>
                         </div>
-                        <div id="sup-perf-dist-container" class="distribution-bars-wrapper">
-                            <!-- Dynamic Distribution Ranges -->
-                        </div>
+                        <div id="sup-perf-dist-container" class="distribution-bars-wrapper"></div>
                     </div>
 
                     <div class="metric-card">
@@ -483,14 +460,12 @@
                             <h3>WORKLOAD DISTRIBUTION</h3>
                             <p class="section-subtitle">Distribution of Unique Officer Workload</p>
                         </div>
-                        <div id="sup-workload-dist-container" class="distribution-bars-wrapper">
-                            <!-- Dynamic Workload Distribution Ranges -->
-                        </div>
+                        <div id="sup-workload-dist-container" class="distribution-bars-wrapper"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- 6. SUPERVISION BY GOVERNORATE & 7. SUPERVISOR GAP -->
+            <!-- SUPERVISION BY GOVERNORATE -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container">
@@ -511,15 +486,13 @@
                                     <th data-sup-gov-sort="gap">Supervisor Result Gap ↕</th>
                                 </tr>
                             </thead>
-                            <tbody id="sup-gov-matrix-tbody">
-                                <!-- Populated dynamically -->
-                            </tbody>
+                            <tbody id="sup-gov-matrix-tbody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- 8. SUPERVISOR DETAILS TABLE -->
+            <!-- SUPERVISOR DETAILS TABLE -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
@@ -545,23 +518,82 @@
                                     <th data-sup-detail-sort="avgResult">Avg Final Result ↕</th>
                                 </tr>
                             </thead>
-                            <tbody id="sup-details-tbody">
-                                <!-- Populated dynamically -->
-                            </tbody>
+                            <tbody id="sup-details-tbody"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- 9. KEY INSIGHTS -->
+            <!-- PERFORMANCE INSIGHTS SECTION -->
             <div class="analytics-section">
                 <div class="metric-card insights-wrapper-card">
                     <div class="section-title-container">
-                        <h3>SUPERVISOR INSIGHTS</h3>
-                        <p class="section-subtitle">Data-driven findings on workload, performance, and coverage</p>
+                        <h3>PERFORMANCE INSIGHTS</h3>
+                        <p class="section-subtitle">Data-driven observations from current supervisor performance</p>
                     </div>
-                    <div class="insights-grid-container" id="sup-insights-grid">
-                        <!-- Populated dynamically via JS -->
+                    <div class="insights-grid-container" id="sup-insights-grid"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================================== -->
+        <!-- TAB 4: HQ VALIDATION CALLS                                                 -->
+        <!-- ========================================================================== -->
+        <div id="tab-hq-calls" class="tab-content">
+            
+            <div class="analytics-header-block">
+                <h2>HQ VALIDATION CALLS</h2>
+                <p class="subtitle">Recorded HQ validation activity across current officers</p>
+            </div>
+
+            <!-- 6A. HQ KPI CARDS SECTION -->
+            <div class="analytics-section">
+                <div class="kpi-executive-cards-grid" id="hq-kpi-grid"></div>
+            </div>
+
+            <!-- 6C. HQ PERFORMANCE DISTRIBUTION SECTION -->
+            <div class="analytics-section">
+                <div class="metric-card">
+                    <div class="section-title-container">
+                        <h3>HQ VALIDATION PERFORMANCE DISTRIBUTION</h3>
+                        <p class="section-subtitle">Supervisors grouped by average HQ validation score</p>
+                    </div>
+                    <div id="hq-perf-dist-container" class="distribution-bars-wrapper" style="margin-top: 16px;"></div>
+                </div>
+            </div>
+
+            <!-- 6E. EXISTING HQ ACTIVITY SECTION (PRESERVED) -->
+            <div class="analytics-section">
+                <div class="metric-card hq-validation-card">
+                    <div class="hq-validation-header">
+                        <div>
+                            <h3 class="hq-validation-title">HQ VALIDATION ACTIVITY</h3>
+                            <p class="hq-validation-subtitle">Recorded HQ validation activity across current officers</p>
+                        </div>
+                        <div class="hq-breakdown-toggle-group">
+                            <button id="hq-toggle-gov" class="hq-toggle-btn active">BY GOVERNORATE</button>
+                            <button id="hq-toggle-sup" class="hq-toggle-btn">BY SUPERVISOR</button>
+                        </div>
+                    </div>
+
+                    <div class="hq-summary-row">
+                        <div class="hq-summary-main">
+                            <span class="hq-main-statement" id="hq-summary-statement">0 of 0 Officers</span>
+                            <span class="hq-coverage-value" id="hq-coverage-value">0.0% Coverage</span>
+                        </div>
+                        <div class="hq-progress-container">
+                            <div class="hq-progress-track">
+                                <div class="hq-progress-fill" id="hq-progress-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="matrix-table-container hq-table-container">
+                        <table class="premium-matrix-table" id="hq-validation-table">
+                            <thead id="hq-table-thead"></thead>
+                            <tbody id="hq-table-tbody"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -569,7 +601,7 @@
         </div>
 
         <!-- ========================================================================== -->
-        <!-- TAB 4: OPERATIONAL CASES                                                   -->
+        <!-- TAB 5: OPERATIONAL CASES                                                   -->
         <!-- ========================================================================== -->
         <div id="tab-cases" class="tab-content">
             
@@ -579,7 +611,7 @@
             </div>
 
             <!-- SECTION 1: 72H EXCEEDED -->
-            <div class="analytics-section">
+            <div class="analytics-section" id="sec-72h-anchor">
                 <div class="metric-card op-case-module">
                     <div class="op-section-header">
                         <div class="op-title-group">
@@ -610,9 +642,7 @@
                         </div>
                     </div>
 
-                    <div id="container-72h-cases" class="op-cases-container">
-                        <!-- Grouped Governorate display populated dynamically -->
-                    </div>
+                    <div id="container-72h-cases" class="op-cases-container"></div>
                 </div>
             </div>
 
@@ -648,9 +678,7 @@
                         </div>
                     </div>
 
-                    <div id="container-quest-cases" class="op-cases-container">
-                        <!-- Grouped Governorate display populated dynamically -->
-                    </div>
+                    <div id="container-quest-cases" class="op-cases-container"></div>
                 </div>
             </div>
 
@@ -686,9 +714,7 @@
                         </div>
                     </div>
 
-                    <div id="container-decl-cases" class="op-cases-container">
-                        <!-- Grouped Governorate display populated dynamically -->
-                    </div>
+                    <div id="container-decl-cases" class="op-cases-container"></div>
                 </div>
             </div>
 
