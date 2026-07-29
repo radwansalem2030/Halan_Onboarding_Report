@@ -326,7 +326,6 @@ document.addEventListener('DOMContentLoaded', () => {
         processTab2AnalyticsPipeline(scopedData, metrics);
         processTab3SupervisorPipeline(scopedSupRecords);
         
-        // Note: these functions are defined in part 2, they will work once you merge both parts
         if(typeof renderHQValidationSection === 'function') {
             renderHQValidationSection(scopedSupRecords);
             processTab4CasesPipeline(scopedData, metrics);
@@ -335,7 +334,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     monthFilterSelect.addEventListener('change', applyDynamicFiltering);
-    // setupOpControlsListeners(); // defined in part 2
+    setupOpControlsListeners();
 
     function processMetricsPipeline(rawRecords, metrics) {
         txtTotalHired.textContent = metrics.totalNewHired.toLocaleString();
@@ -2250,6 +2249,7 @@ document.addEventListener('DOMContentLoaded', () => {
             container.appendChild(card);
         });
     }
+
     // ==========================================================================
     // TAB 4: HQ VALIDATION CALLS ENGINE
     // ==========================================================================
@@ -2835,6 +2835,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (!hDate) return; 
 
+            if (hDate && (!latestDateFound || hDate > latestDateFound)) {
+                latestDateFound = hDate;
+            }
+
             if (tDate && (!latestDateFound || tDate > latestDateFound)) {
                 latestDateFound = tDate;
             }
@@ -2928,10 +2932,16 @@ document.addEventListener('DOMContentLoaded', () => {
             scopedRecords = records.filter(r => r.governorate === mosState.gov);
         }
 
-        const baseFrom = new Date(mosState.baseFrom);
-        const baseTo = new Date(mosState.baseTo);
-        const projFrom = new Date(mosState.projFrom);
-        const projTo = new Date(mosState.projTo);
+        const parseLocalISO = (isoStr) => {
+            if (!isoStr) return null;
+            const [y, m, d] = isoStr.split('-');
+            return new Date(y, m - 1, d);
+        };
+
+        const baseFrom = parseLocalISO(mosState.baseFrom);
+        const baseTo = parseLocalISO(mosState.baseTo);
+        const projFrom = parseLocalISO(mosState.projFrom);
+        const projTo = parseLocalISO(mosState.projTo);
         const windowDays = mosState.windowDays;
 
         const getMaturedCohort = (fromD, toD) => {
