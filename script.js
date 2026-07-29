@@ -33,9 +33,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let globalDataset = [];
     let supervisorDataset = [];
     let rawSupervisorRecordsGlobal = [];
+    let turnoverDatasetGlobal = []; // New Tab Dataset
+
     let currentGovMatrixSort = { key: 'eff', dir: 'desc' };
     let currentSupGovSort = { key: 'officers', dir: 'desc' };
     let currentSupDetailSort = { key: 'gov', dir: 'asc' };
+    let currentMosGovSort = { key: 'projRate', dir: 'desc' };
 
     // Ranking active range filter state
     let activeRankingRangeFilter = 'ALL';
@@ -47,6 +50,17 @@ document.addEventListener('DOMContentLoaded', () => {
     // HQ Validation Globals
     let hqBreakdownMode = 'gov'; // 'gov' | 'sup'
     let hqSortConfig = { key: 'name', dir: 'asc' };
+
+    // Measure of Success Filter State
+    const PROJECT_LAUNCH_DATE_STR = '2026-06-18';
+    let mosState = {
+        baseFrom: '2026-01-01',
+        baseTo: '2026-06-17',
+        projFrom: '2026-06-18',
+        projTo: '2026-07-25',
+        windowDays: 30,
+        gov: 'all'
+    };
 
     // Global Sorting Registry for Data Tables
     const tableSortStates = {};
@@ -149,7 +163,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return '';
     }
 
-    // Dynamic Filter UI Builder (Consolidates months from both datasets)
+    // Dynamic Filter UI Builder
     function populateMonthFilter() {
         const monthsSet = new Set();
         
@@ -183,7 +197,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Central Helper for Questionnaire Exceeded Rule Correct Logic
     function isQuestionnaireExceeded(row) {
         if (!row || typeof row !== 'object') return false;
 
@@ -230,7 +243,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return isExceeded;
     }
 
-    // Single Unified Calculator for Central Metrics
     function calculateCentralMetrics(rawRecords) {
         const totalNewHired = rawRecords.length;
         const resignedSubset = rawRecords.filter(r => {
@@ -264,7 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const sla72hBreachCount = slaBreachSubset.length;
         const sla72hBreachRate = effectivePopulation > 0 ? (sla72hBreachCount / effectivePopulation) * 100 : 0;
 
-        // Reason documentation classification for 72h breach
         const withReasonCount = slaBreachSubset.filter(r => r['Comment'] && r['Comment'].trim() !== '').length;
         const withoutReasonCount = sla72hBreachCount - withReasonCount;
 
@@ -299,7 +310,6 @@ document.addEventListener('DOMContentLoaded', () => {
         };
     }
 
-    // Pipeline Orchestrator on Filter Event
     function applyDynamicFiltering() {
         const chosenValue = monthFilterSelect.value;
         let scopedData = globalDataset;
@@ -312,26 +322,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const metrics = calculateCentralMetrics(scopedData);
 
-        // Tab 1 Pipeline Processing
         processMetricsPipeline(scopedData, metrics);
-
-        // Tab 2 Analytics Pipeline Processing
         processTab2AnalyticsPipeline(scopedData, metrics);
-
-        // Tab 3 Supervisor Performance Pipeline Processing
         processTab3SupervisorPipeline(scopedSupRecords);
-
-        // Tab 4 HQ Validation Calls Pipeline Processing
-        renderHQValidationSection(scopedSupRecords);
-
-        // Tab 5 Operational Cases Pipeline Processing
-        processTab4CasesPipeline(scopedData, metrics);
+        
+        // Note: these functions are defined in part 2, they will work once you merge both parts
+        if(typeof renderHQValidationSection === 'function') {
+            renderHQValidationSection(scopedSupRecords);
+            processTab4CasesPipeline(scopedData, metrics);
+            renderMeasureOfSuccessTab();
+        }
     }
 
     monthFilterSelect.addEventListener('change', applyDynamicFiltering);
-    setupOpControlsListeners();
+    // setupOpControlsListeners(); // defined in part 2
 
-    // Core Processing Engine for Tab 1
     function processMetricsPipeline(rawRecords, metrics) {
         txtTotalHired.textContent = metrics.totalNewHired.toLocaleString();
         txtResignedCount.textContent = metrics.resignedCount.toLocaleString();
@@ -352,7 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
         txtExceeded72.textContent = metrics.sla72hBreachCount.toLocaleString();
         txtExceeded72Pct.textContent = metrics.sla72hBreachRate.toFixed(1) + '%';
 
-        // Update 72h Reason Documentation Breakdown
         const breakdownElem = document.getElementById('exceeded-72-reason-breakdown');
         if (breakdownElem) {
             if (metrics.sla72hBreachCount > 0 && metrics.withoutReasonCount === 0) {
@@ -373,7 +377,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPremiumLineChart(rawRecords);
     }
 
-    // Dynamic Specialization Parser
     function renderPureSpecialization(data) {
         const segments = ['Loan Officer MF', 'Loan Officer CF', 'Gam3ya', 'Investment'];
         const colors = ['#6366F1', '#3B82F6', '#10B981', '#F59E0B'];
@@ -431,12 +434,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // REQUIREMENT 1: Daily Performance Trend Engine
-// Daily Premium Smooth Area Line Chart Engine — Onboarding Overview
     function renderPremiumLineChart(data) {
         if (!nodeLineChartContainer) return;
 
-        // Daily aggregation from actual Hiring Date records
         const dailyRegistry = {};
         data.forEach(row => {
             const rawDate = row['Hiring Date'] ? row['Hiring Date'].trim() : '';
@@ -480,7 +480,6 @@ document.addEventListener('DOMContentLoaded', () => {
             points.push({ x, y, val, dateStr: dStr });
         });
 
-        // Smooth Bezier Curve Path calculation
         let lineD = "";
         let areaD = "";
 
@@ -514,12 +513,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     </linearGradient>
                 </defs>
 
-                <!-- Soft Grid Lines -->
                 <line x1="${pL}" y1="${pT}" x2="${pL + chartW}" y2="${pT}" stroke="var(--border-color)" stroke-dasharray="3,3" stroke-opacity="0.5"/>
                 <line x1="${pL}" y1="${pT + chartH / 2}" x2="${pL + chartW}" y2="${pT + chartH / 2}" stroke="var(--border-color)" stroke-dasharray="3,3" stroke-opacity="0.5"/>
                 <line x1="${pL}" y1="${pT + chartH}" x2="${pL + chartW}" y2="${pT + chartH}" stroke="var(--border-color)" stroke-width="1.2"/>
 
-                <!-- Smooth Gradient Area & Line -->
                 <path d="${areaD}" fill="url(#premium-area-gradient)"/>
                 <path d="${lineD}" fill="none" stroke="var(--brand-purple)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
         `;
@@ -551,7 +548,6 @@ document.addEventListener('DOMContentLoaded', () => {
         svgCode += `</svg>`;
         nodeLineChartContainer.innerHTML = svgCode;
 
-        // Interactive tooltips
         nodeLineChartContainer.querySelectorAll('.interactive-dot').forEach(dot => {
             const content = decodeURIComponent(dot.getAttribute('data-tt'));
             dot.addEventListener('mouseenter', (e) => { 
@@ -566,7 +562,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Leaderboards Processing - Tab 1
     function calculateGovernorateLeaderboards(data) {
         const processingMap = {};
         data.forEach(row => {
@@ -618,12 +613,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Universal Type-Aware Table Sorter Engine
     function attachUniversalTableSorting(tableId) {
         const table = document.getElementById(tableId);
         if (!table) return;
 
-        const headers = table.querySelectorAll('th[data-sort], th[data-sup-gov-sort], th[data-sup-detail-sort], th[data-hq-sort]');
+        const headers = table.querySelectorAll('th[data-sort], th[data-sup-gov-sort], th[data-sup-detail-sort], th[data-hq-sort], th[data-mos-sort]');
         headers.forEach((th, colIdx) => {
             th.style.cursor = 'pointer';
             th.onclick = () => {
@@ -679,10 +673,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
         });
     }
-
-    // ==========================================================================
-    // TAB 2: ANALYTICS CORE PROCESSING PIPELINE
-    // ==========================================================================
 
     function processTab2AnalyticsPipeline(data, centralMetrics) {
         renderCompactOnboardingFlow(centralMetrics);
@@ -1335,10 +1325,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==========================================================================
-    // TAB 3: SUPERVISOR PERFORMANCE CORE PIPELINE
-    // ==========================================================================
-
     function findColumnName(sampleRow, candidates) {
         if (!sampleRow) return '';
         const keys = Object.keys(sampleRow);
@@ -1468,7 +1454,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderSupervisorInsights(supervisors, supRecords);
     }
 
-    // Operational Scope Context Strip
     function renderSupervisorOperationalScope(supervisors) {
         const container = document.getElementById('sup-op-scope-strip');
         if (!container) return;
@@ -1507,7 +1492,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    // Helper: Compute real time cohort trend series for sparklines
     function computeCohortTrendSeries(supRecords, metricColName) {
         if (!supRecords || supRecords.length === 0) return { grain: 'NONE', points: [] };
 
@@ -1583,7 +1567,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return { grain: timeGrain, points };
     }
 
-    // Executive Sparkline Area Chart SVG Builder
     function buildSparklineSVG(trendData, strokeColor = '#6366F1') {
         if (!trendData || trendData.points.length < 2) {
             return `<div class="kpi-sparkline-wrapper"><span class="sparkline-grain-tag text-muted">Single Period</span></div>`;
@@ -1637,7 +1620,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    // Render 4 Executive Performance KPI Cards
     function renderSupervisorPrimaryKPIs(rawValids, rawQuestValids, raw72hValids, rawHqValids, supRecords) {
         const container = document.getElementById('sup-primary-kpi-grid');
         if (!container) return;
@@ -1705,7 +1687,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    // Performance x Workload 4-Segment Classification
     function renderPerformanceWorkloadSegmentation(supervisors) {
         const container = document.getElementById('sup-performance-segmentation-container');
         if (!container) return;
@@ -1782,7 +1763,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    // REQUIREMENT 5: Named Supervisor Insights & Analytical Highlights Context
     function renderSupervisorAnalyticalHighlights(supervisors) {
         const highlightsBox = document.getElementById('sup-analytical-highlights');
         if (!highlightsBox) return;
@@ -1827,7 +1807,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    // Supervisor Performance Ranking with Range Filter Buttons
     function renderSupervisorPerformanceRanking(supervisors, rangeFilter = 'ALL') {
         const container = document.getElementById('sup-performance-ranking-container');
         const filterBar = document.getElementById('ranking-range-filters');
@@ -1911,7 +1890,6 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = html;
     }
 
-    // Performance Distribution Connected to Ranking
     function renderPerformanceAndWorkloadDistributions(supervisors) {
         const perfBox = document.getElementById('sup-perf-dist-container');
         const workBox = document.getElementById('sup-workload-dist-container');
@@ -2191,7 +2169,6 @@ document.addEventListener('DOMContentLoaded', () => {
         attachUniversalTableSorting('sup-details-table');
     }
 
-    // REQUIREMENT 5: PERFORMANCE INSIGHTS WITH FULL SUPERVISOR & SAMPLE CONTEXT
     function renderSupervisorInsights(supervisors, rawRecords) {
         const container = document.getElementById('sup-insights-grid');
         if (!container) return;
@@ -2273,9 +2250,8 @@ document.addEventListener('DOMContentLoaded', () => {
             container.appendChild(card);
         });
     }
-
     // ==========================================================================
-    // REQUIREMENT 6: HQ VALIDATION CALLS TAB ENRICHMENT ENGINE
+    // TAB 4: HQ VALIDATION CALLS ENGINE
     // ==========================================================================
     function isValidHQVal(val) {
         if (val === undefined || val === null) return false;
@@ -2345,13 +2321,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const calledOfficersCount = calledOfficersSet.size;
         const coveragePct = totalOfficersCount > 0 ? (calledOfficersCount / totalOfficersCount) * 100 : 0;
 
-        // Render 6A: HQ Top KPI Cards
         renderHQKPICards(totalOfficersCount, calledOfficersCount, coveragePct, hqResultRecords, supHqPerformanceMap, supRecords);
-
-        // Render 6C: HQ Performance Distribution
         renderHQPerformanceDistribution(supHqPerformanceMap);
 
-        // Render 6E: Existing Activity Statement
         if (stmtNode) stmtNode.textContent = `${calledOfficersCount.toLocaleString()} of ${totalOfficersCount.toLocaleString()} Officers`;
         if (covNode) covNode.textContent = `${coveragePct.toFixed(1)}% Coverage`;
         if (fillNode) fillNode.style.width = `${Math.min(coveragePct, 100)}%`;
@@ -2379,7 +2351,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderHQTable(govMap, supMap);
     }
 
-    // REQUIREMENT 6A & 6B: HQ KPI Cards & Real Sparklines
     function renderHQKPICards(totalOfficers, calledOfficers, coveragePct, hqResultRecords, supHqPerfMap, supRecords) {
         const container = document.getElementById('hq-kpi-grid');
         if (!container) return;
@@ -2434,7 +2405,6 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    // REQUIREMENT 6C: HQ Validation Performance Distribution
     function renderHQPerformanceDistribution(supHqPerfMap) {
         const container = document.getElementById('hq-perf-dist-container');
         if (!container) return;
@@ -2486,7 +2456,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
     }
 
-    // REQUIREMENT 6D: HQ Table with Sample Size Context
     function renderHQTable(govMap, supMap) {
         const thead = document.getElementById('hq-table-thead');
         const tbody = document.getElementById('hq-table-tbody');
@@ -2632,7 +2601,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderOpSection('decl', casesDecl, 'DECLARATION PENDING', 'sec-decl-badge', 'container-decl-cases', false);
     }
 
-    // REQUIREMENT 4: Display Comment in Operational Cases
     function renderOpSection(secKey, population, titlePrefix, badgeId, containerId, includeHiringDate) {
         const badgeNode = document.getElementById(badgeId);
         const containerNode = document.getElementById(containerId);
@@ -2816,6 +2784,567 @@ document.addEventListener('DOMContentLoaded', () => {
         containerNode.innerHTML = html;
     }
 
+    // ==========================================================================
+    // TAB 6: MEASURE OF SUCCESS ENGINE (REFINED)
+    // ==========================================================================
+
+    function parseDDMMYYYY(dateStr) {
+        if (!dateStr || typeof dateStr !== 'string') return null;
+        const cleaned = dateStr.trim();
+        if (!cleaned) return null;
+
+        const parts = cleaned.split('/');
+        if (parts.length === 3) {
+            const day = parseInt(parts[0], 10);
+            const month = parseInt(parts[1], 10) - 1;
+            const year = parseInt(parts[2], 10);
+            if (!isNaN(day) && !isNaN(month) && !isNaN(year) && year > 1900 && year < 2100) {
+                const d = new Date(year, month, day);
+                if (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) {
+                    return d;
+                }
+            }
+        }
+        return null;
+    }
+
+    function toISODateStr(dObj) {
+        if (!dObj || isNaN(dObj.getTime())) return '';
+        const y = dObj.getFullYear();
+        const m = String(dObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dObj.getDate()).padStart(2, '0');
+        return `${y}-${m}-${d}`;
+    }
+
+    function extractGovernorate(siteStr) {
+        if (!siteStr || typeof siteStr !== 'string') return 'Unknown';
+        return siteStr.split(/\s*-\s*/)[0].trim();
+    }
+
+    function processTurnoverRecords(rawCsvRecords) {
+        const records = [];
+        let latestDateFound = null;
+
+        rawCsvRecords.forEach(row => {
+            const empCode = row['Employee Code'] ? row['Employee Code'].trim() : '';
+            const hDate = parseDDMMYYYY(row['Hiring Date']);
+            const tDate = parseDDMMYYYY(row['Termination Date']);
+            const termType = row['Termination Type - English'] ? row['Termination Type - English'].trim() : '';
+            const site = row['Site - English'] || row['Site - Arabic'] || '';
+            const gov = extractGovernorate(site);
+
+            if (!hDate) return; 
+
+            if (tDate && (!latestDateFound || tDate > latestDateFound)) {
+                latestDateFound = tDate;
+            }
+
+            let daysToResignation = null;
+            const isResignation = termType.toLowerCase() === 'resignation';
+
+            if (isResignation && tDate && tDate >= hDate) {
+                const diffTime = tDate.getTime() - hDate.getTime();
+                daysToResignation = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            }
+
+            records.push({
+                empCode,
+                hiringDate: hDate,
+                hiringDateStr: toISODateStr(hDate),
+                terminationDate: tDate,
+                terminationDateStr: toISODateStr(tDate),
+                terminationType: termType,
+                isResignation,
+                daysToResignation,
+                governorate: gov
+            });
+        });
+
+        const analysisCutoff = latestDateFound || new Date(2026, 6, 25); 
+        const validRecords = records.filter(r => r.hiringDate <= analysisCutoff);
+
+        return { records: validRecords, analysisCutoff };
+    }
+
+    function setupMeasureOfSuccessControls(allGovernorates) {
+        const baseFromInp = document.getElementById('mos-base-from');
+        const baseToInp = document.getElementById('mos-base-to');
+        const projFromInp = document.getElementById('mos-proj-from');
+        const projToInp = document.getElementById('mos-proj-to');
+        const govSelect = document.getElementById('mos-gov-filter');
+        const windowBtns = document.querySelectorAll('.mos-window-btn');
+
+        if (baseFromInp) baseFromInp.value = mosState.baseFrom;
+        if (baseToInp) baseToInp.value = mosState.baseTo;
+        if (projFromInp) projFromInp.value = mosState.projFrom;
+        if (projToInp) projToInp.value = mosState.projTo;
+
+        if (govSelect && govSelect.options.length <= 1) {
+            govSelect.innerHTML = '<option value="all">All Governorates ▼</option>';
+            allGovernorates.sort().forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g;
+                opt.textContent = g;
+                govSelect.appendChild(opt);
+            });
+            govSelect.value = mosState.gov;
+        }
+
+        const handleFilterChange = () => {
+            if (baseFromInp) mosState.baseFrom = baseFromInp.value;
+            if (baseToInp) mosState.baseTo = baseToInp.value;
+            if (projFromInp) mosState.projFrom = projFromInp.value;
+            if (projToInp) mosState.projTo = projToInp.value;
+            if (govSelect) mosState.gov = govSelect.value;
+            renderMeasureOfSuccessTab();
+        };
+
+        if (baseFromInp) baseFromInp.onchange = handleFilterChange;
+        if (baseToInp) baseToInp.onchange = handleFilterChange;
+        if (projFromInp) projFromInp.onchange = handleFilterChange;
+        if (projToInp) projToInp.onchange = handleFilterChange;
+        if (govSelect) govSelect.onchange = handleFilterChange;
+
+        windowBtns.forEach(btn => {
+            btn.onclick = () => {
+                windowBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                mosState.windowDays = parseInt(btn.getAttribute('data-window'), 10);
+                renderMeasureOfSuccessTab();
+            };
+        });
+    }
+
+    function renderMeasureOfSuccessTab() {
+        if (!turnoverDatasetGlobal || turnoverDatasetGlobal.length === 0) return;
+
+        const { records, analysisCutoff } = processTurnoverRecords(turnoverDatasetGlobal);
+
+        const allGovs = Array.from(new Set(records.map(r => r.governorate).filter(Boolean)));
+        setupMeasureOfSuccessControls(allGovs);
+
+        let scopedRecords = records;
+        if (mosState.gov !== 'all') {
+            scopedRecords = records.filter(r => r.governorate === mosState.gov);
+        }
+
+        const baseFrom = new Date(mosState.baseFrom);
+        const baseTo = new Date(mosState.baseTo);
+        const projFrom = new Date(mosState.projFrom);
+        const projTo = new Date(mosState.projTo);
+        const windowDays = mosState.windowDays;
+
+        const getMaturedCohort = (fromD, toD) => {
+            return scopedRecords.filter(r => {
+                if (r.hiringDate < fromD || r.hiringDate > toD) return false;
+                const obsDays = Math.floor((analysisCutoff.getTime() - r.hiringDate.getTime()) / (1000 * 60 * 60 * 24));
+                return obsDays >= windowDays;
+            });
+        };
+
+        const baseMaturedCohort = getMaturedCohort(baseFrom, baseTo);
+        const projMaturedCohort = getMaturedCohort(projFrom, projTo);
+
+        const getResignationsWithinWindow = (cohort) => {
+            return cohort.filter(r => r.isResignation && r.daysToResignation !== null && r.daysToResignation >= 0 && r.daysToResignation <= windowDays);
+        };
+
+        const baseResignations = getResignationsWithinWindow(baseMaturedCohort);
+        const projResignations = getResignationsWithinWindow(projMaturedCohort);
+
+        const baseRate = baseMaturedCohort.length > 0 ? (baseResignations.length / baseMaturedCohort.length) * 100 : 0;
+        const projRate = projMaturedCohort.length > 0 ? (projResignations.length / projMaturedCohort.length) * 100 : 0;
+
+        const ppChange = projRate - baseRate;
+        const relChange = baseRate > 0 ? ((projRate - baseRate) / baseRate) * 100 : 0;
+
+        renderMosExecutiveKPIs(baseMaturedCohort.length, baseResignations.length, baseRate, projMaturedCohort.length, projResignations.length, projRate, ppChange, relChange, windowDays);
+        renderMosVisualImpact(baseRate, projRate, ppChange, windowDays, baseMaturedCohort.length, projMaturedCohort.length);
+        renderMosRetentionView(scopedRecords, analysisCutoff, baseFrom, baseTo, projFrom, projTo);
+        renderMosCohortTrendWeekly(scopedRecords, analysisCutoff, windowDays);
+        renderMosExitTimingDistribution(scopedRecords, analysisCutoff, baseFrom, baseTo, projFrom, projTo);
+        renderMosGovernorateImpactTable(records, analysisCutoff, baseFrom, baseTo, projFrom, projTo, windowDays);
+    }
+
+    function renderMosExecutiveKPIs(baseMatCount, baseResCount, baseRate, projMatCount, projResCount, projRate, ppChange, relChange, windowDays) {
+        const container = document.getElementById('mos-kpi-grid');
+        if (!container) return;
+
+        const isProjectNotMature = projMatCount === 0;
+
+        const ppChangeFormatted = ppChange > 0 ? `+${ppChange.toFixed(1)} pts` : `${Math.abs(ppChange).toFixed(1)} pts`;
+        const relChangeFormatted = relChange > 0 ? `+${relChange.toFixed(1)}%` : `${Math.abs(relChange).toFixed(1)}%`;
+
+        const outcomeColorClass = ppChange < 0 ? 'text-success' : (ppChange > 0 ? 'text-danger' : 'text-muted');
+
+        container.innerHTML = `
+            <div class="metric-card kpi-exec-card">
+                <div class="kpi-exec-title">BEFORE PROJECT</div>
+                <div class="kpi-exec-val-row">
+                    <span class="main-value">${baseRate.toFixed(1)}%</span>
+                </div>
+                <div class="kpi-exec-sub">Early voluntary resignation rate</div>
+                <div class="kpi-exec-denom"><strong>${baseResCount.toLocaleString()}</strong> resigned within window<br><strong>${baseMatCount.toLocaleString()}</strong> eligible hires</div>
+            </div>
+
+            <div class="metric-card kpi-exec-card">
+                <div class="kpi-exec-title">AFTER PROJECT</div>
+                <div class="kpi-exec-val-row">
+                    <span class="main-value ${isProjectNotMature ? 'text-muted' : ''}">${isProjectNotMature ? 'Not available yet' : projRate.toFixed(1) + '%'}</span>
+                </div>
+                <div class="kpi-exec-sub">${isProjectNotMature ? `Project hires have not completed ${windowDays} days yet.` : `Early voluntary resignation rate`}</div>
+                <div class="kpi-exec-denom"><strong>${projResCount.toLocaleString()}</strong> resigned within window<br><strong>${projMatCount.toLocaleString()}</strong> eligible hires</div>
+            </div>
+
+            <div class="metric-card kpi-exec-card">
+                <div class="kpi-exec-title">IMPROVEMENT</div>
+                <div class="kpi-exec-val-row">
+                    <span class="main-value ${outcomeColorClass}">${isProjectNotMature ? 'N/A' : Math.abs(ppChange).toFixed(1) + ' pts'}</span>
+                </div>
+                <div class="kpi-exec-sub">Absolute difference</div>
+                <div class="kpi-exec-denom" style="color:${ppChange < 0 ? 'var(--primary)' : 'var(--red)'}; font-weight:700;">
+                    ${isProjectNotMature ? 'Awaiting cohort observation' : (ppChange <= 0 ? 'Lower early resignation after project' : 'Higher early resignation after project')}
+                </div>
+            </div>
+
+            <div class="metric-card kpi-exec-card">
+                <div class="kpi-exec-title">RESIGNATION REDUCTION</div>
+                <div class="kpi-exec-val-row">
+                    <span class="main-value ${outcomeColorClass}">${isProjectNotMature ? 'N/A' : relChangeFormatted}</span>
+                </div>
+                <div class="kpi-exec-sub">Relative impact</div>
+                <div class="kpi-exec-denom">Reduction compared with before project</div>
+            </div>
+        `;
+    }
+
+    function renderMosVisualImpact(baseRate, projRate, ppChange, windowDays, baseMat, projMat) {
+        const container = document.getElementById('mos-impact-visual-container');
+        if (!container) return;
+
+        if (projMat === 0) {
+            container.innerHTML = `
+                <div class="op-empty-state">
+                    <strong>Not available yet</strong><br>
+                    Project hires do not yet have ${windowDays} days of observation maturity. Baseline rate is currently ${baseRate.toFixed(1)}% (n=${baseMat}).
+                </div>
+            `;
+            return;
+        }
+
+        const maxRate = Math.max(baseRate, projRate, 1);
+        const baseWidth = (baseRate / maxRate) * 100;
+        const projWidth = (projRate / maxRate) * 100;
+
+        const isImproved = ppChange < 0;
+        const statusText = isImproved ? `Improved by ${Math.abs(ppChange).toFixed(1)} pts` : `Increased by ${ppChange.toFixed(1)} pts`;
+        const sampleWarning = projMat < 30 ? `<span style="font-size:11px; color:var(--text-muted); font-weight:normal;"> (Early indication — based on ${projMat} eligible hires)</span>` : '';
+
+        container.innerHTML = `
+            <div style="display: flex; flex-direction: column; gap: 20px;">
+                
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700;">
+                        <span>BEFORE PROJECT</span>
+                        <span>${baseRate.toFixed(1)}% <span class="sample-size-tag">n=${baseMat}</span></span>
+                    </div>
+                    <div class="dist-bar-track" style="height: 14px; background: #E2E8F0;">
+                        <div class="dist-bar-fill" style="width: ${baseWidth}%; background: #64748B;"></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 6px;">
+                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700;">
+                        <span>AFTER PROJECT</span>
+                        <span class="${isImproved ? 'text-success' : 'text-danger'}">${projRate.toFixed(1)}% <span class="sample-size-tag">n=${projMat}</span></span>
+                    </div>
+                    <div class="dist-bar-track" style="height: 14px; background: #E2E8F0;">
+                        <div class="dist-bar-fill" style="width: ${projWidth}%; background: ${isImproved ? 'var(--primary)' : 'var(--red)'};"></div>
+                    </div>
+                </div>
+
+                <div style="background: ${isImproved ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)'}; border: 1px solid ${isImproved ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}; padding: 12px 16px; border-radius: var(--radius-md); font-size: 12.5px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-weight: 700; color: ${isImproved ? 'var(--primary)' : 'var(--red)'};">${statusText}${sampleWarning}</span>
+                </div>
+
+            </div>
+        `;
+    }
+
+    function renderMosRetentionView(records, analysisCutoff, baseFrom, baseTo, projFrom, projTo) {
+        const container = document.getElementById('mos-retention-container');
+        if (!container) return;
+
+        const windows = [30, 60, 90];
+        let html = '';
+
+        windows.forEach(w => {
+            const getRetentionForRange = (fromD, toD) => {
+                const matured = records.filter(r => {
+                    if (r.hiringDate < fromD || r.hiringDate > toD) return false;
+                    const obsDays = Math.floor((analysisCutoff.getTime() - r.hiringDate.getTime()) / (1000 * 60 * 60 * 24));
+                    return obsDays >= w;
+                });
+                if (matured.length === 0) return null;
+                const resigned = matured.filter(r => r.isResignation && r.daysToResignation !== null && r.daysToResignation >= 0 && r.daysToResignation <= w).length;
+                return ((matured.length - resigned) / matured.length) * 100;
+            };
+
+            const baseRet = getRetentionForRange(baseFrom, baseTo);
+            const projRet = getRetentionForRange(projFrom, projTo);
+
+            const baseDisplay = baseRet !== null ? `${baseRet.toFixed(1)}%` : 'N/A';
+            const projDisplay = projRet !== null ? `${projRet.toFixed(1)}%` : 'Not available yet';
+
+            html += `
+                <div class="capacity-stat-item">
+                    <span class="cap-label"><strong>After ${w} Days</strong></span>
+                    <div style="display: flex; gap: 16px; align-items: center;">
+                        <span style="font-size: 11.5px; color: var(--text-muted);">Before: <strong>${baseDisplay}</strong></span>
+                        <span style="font-size: 11.5px; color: var(--brand-purple);">After: <strong>${projDisplay}</strong></span>
+                    </div>
+                </div>
+            `;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function renderMosCohortTrendWeekly(records, analysisCutoff, windowDays) {
+        const container = document.getElementById('mos-cohort-trend-container');
+        if (!container) return;
+
+        const cohortMap = {};
+
+        records.forEach(r => {
+            const firstJan = new Date(r.hiringDate.getFullYear(), 0, 1);
+            const weekNum = Math.ceil((((r.hiringDate - firstJan) / 86400000) + firstJan.getDay() + 1) / 7);
+            const key = `${r.hiringDate.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
+            
+            if (!cohortMap[key]) cohortMap[key] = { key, date: r.hiringDate, totalHires: 0, maturedHires: 0, resignations: 0 };
+            
+            cohortMap[key].totalHires++;
+
+            const obsDays = Math.floor((analysisCutoff.getTime() - r.hiringDate.getTime()) / (1000 * 60 * 60 * 24));
+            if (obsDays >= windowDays) {
+                cohortMap[key].maturedHires++;
+                if (r.isResignation && r.daysToResignation !== null && r.daysToResignation >= 0 && r.daysToResignation <= windowDays) {
+                    cohortMap[key].resignations++;
+                }
+            }
+        });
+
+        const sortedKeys = Object.keys(cohortMap).sort();
+        const validCohorts = sortedKeys.map(k => cohortMap[k]).filter(c => c.maturedHires > 0);
+
+        if (validCohorts.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding-top:80px; font-size:12px; color:var(--text-muted)">No matured cohorts available</div>';
+            return;
+        }
+
+        const rates = validCohorts.map(c => (c.resignations / c.maturedHires) * 100);
+        const maxRate = Math.max(...rates, 1);
+
+        const svgW = 600; const svgH = 180;
+        const pL = 40; const pR = 30; const pT = 25; const pB = 35;
+        const cW = svgW - pL - pR; const cH = svgH - pT - pB;
+
+        const totalPoints = validCohorts.length;
+        const stepX = totalPoints > 1 ? cW / (totalPoints - 1) : cW;
+
+        const points = [];
+        validCohorts.forEach((c, idx) => {
+            const rate = (c.resignations / c.maturedHires) * 100;
+            const x = pL + (idx * stepX);
+            const y = pT + cH - ((rate / maxRate) * cH);
+            points.push({ x, y, rate, key: c.key, dateObj: c.date, matured: c.maturedHires, res: c.resignations });
+        });
+
+        let lineD = `M ${points[0].x} ${points[0].y}`;
+        for (let i = 0; i < points.length - 1; i++) {
+            const p0 = points[i];
+            const p1 = points[i + 1];
+            const cpX1 = p0.x + (p1.x - p0.x) / 2;
+            const cpY1 = p0.y;
+            const cpX2 = p0.x + (p1.x - p0.x) / 2;
+            const cpY2 = p1.y;
+            lineD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
+        }
+
+        let launchX = null;
+        points.forEach(pt => {
+            if (pt.key >= '2026-W25' && launchX === null) launchX = pt.x;
+        });
+
+        let svg = `
+            <svg viewBox="0 0 ${svgW} ${svgH}" width="100%" height="100%" style="overflow: visible;">
+                <line x1="${pL}" y1="${pT}" x2="${pL + cW}" y2="${pT}" stroke="var(--border-color)" stroke-dasharray="3,3"/>
+                <line x1="${pL}" y1="${pT + cH/2}" x2="${pL + cW}" y2="${pT + cH/2}" stroke="var(--border-color)" stroke-dasharray="3,3"/>
+                <line x1="${pL}" y1="${pT + cH}" x2="${pL + cW}" y2="${pT + cH}" stroke="var(--border-color)" stroke-width="1.2"/>
+
+                ${launchX !== null ? `
+                    <line x1="${launchX}" y1="${pT - 10}" x2="${launchX}" y2="${pT + cH}" stroke="var(--brand-purple)" stroke-dasharray="4,4" stroke-width="2"/>
+                    <rect x="${launchX - 55}" y="${pT - 22}" width="110" height="18" fill="var(--brand-purple)" rx="4"/>
+                    <text x="${launchX}" y="${pT - 10}" fill="#FFFFFF" font-size="8.5" font-weight="700" text-anchor="middle">Project Launch (18 Jun)</text>
+                ` : ''}
+
+                <path d="${lineD}" fill="none" stroke="var(--brand-purple)" stroke-width="2.5" stroke-linecap="round"/>
+        `;
+
+        const labelInterval = Math.max(1, Math.ceil(points.length / 8));
+
+        points.forEach((pt, idx) => {
+            const ttHtml = `
+                <div class="tt-title">Week: ${pt.key}</div>
+                <div class="tt-row"><span>Rate:</span> <strong>${pt.rate.toFixed(1)}%</strong></div>
+                <div class="tt-row"><span>Resignations:</span> <strong>${pt.res} of ${pt.matured} eligible</strong></div>
+            `;
+
+            svg += `
+                <circle cx="${pt.x}" cy="${pt.y}" r="4" 
+                        fill="var(--card-bg)" stroke="var(--brand-purple)" stroke-width="2.5" 
+                        class="chart-dot interactive-dot" style="cursor:pointer;" 
+                        data-tt="${encodeURIComponent(ttHtml)}"></circle>
+            `;
+            
+            if (idx % labelInterval === 0 || idx === points.length - 1) {
+                 svg += `<text x="${pt.x}" y="${pT + cH + 16}" fill="var(--text-muted)" font-size="9" text-anchor="middle">${pt.key}</text>`;
+            }
+        });
+
+        svg += `</svg>`;
+        container.innerHTML = svg;
+
+        container.querySelectorAll('.interactive-dot').forEach(dot => {
+            const content = decodeURIComponent(dot.getAttribute('data-tt'));
+            dot.addEventListener('mouseenter', (e) => { dot.setAttribute('r', '6'); showTooltip(e, content); });
+            dot.addEventListener('mousemove', (e) => { showTooltip(e, content); });
+            dot.addEventListener('mouseleave', () => { dot.setAttribute('r', '4'); hideTooltip(); });
+        });
+    }
+
+    function renderMosExitTimingDistribution(records, analysisCutoff, baseFrom, baseTo, projFrom, projTo) {
+        const container = document.getElementById('mos-exit-timing-container');
+        if (!container) return;
+
+        const bands = [
+            { label: 'Within 30 Days', min: 0, max: 30 },
+            { label: '31–60 Days', min: 31, max: 60 },
+            { label: '61–90 Days', min: 61, max: 90 },
+            { label: 'After 90 Days', min: 91, max: 9999 }
+        ];
+
+        const getDist = (from, to) => {
+            const resLogs = records.filter(r => r.hiringDate >= from && r.hiringDate <= to && r.isResignation && r.daysToResignation !== null);
+            const counts = { 'Within 30 Days': 0, '31–60 Days': 0, '61–90 Days': 0, 'After 90 Days': 0 };
+            resLogs.forEach(r => {
+                for (const b of bands) if (r.daysToResignation >= b.min && r.daysToResignation <= b.max) { counts[b.label]++; break; }
+            });
+            
+            let maxMaturity = 0;
+            const cohort = records.filter(r => r.hiringDate >= from && r.hiringDate <= to);
+            if(cohort.length > 0) {
+                 maxMaturity = Math.max(...cohort.map(r => Math.floor((analysisCutoff.getTime() - r.hiringDate.getTime()) / (1000 * 60 * 60 * 24))));
+            }
+            
+            return { total: resLogs.length, counts, maxMaturity };
+        };
+
+        const bDist = getDist(baseFrom, baseTo);
+        const pDist = getDist(projFrom, projTo);
+
+        let html = `<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">`;
+        bands.forEach(b => {
+            const bPct = bDist.total > 0 ? (bDist.counts[b.label] / bDist.total) * 100 : 0;
+            const pPct = pDist.total > 0 ? (pDist.counts[b.label] / pDist.total) * 100 : 0;
+            
+            const bTxt = bDist.total > 0 ? `${bPct.toFixed(1)}%` : '0%';
+            const pTxt = (pDist.maxMaturity >= b.max || pDist.counts[b.label] > 0) ? (pDist.total > 0 ? `${pPct.toFixed(1)}%` : '0%') : 'Not measurable yet';
+            
+            html += `
+                <div style="background: #F8FAFC; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 6px;">
+                    <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">${b.label}</span>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
+                        <span style="font-size: 10.5px; color: var(--text-muted);">Before:</span>
+                        <strong style="font-size: 12px;">${bTxt}</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
+                        <span style="font-size: 10.5px; color: var(--brand-purple);">After:</span>
+                        <strong style="font-size: 11px; color: var(--brand-purple);">${pTxt}</strong>
+                    </div>
+                </div>
+            `;
+        });
+        html += `</div>`;
+        container.innerHTML = html;
+    }
+
+    function renderMosGovernorateImpactTable(records, analysisCutoff, baseFrom, baseTo, projFrom, projTo, windowDays) {
+        const tbody = document.getElementById('mos-gov-tbody');
+        if (!tbody) return;
+
+        const govMap = {};
+        records.forEach(r => {
+            const g = r.governorate;
+            if (!govMap[g]) govMap[g] = { gov: g, bM: 0, bR: 0, pM: 0, pR: 0 };
+            
+            const isMatured = Math.floor((analysisCutoff.getTime() - r.hiringDate.getTime()) / (1000 * 60 * 60 * 24)) >= windowDays;
+            
+            if (isMatured) {
+                if (r.hiringDate >= baseFrom && r.hiringDate <= baseTo) {
+                    govMap[g].bM++;
+                    if (r.isResignation && r.daysToResignation !== null && r.daysToResignation <= windowDays) govMap[g].bR++;
+                }
+                if (r.hiringDate >= projFrom && r.hiringDate <= projTo) {
+                    govMap[g].pM++;
+                    if (r.isResignation && r.daysToResignation !== null && r.daysToResignation <= windowDays) govMap[g].pR++;
+                }
+            }
+        });
+
+        const list = Object.values(govMap).map(g => {
+            const baseRate = g.bM > 0 ? (g.bR / g.bM) * 100 : 0;
+            const projRate = g.pM > 0 ? (g.pR / g.pM) * 100 : null;
+            const pp = projRate !== null ? (projRate - baseRate) : null;
+            let status = 'Not Enough Data';
+            if (pp !== null) {
+                if (pp < 0) status = 'Improved';
+                else if (pp > 0) status = 'Increased';
+                else status = 'No Change';
+            }
+            return { ...g, baseRate, projRate, pp, status };
+        });
+
+        const k = currentMosGovSort.key || 'projRate';
+        const dir = currentMosGovSort.dir === 'asc' ? 1 : -1;
+        
+        list.sort((a, b) => {
+            let valA = a[k] !== null ? a[k] : -999;
+            let valB = b[k] !== null ? b[k] : -999;
+            if (typeof valA === 'string') return valA.localeCompare(valB) * dir;
+            return (valA - valB) * dir;
+        });
+
+        tbody.innerHTML = '';
+        list.forEach(r => {
+            const tr = document.createElement('tr');
+            const pStr = r.projRate !== null ? `${r.projRate.toFixed(1)}% <br><span class="sample-size-tag" style="margin-left:0;">${r.pR}/${r.pM} eligible</span>` : '<span class="text-muted">Not available yet</span>';
+            const cStr = r.pp !== null ? `<span class="${r.pp < 0 ? 'text-success' : (r.pp > 0 ? 'text-danger' : '')}">${r.pp > 0 ? '+' : ''}${r.pp.toFixed(1)} pts</span>` : '<span class="text-muted">-</span>';
+            const smallBadge = r.pM > 0 && r.pM < 5 ? `<span class="small-pop-badge">Small Base</span>` : '';
+            
+            tr.innerHTML = `
+                <td><strong>${r.gov}</strong> ${smallBadge}</td>
+                <td><strong>${r.baseRate.toFixed(1)}%</strong> <br><span class="sample-size-tag" style="margin-left:0;">${r.bR}/${r.bM} eligible</span></td>
+                <td><strong>${pStr}</strong></td>
+                <td><strong>${cStr}</strong></td>
+                <td><span class="insight-tag" style="background: ${r.status==='Improved'?'#D1FAE5':(r.status==='Increased'?'#FEE2E2':'#F1F5F9')}; color: ${r.status==='Improved'?'#065F46':(r.status==='Increased'?'#991B1B':'#475569')};">${r.status}</span></td>
+            `;
+            tbody.appendChild(tr);
+        });
+
+        attachUniversalTableSorting('mos-gov-table');
+    }
+
     // Dynamic Resize Listener
     window.addEventListener('resize', () => {
         if (globalDataset.length > 0) {
@@ -2831,10 +3360,8 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(csvText => {
             globalDataset = parseCSVDataEngine(csvText);
-            
             populateMonthFilter();
             applyDynamicFiltering();
-            
             if(nodeUpdateBadge) nodeUpdateBadge.textContent = "Data Synced Live";
         })
         .catch(err => {
@@ -2854,21 +3381,24 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(csvText => {
             rawSupervisorRecordsGlobal = parseCSVDataEngine(csvText);
-            
             populateMonthFilter();
             applyDynamicFiltering();
         })
         .catch(err => {
             console.warn("Supervisor KPI Results.csv File Offline or Unreachable:", err);
-            const supTabNode = document.getElementById('tab-supervisor');
-            if (supTabNode) {
-                const errCard = document.createElement('div');
-                errCard.className = 'metric-card';
-                errCard.style.color = 'var(--red)';
-                errCard.style.padding = '20px';
-                errCard.style.marginTop = '20px';
-                errCard.textContent = "Unable to load 'Supervisor KPI Results.csv'. Supervisor Performance tab data is currently unavailable.";
-                supTabNode.prepend(errCard);
-            }
+        });
+
+    // Dynamic Live Data Loader - turnover.csv (New Tab Dataset)
+    fetch('turnover.csv', { cache: 'no-store' })
+        .then(res => {
+            if (!res.ok) throw new Error("Offline Turnover CSV Data");
+            return res.text();
+        })
+        .then(csvText => {
+            turnoverDatasetGlobal = parseCSVDataEngine(csvText);
+            renderMeasureOfSuccessTab();
+        })
+        .catch(err => {
+            console.warn("turnover.csv File Offline or Unreachable:", err);
         });
 });

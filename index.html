@@ -51,6 +51,10 @@
                 <span class="tab-icon">📋</span>
                 <span class="tab-label">OPERATIONAL CASES</span>
             </button>
+            <button class="nav-tab-btn" data-tab="tab-measure-success">
+                <span class="tab-icon">🎯</span>
+                <span class="tab-label">MEASURE OF SUCCESS</span>
+            </button>
         </nav>
 
         <!-- ========================================================================== -->
@@ -172,7 +176,6 @@
                             <span class="main-value text-danger" id="exceeded-72-val">0</span>
                             <span class="rate-badge" id="exceeded-72-pct-val">0%</span>
                         </div>
-                        <!-- Dynamic Reason Documentation Breakdown -->
                         <div class="reason-doc-breakdown" id="exceeded-72-reason-breakdown">
                             <span class="reason-chip with-reason">With Reason: <strong id="val-with-reason">0</strong></span>
                             <span class="reason-chip without-reason">Without Reason: <strong id="val-without-reason">0</strong></span>
@@ -229,7 +232,6 @@
                 <p class="subtitle">Deeper analysis of hiring, training performance and operational differences across governorates.</p>
             </div>
 
-            <!-- COMPACT ONBOARDING FLOW -->
             <div class="analytics-section">
                 <div class="metric-card compact-flow-card">
                     <div class="section-title-container">
@@ -240,7 +242,6 @@
                 </div>
             </div>
 
-            <!-- HIRING ACTIVITY AND WORKLOAD -->
             <div class="analytics-section">
                 <div class="middle-charts-layout">
                     <div class="metric-card chart-container">
@@ -282,7 +283,6 @@
                 </div>
             </div>
 
-            <!-- GOVERNORATE TRAINING PERFORMANCE -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
@@ -327,7 +327,6 @@
                 </div>
             </div>
 
-            <!-- DETAILED TABLE -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container">
@@ -357,7 +356,6 @@
                 </div>
             </div>
 
-            <!-- RESIGNATIONS ANALYSIS -->
             <div class="analytics-section">
                 <div class="leaderboards-grid">
                     <div class="metric-card">
@@ -378,7 +376,6 @@
                 </div>
             </div>
 
-            <!-- OPERATIONAL INSIGHTS -->
             <div class="analytics-section">
                 <div class="metric-card insights-wrapper-card">
                     <div class="section-title-container">
@@ -401,17 +398,14 @@
                 <p class="subtitle">Operational scale, evaluation coverage, and result analysis across supervision team.</p>
             </div>
 
-            <!-- OPERATIONAL SCOPE CONTEXT STRIP -->
             <div class="analytics-section">
                 <div class="sup-executive-summary-strip" id="sup-op-scope-strip"></div>
             </div>
 
-            <!-- FOUR EXECUTIVE PERFORMANCE KPI CARDS WITH REAL SPARKLINES -->
             <div class="analytics-section">
                 <div class="kpi-executive-cards-grid" id="sup-primary-kpi-grid"></div>
             </div>
 
-            <!-- PERFORMANCE × WORKLOAD SEGMENTATION & HIGHLIGHTS -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container">
@@ -429,7 +423,6 @@
                 </div>
             </div>
 
-            <!-- SUPERVISOR PERFORMANCE RANKING WITH RANGE FILTERS -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
@@ -444,7 +437,6 @@
                 </div>
             </div>
 
-            <!-- PERFORMANCE & WORKLOAD DISTRIBUTION -->
             <div class="analytics-section">
                 <div class="leaderboards-grid">
                     <div class="metric-card">
@@ -465,7 +457,6 @@
                 </div>
             </div>
 
-            <!-- SUPERVISION BY GOVERNORATE -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container">
@@ -492,7 +483,6 @@
                 </div>
             </div>
 
-            <!-- SUPERVISOR DETAILS TABLE -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
@@ -524,7 +514,6 @@
                 </div>
             </div>
 
-            <!-- PERFORMANCE INSIGHTS SECTION -->
             <div class="analytics-section">
                 <div class="metric-card insights-wrapper-card">
                     <div class="section-title-container">
@@ -547,12 +536,10 @@
                 <p class="subtitle">Recorded HQ validation activity across current officers</p>
             </div>
 
-            <!-- 6A. HQ KPI CARDS SECTION -->
             <div class="analytics-section">
                 <div class="kpi-executive-cards-grid" id="hq-kpi-grid"></div>
             </div>
 
-            <!-- 6C. HQ PERFORMANCE DISTRIBUTION SECTION -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container">
@@ -563,7 +550,6 @@
                 </div>
             </div>
 
-            <!-- 6E. EXISTING HQ ACTIVITY SECTION (PRESERVED) -->
             <div class="analytics-section">
                 <div class="metric-card hq-validation-card">
                     <div class="hq-validation-header">
@@ -610,7 +596,6 @@
                 <p class="subtitle">Detailed onboarding cases requiring operational follow-up</p>
             </div>
 
-            <!-- SECTION 1: 72H EXCEEDED -->
             <div class="analytics-section" id="sec-72h-anchor">
                 <div class="metric-card op-case-module">
                     <div class="op-section-header">
@@ -646,7 +631,6 @@
                 </div>
             </div>
 
-            <!-- SECTION 2: QUESTIONNAIRE OVERDUE -->
             <div class="analytics-section">
                 <div class="metric-card op-case-module">
                     <div class="op-section-header">
@@ -682,7 +666,6 @@
                 </div>
             </div>
 
-            <!-- SECTION 3: DECLARATION PENDING -->
             <div class="analytics-section">
                 <div class="metric-card op-case-module">
                     <div class="op-section-header">
@@ -715,6 +698,141 @@
                     </div>
 
                     <div id="container-decl-cases" class="op-cases-container"></div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ========================================================================== -->
+        <!-- TAB 6: MEASURE OF SUCCESS (NEW TAB)                                        -->
+        <!-- ========================================================================== -->
+        <div id="tab-measure-success" class="tab-content">
+            
+            <div class="analytics-header-block">
+                <h2>MEASURE OF SUCCESS</h2>
+                <p class="subtitle">Analytical impact evaluation of the onboarding project on early employee voluntary resignation.</p>
+            </div>
+
+            <!-- COMPARISON CONTROLS BAR -->
+            <div class="analytics-section">
+                <div class="metric-card" style="padding: 16px 24px; min-height: auto;">
+                    <div class="mos-controls-bar">
+                        
+                        <div class="mos-control-group">
+                            <span class="mos-control-label">BEFORE PROJECT</span>
+                            <div class="mos-inputs-row">
+                                <input type="date" id="mos-base-from" class="premium-input mos-date-input">
+                                <span class="mos-sep">→</span>
+                                <input type="date" id="mos-base-to" class="premium-input mos-date-input">
+                            </div>
+                        </div>
+
+                        <div class="mos-control-group">
+                            <span class="mos-control-label">AFTER PROJECT</span>
+                            <div class="mos-inputs-row">
+                                <input type="date" id="mos-proj-from" class="premium-input mos-date-input">
+                                <span class="mos-sep">→</span>
+                                <input type="date" id="mos-proj-to" class="premium-input mos-date-input">
+                            </div>
+                        </div>
+
+                        <div class="mos-control-group">
+                            <span class="mos-control-label">MEASURE RESIGNATION WITHIN</span>
+                            <div class="mos-window-btn-group">
+                                <button class="mos-window-btn active" data-window="30">30 Days</button>
+                                <button class="mos-window-btn" data-window="60">60 Days</button>
+                                <button class="mos-window-btn" data-window="90">90 Days</button>
+                            </div>
+                        </div>
+
+                        <div class="mos-control-group">
+                            <span class="mos-control-label">GOVERNORATE</span>
+                            <select id="mos-gov-filter" class="premium-select" style="min-width: 170px;">
+                                <option value="all">All Governorates ▼</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- EXECUTIVE IMPACT KPIS -->
+            <div class="analytics-section">
+                <div class="kpi-executive-cards-grid" id="mos-kpi-grid"></div>
+            </div>
+
+            <!-- BEFORE VS AFTER VISUAL IMPACT & RETENTION / SURVIVAL VIEW -->
+            <div class="analytics-section">
+                <div class="middle-charts-layout">
+                    
+                    <div class="metric-card">
+                        <div class="section-title-container">
+                            <h3>PROJECT EARLY RESIGNATION IMPACT</h3>
+                            <p class="section-subtitle" id="mos-visual-subtitle">Direct rate comparison across Before vs After project cohorts</p>
+                        </div>
+                        <div id="mos-impact-visual-container" style="margin-top: 16px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center;"></div>
+                    </div>
+
+                    <div class="metric-card">
+                        <div class="section-title-container">
+                            <h3>EMPLOYEE RETENTION</h3>
+                            <p class="section-subtitle">How many new hires remained after each period</p>
+                        </div>
+                        <div id="mos-retention-container" class="capacity-stats-list" style="margin-top: 16px;"></div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- COHORT TREND WITH LAUNCH MARKER -->
+            <div class="analytics-section">
+                <div class="metric-card">
+                    <div class="section-title-container" style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <h3>EARLY RESIGNATION TREND</h3>
+                            <p class="section-subtitle">Early resignation rate by weekly hiring period</p>
+                        </div>
+                        <div class="status-pill" style="box-shadow:none; padding: 4px 12px;">
+                            <span class="status-indicator live" style="background-color: var(--brand-purple);"></span>
+                            <span style="font-size:11px;">Project Launch: <strong>18 Jun 2026</strong></span>
+                        </div>
+                    </div>
+                    <div id="mos-cohort-trend-container" class="pure-line-chart-wrapper" style="margin-top: 16px; height: 220px;"></div>
+                </div>
+            </div>
+
+            <!-- EXIT TIMING BANDS -->
+            <div class="analytics-section">
+                <div class="metric-card">
+                    <div class="section-title-container">
+                        <h3>WHEN DO RESIGNATIONS HAPPEN?</h3>
+                        <p class="section-subtitle">Timing of voluntary resignation after hiring</p>
+                    </div>
+                    <div id="mos-exit-timing-container" style="margin-top: 16px;"></div>
+                </div>
+            </div>
+
+            <!-- GOVERNORATE IMPACT MATRIX -->
+            <div class="analytics-section">
+                <div class="metric-card">
+                    <div class="section-title-container">
+                        <h3>GOVERNORATE EARLY RESIGNATION IMPACT</h3>
+                        <p class="section-subtitle">Early resignation performance breakdown and rate changes by governorate</p>
+                    </div>
+                    <div class="matrix-table-container">
+                        <table class="premium-matrix-table" id="mos-gov-table">
+                            <thead>
+                                <tr>
+                                    <th data-mos-sort="gov">GOVERNORATE ↕</th>
+                                    <th data-mos-sort="baseRate">BEFORE PROJECT ↕</th>
+                                    <th data-mos-sort="projRate">AFTER PROJECT ↕</th>
+                                    <th data-mos-sort="ppChange">CHANGE ↕</th>
+                                    <th data-mos-sort="status">STATUS ↕</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mos-gov-tbody"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
