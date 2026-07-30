@@ -37,7 +37,7 @@
 50020726,Hossam Mangy Samier Takay,Loan Officer CF,اسيوط - المطيعه - تساهيل,Mario Khalaf Seha Zakhary,Asseiut,6/15/2026,6/22/2026,6/15/2026,6/21/2026,7/12/2026,Normal,0,Late,0,,,0.85,1,0,0.63125,1206324992
 50020728,Youanaa Zouheir Maks Shalaby,Loan Officer CF,اسيوط - كوم بوها - تساهيل,Amany Kamal Sedky Hanin,Asseiut,6/15/2026,6/22/2026,6/22/2026,6/22/2026,7/14/2026,Normal,0,Late,0,,,0.35,1,0,0.44375,1288679469
 50020729,Neama Aref Mohamed Qenawy Mohamed,Loan Officer CF,الاسماعيلية - نفيشه - تساهيل,Mahmoud Nabil Mohamed Rageh,Ismailia,6/14/2026,6/18/2026,6/26/2026,6/26/2026,,Late,0,Late,0,,,,0,0,0,1010189210
-50020731,Malak Hany Sayed Helmy Farghaly,Loan Officer CF,الجيزة - امبابة - تساهيل,Ramy Wafik Boshra Eshak,Giza,6/15/2026,6/18/2026,6/17/2026,6/20/2026,7/16/2026,Normal,0,Late,0,,,0.683333333,1,0,0.56875,1122086964
+50020731,Malak Hany Sayed Helmy Farghaly,Loan Officer CF,الجيزة - امبابة - تساهيل,Ramy Wafik Boshra Eshak,Giza,6/15/2026,6/18/2026,6/17/2026,6/20/2026,7/16/2026,Normal,0,Late,0,,0.9,0.683333333,1,0,0.635,1122086964
 50020734,Azza Abdelnabi Nour Eldin Mohamed,Loan Officer CF,القاهرة - حلوان - تساهيل,Anasimon Ashraf Bebawy Yousef,Cairo,6/15/2026,6/18/2026,6/20/2026,6/21/2026,7/14/2026,Normal,0,Late,0,,0.9,0.683333333,1,0,0.635,1111405972
 50020735,Asmaa Ahmed Abdelaaleem Mohamed,Loan Officer CF,الجيزة - امبابة ثان - تساهيل,Moustafa Mohamed Mohamed Ahmed,Giza,6/15/2026,6/18/2026,6/20/2026,6/21/2026,7/16/2026,Normal,0,Late,0,,,تم الاستقالة,,,,1032523478
 50020736,Rewan Elsayed Ahmed Abd Elrhman Mohamed,Loan Officer CF,بورسعيد - بورسعيد - تساهيل,Esraa Abdelsalam Ahmed Abdelsalam Elbarawy,Port-said,6/15/2026,6/18/2026,6/23/2026,7/28/2026,,Normal,0,,0,,,,1,,1,1281575368
@@ -132,11 +132,11 @@
 20082897,Menna Khaled Loutfi Ali Hindk,Loan Officer,الدقهلية - نبروه - تساهيل,Amr Adel Mohamed Shehata,Daqhlia,6/15/2026,6/18/2026,6/20/2026,6/20/2026,7/20/2026,Normal,0,Late,0,,,0.85,1,0,0.63125,1031809483
 20082899,Abdo Mohamed Abdo Salem,Loan Officer,الشرقية - فاقوس - مشروعي,Ahmed Ismael Abdelaal Abdelaal Ghoniem,Sharqia,6/14/2026,6/18/2026,6/22/2026,6/23/2026,7/15/2026,Normal,0,Late,0,,,0.85,1,0,0.63125,1036150183
 20082900,Reham Malak Makram Ataya,Loan Officer,الشرقية - بدر - تساهيل,Mohamed Ashraf Ahmed Metwally,Sharqia,6/15/2026,6/22/2026,6/21/2026,6/22/2026,7/9/2026,Normal,0,Late,0,,,0.707142857,1,0,0.577678571,1229202498
-20082902,Gamal Khairy Mohamed Taha,Loan Officer,القاهرة - الاميرية - تساهيل,Fatma Zaree Mohamed Salem,Cairo,6/15/2026,6/18/2026,6/21/2026,6/22/2026,7/16/2026,Normal,0,Late,0,,,0.85,1,0,0.63125,1099573576
+20082902,Gamal Khairy Mohamed Taha,Loan Officer,القاهرة - الاميرية - تساهيل,Fatma Zaree Mohamed Salem,Cairo,6/15/2026,6/18/2026,6/21/2026,6/22/2026,7/16/2026,Normal,0,Late,0,,0.8,0.85,1,0,0.665,1099573576
 20082903,Mohamed Fathy Gomaa Mohamed,Loan Officer,البحيرة - غازى - تساهيل,Karim Zakarya Mohamed Abdel,Behira,6/15/2026,6/18/2026,6/23/2026,6/23/2026,,Normal,0,Late,0,,,,1,0,0.5,1275520686
 20082905,Marwan Hussen Sayed Mohamed,Loan Officer,القليوبية - القناطر الخيريه - تساهيل,Nourhan Farid Hamdy Abdelreheem,Qalubia,6/15/2026,6/18/2026,6/17/2026,6/20/2026,7/28/2026,Normal,0,Late,0,,,0.707142857,1,0,0.577678571,1097172493
 20082907,Ahmed Osman Ibrahem Osman,Loan Officer,الاسماعيلية - الاسماعيلية - مركزى,Bola Ata Fakhry Tadros,Ismailia,6/15/2026,6/18/2026,6/23/2026,7/5/2026,7/16/2026,Normal,0,Normal,0,,,0.707142857,1,1,0.890178571,1206821832
-9001249,mafdy fadal ibrahem wahaba,Gamaya Officer,المنيا - بندر ملوي - مركزى,Sandy Wageh Zakaria Rizk,Menia,7/9/2026,7/15/2026,7/14/2026,7/15/2026,,Normal,0,,0,,0.78,,1,,0.902222222,1275607377
+9001249,mafdy fadal ibrahem wahaba,Gamaya Officer,المنيا - بندر ملوي - مركزى,Sandy Wageh Zakaria Rizk,Menia,7/9/2026,7/15/2026,7/14/2026,7/15/2026,,Normal,0,Late,0,,0.78,,1,0,0.58,1275607377
 20082909,Asmaa Amin Mohamed Mohamed,Loan Officer,الشرقية - جميزة بني عمرو - تساهيل,Ahmed Ismael Abdelaal Abdelaal Ghoniem,Sharqia,6/15/2026,6/18/2026,6/21/2026,6/22/2026,7/15/2026,Normal,0,Late,0,,0.84,0.707142857,1,0,0.630142857,1016545808
 20082910,AbdRahman Mahmoud Ahmed Hamdan,Loan Officer,اسيوط - القوصية - تساهيل,Amany Kamal Sedky Hanin,Asseiut,6/15/2026,6/18/2026,6/22/2026,6/22/2026,7/15/2026,Normal,0,Late,0,,,0.85,1,0,0.63125,1067511010
 20082912,Aya Eldesouky Abdrabbo Zaghloul,Loan Officer,الغربية - مشله - تساهيل,Mahmoud Mohamed Talaat Abdelreheim,Gharbya,6/15/2026,6/22/2026,6/21/2026,7/6/2026,7/21/2026,Normal,0,Late,0,الغربية - محلة زياد - تساهيل,,0.85,1,0,0.63125,1019923290
@@ -153,7 +153,7 @@
 20082926,Esraa Hany Fawzy Esmail,Loan Officer,بني سويف - الواسطي ثالث - مركزى,Abram Magdy Tawfik Hana,Beny-suef,6/15/2026,6/18/2026,6/18/2026,6/18/2026,,Normal,0,Late,0,,,,1,0,0.5,1102414766
 20082927,David Sameh Qalini Farag Alla,Loan Officer,المنيا - سمالوط - مشروعي,Abanoub Emad Thabet Farag,Menia,6/15/2026,6/18/2026,6/21/2026,6/23/2026,7/13/2026,Normal,0,Late,0,,0.88,0.516666667,1,0,0.581,1063688320
 20082928,Mohamed Saeed Ahmed Abul,Loan Officer,الفيوم - اللاهون - تساهيل,Ahmed Ewais Ramadan Abdelhamed,Fayoum,6/15/2026,6/18/2026,6/22/2026,6/24/2026,7/9/2026,Normal,0,Late,0,,,0.707142857,1,0,0.577678571,103812124
-20082929,Mohamed Hamed Mohamed Eid,Loan Officer,الدقهلية - الجمالية - تساهيل,Eslam Mohamed Elsayed Khedr,Daqhlia,6/15/2026,6/18/2026,6/28/2026,7/15/2026,,Late,0,,0,,,,0,,0,1005767657
+20082929,Mohamed Hamed Mohamed Eid,Loan Officer,الدقهلية - الجمالية - تساهيل,Eslam Mohamed Elsayed Khedr,Daqhlia,6/15/2026,6/18/2026,6/28/2026,7/15/2026,,Late,0,Late,0,,,,0,0,0,1005767657
 20082930,Nadia Ashraf Abdo Mohamed Shahat,Loan Officer,السويس - الجناين - تساهيل,Ahmed Shaban Ali Shaban,Suez,6/15/2026,6/18/2026,6/17/2026,7/6/2026,,Normal,0,Late,0,,,,1,0,0.5,1093368089
 20082931,Reham Khaled Gaber Matar,Loan Officer,البحيرة - دمنهور - مشروعي,Ibrahim Reda Abdelaziz Kheerallah,Behira,6/14/2026,6/18/2026,6/20/2026,6/20/2026,,Normal,0,Late,0,,0.63,,1,0,0.537142857,1008091296
 20082932,Marwan Ibrahim Rashad Mohamed,Loan Officer,السويس - السويس - تساهيل,Ahmed Shaban Ali Shaban,Suez,6/15/2026,6/18/2026,6/22/2026,6/25/2026,7/20/2026,Normal,0,Late,0,,0.74,0.707142857,1,0,0.610142857,1068391931
@@ -162,7 +162,7 @@
 20082935,Manar Ahmed Ahmed Hassan,Loan Officer Investment,الجيزة - العياط ثان - تساهيل,Ahmed Mostafa Mohamed Ahmed,Giza,6/14/2026,6/18/2026,6/17/2026,6/22/2026,7/13/2026,Normal,0,Late,0,,,0.85,1,0,0.63125,1015329974
 20082936,Mahmoud Hamdi Tawfiq Mohamed,Loan Officer,سوهاج - اخميم ثان - تساهيل,Maysara Mohamed Helmy Abdulrahman,Souhag,6/15/2026,6/18/2026,6/18/2026,6/21/2026,7/19/2026,Normal,0,Late,0,,,تم الاستقالة,,,,1109173838
 20082937,Hagar Mostafa Taha Morsi,Loan Officer,الجيزة - البدرشين ثان - تساهيل,Ahmed Mostafa Mohamed Ahmed,Giza,6/15/2026,6/18/2026,6/17/2026,6/22/2026,7/16/2026,Normal,0,Late,0,,,0.707142857,1,0,0.577678571,1050609550
-20082938,Girgis Siha Abdelsabour Siha,Loan Officer,اسيوط - نزلة عبد اللاه - تساهيل,Amany Kamal Sedky Hanin,Asseiut,6/15/2026,6/22/2026,6/21/2026,6/23/2026,7/14/2026,Normal,0,Late,0,,,0.707142857,1,0,0.577678571,1226891887
+20082938,Girgis Siha Abdelsabour Siha,Loan Officer,اسيوط - نزلة عبد اللاه - تساهيل,Amany Kamal Sedky Hanin,Asseiut,6/15/2026,6/22/2026,6/21/2026,6/23/2026,7/14/2026,Normal,0,Late,0,,0.99,0.707142857,1,0,0.660142857,1226891887
 20082939,Mohamed Aly Elsayed Araby,Loan Officer,الاسماعيلية - نفيشه - تساهيل,Mahmoud Nabil Mohamed Rageh,Ismailia,6/14/2026,6/18/2026,6/26/2026,6/26/2026,,Late,0,Late,0,,,,0,0,0,1027928179
 20082941,Aya Khalid Eisa Khalifa,Loan Officer,الجيزة - البدرشين ثان - تساهيل,Ahmed Mostafa Mohamed Ahmed,Giza,6/15/2026,6/18/2026,6/17/2026,6/22/2026,7/13/2026,Normal,0,Late,0,,0.42,0.85,1,0,0.589,1102529784
 20082942,Shahd Yasser Fawzy Ibrahim,Loan Officer,الجيزة - البراجيل - تساهيل,Ramy Wafik Boshra Eshak,Giza,6/15/2026,6/18/2026,6/17/2026,6/22/2026,7/27/2026,Normal,0,Late,0,,0.79,0.707142857,1,0,0.620142857,1151374380
@@ -306,7 +306,7 @@
 50020832,jumana mohamed abdellah youssef,Loan Officer CF,الشرقية - ابوحماد - مشروعي,Samar Mahmoud Mohamed Elsayed,Sharqia,6/30/2026,7/5/2026,7/5/2026,7/6/2026,7/21/2026,Normal,0,Late,0,,,0.683333333,1,0,0.56875,1202983926
 50020833,Amani Ruby Ali Hafez,Loan Officer CF,الفيوم - سيلا - تساهيل,Ahmed Ewais Ramadan Abdelhamed,Fayoum,6/30/2026,7/5/2026,7/5/2026,7/6/2026,7/19/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1152159508
 50020835,neamaa rezk shoukry marzouk,Loan Officer CF,اسيوط - ابوتيج ثان - مركزى,Mario Khalaf Seha Zakhary,Asseiut,6/30/2026,7/5/2026,7/5/2026,7/8/2026,7/19/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1037681922
-50020836,Heba ashraf mohamed mahmoud,Loan Officer CF,الاسكندرية - الورديان - تساهيل,Amr yehia Abdelmonem Mohamed,Alex,6/30/2026,7/5/2026,7/5/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1278959450
+50020836,Heba ashraf mohamed mahmoud,Loan Officer CF,الاسكندرية - الورديان - تساهيل,Amr yehia Abdelmonem Mohamed,Alex,6/30/2026,7/5/2026,7/5/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1278959450
 50020852,Naglaa Mosaad Alsayed Mohamed,Loan Officer CF,الدقهلية - سندوب - تساهيل,Amr Adel Mohamed Shehata,Daqhlia,6/30/2026,7/5/2026,7/6/2026,7/7/2026,7/20/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1060152541
 50020860,Mayda Hany Moustafa Ebrahim,Loan Officer CF,الدقهلية - سندوب - تساهيل,Amr Adel Mohamed Shehata,Daqhlia,6/30/2026,7/5/2026,7/6/2026,7/7/2026,7/20/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1007336626
 20083106,walaa ragab abd el maksoud elhdad,Loan Officer,الدقهلية - برج النور - تساهيل,Amr Adel Mohamed Shehata,Daqhlia,7/1/2026,7/5/2026,7/5/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1028384704
@@ -390,7 +390,7 @@
 20083219,aya mohamed mahmoud ebs,Loan Officer,البحيرة - كفر الدوار - تساهيل,Ahmed Kamel Abdelatif Ali Nagy,Behira,7/1/2026,7/5/2026,7/5/2026,7/5/2026,,Normal,0,Late,0,,,,1,0,0.5,1208024588
 20083220,Salma Mohamed Mohamed Farouk Helmy,Loan Officer,بورسعيد - بورسعيد - تساهيل,Esraa Abdelsalam Ahmed Abdelsalam Elbarawy,Port-said,7/1/2026,7/5/2026,7/5/2026,7/6/2026,7/16/2026,Normal,0,Normal,0,,0.84,0.85,1,1,0.923,1210799555
 20083221,Elham Samy Faheem Roman,Loan Officer Investment,اسيوط - البدارى - مركزى,Mahmoud Raslan Abo Elghaet Mohamed,Asseiut,7/1/2026,7/5/2026,7/1/2026,7/5/2026,7/23/2026,Normal,0,Late,0,,,0.683333333,1,0,0.56875,1224070761
-20083222,ereen samer boshra yaqoub,Loan Officer Investment,اسيوط - ديروط الشريف - تساهيل,Amany Kamal Sedky Hanin,Asseiut,7/1/2026,7/5/2026,7/8/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1279649307
+20083222,ereen samer boshra yaqoub,Loan Officer Investment,اسيوط - ديروط الشريف - تساهيل,Amany Kamal Sedky Hanin,Asseiut,7/1/2026,7/5/2026,7/8/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1279649307
 20083223,shahd adel sayed elzeftawy,Loan Officer,الغربية - الدلجمون - تساهيل,Mahmoud Mohamed Talaat Abdelreheim,Gharbya,7/1/2026,7/5/2026,7/6/2026,7/7/2026,7/22/2026,Normal,0,Late,0,,,0.707142857,1,0,0.577678571,1069309806
 20083225,arwa ali sedik elsayed,Loan Officer,الشرقية - ههيا - تساهيل,Samar Mahmoud Mohamed Elsayed,Sharqia,7/1/2026,7/5/2026,7/6/2026,7/22/2026,,Normal,0,,0,,,,1,,1,1013089161
 20083227,demiana magdy aiad youakem,Loan Officer,المنيا - سمالوط - تساهيل,Abanoub Emad Thabet Farag,Menia,7/1/2026,7/5/2026,7/5/2026,7/6/2026,,Normal,0,Late,0,استقالت,,,1,0,0.5,0
@@ -559,7 +559,7 @@
 20057960,Rukia Farid Abdullah Muhammad,Loan Officer,القاهرة - المرج - تساهيل,Mina Ibrahim Azmy Aziz,Cairo,7/6/2026,7/11/2026,7/13/2026,7/14/2026,7/29/2026,Normal,0,Late,0,,,0.85,1,0,0.63125,1005186040
 20066449,Rajhi Hossam Rajhi Rajhi,Loan Officer,دمياط - الروضة فارسكور - تساهيل,Walid Elsayed Mohamed Atwa Elmongy ,Dumiatte,7/6/2026,7/11/2026,7/14/2026,7/28/2026,,Normal,0,,0,,,,1,,1,1032969988
 20066571,AbdElrahman Atef Mohamed Rashed,Loan Officer,المنيا - سمالوط - تساهيل,Abanoub Emad Thabet Farag,Menia,7/6/2026,7/11/2026,7/13/2026,7/20/2026,,Normal,0,,0,اعادة تعيين,,,1,,1,1126201244
-20068911,romany marzok wasef aziz,Loan Officer,المنيا - ابوقرقاص ثالث - مركزى,Karim Khaled Yahia Abdelghany,Menia,7/6/2026,7/11/2026,7/13/2026,7/15/2026,,Normal,0,,0,تم عمل الاستبيان  و مش مسمع ف الشيت ,,,1,,1,1224681202
+20068911,romany marzok wasef aziz,Loan Officer,المنيا - ابوقرقاص ثالث - مركزى,Karim Khaled Yahia Abdelghany,Menia,7/6/2026,7/11/2026,7/13/2026,7/15/2026,,Normal,0,Late,0,تم عمل الاستبيان  و مش مسمع ف الشيت ,,,1,0,0.5,1224681202
 20073919,nariman ahmed sayid hamad,Loan Officer,سوهاج - الجبيرات - تساهيل,Andro Samir Lahzy Ragheb,Souhag,7/6/2026,7/11/2026,7/13/2026,7/18/2026,,Normal,0,,0,,,,1,,1,1142294806
 20083333,soma mansour ali abdeltawab hasan,Loan Officer,البحيرة - الجنبيهي - تساهيل,Ahmed Samir Mohamed Moustafa Abohassan,Behira,7/6/2026,7/11/2026,7/9/2026,7/13/2026,7/14/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1022569450
 20083335,Fatma Badwey Hussein Hamoda,Loan Officer,الاقصر - ارمنت الحيط - تساهيل,Mostafa Eltayeb Mostafa Mohamed,Luxor,7/6/2026,7/11/2026,7/12/2026,7/13/2026,,Normal,0,Late,0,,,,1,0,0.5,1147517029
@@ -589,7 +589,7 @@
 20083377,hend rafat basiony abdelaziz,Loan Officer,الوادي الجديد - الخارجه - تساهيل,Asmaa Youssef Mohamed Youssef,Wady Elgded,7/6/2026,7/11/2026,7/9/2026,7/13/2026,,Normal,0,Late,0,,0.84,,1,0,0.597142857,1035144164
 20083378,Amany Mohamed Elqasmy Ahmed Ali,Loan Officer Investment,الدقهلية - كفر طنبول - تساهيل,Ahmed Fathy Elsayed Hammed Ahmed Omara,Daqhlia,7/6/2026,7/11/2026,7/12/2026,7/19/2026,7/19/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1093237167
 20083379,Doaa Shaker Fawzy Abdelkarim,Loan Officer,الدقهلية - أجا - تساهيل,Amr Adel Mohamed Shehata,Daqhlia,7/6/2026,7/11/2026,7/9/2026,7/12/2026,7/20/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1025332976
-20083380,Hassanin Ali Hussein Ibrahim,Loan Officer,الشرقية - رمسيس,Mohamed Ebrahem Mohamed Boray,Sharqia,7/6/2026,7/11/2026,7/12/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1007862240
+20083380,Hassanin Ali Hussein Ibrahim,Loan Officer,الشرقية - رمسيس,Mohamed Ebrahem Mohamed Boray,Sharqia,7/6/2026,7/11/2026,7/12/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1007862240
 20083386,hussrin mostafa mohamed mahmoud,Loan Officer,قنا - الجبلاو - تساهيل,Eslam Ahmed Mahmoud Abdallah,Qena,7/6/2026,7/11/2026,7/9/2026,7/14/2026,7/14/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1007900528
 20083391,mohamed osama fathy lotfy,Loan Officer,القليوبية - طحانوب - تساهيل,Amira Issa Lotfy Khamis,Qalubia,7/6/2026,7/11/2026,7/14/2026,7/26/2026,7/22/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1001579325
 20083392,Martena Samy Shehata Gerges,Loan Officer,اسيوط - اسيوط - مركزى,Madonna Maher Yacoub Abdel Qoudous,Asseiut,7/6/2026,7/11/2026,7/8/2026,7/15/2026,7/15/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1069416461
@@ -618,13 +618,13 @@
 50020976,Chrstina Fahem Nasem Esrafil,Loan Officer CF,اسوان - كوم امبو - مركزى,Osama Fathy Naseef Bekhet,Aswan,7/6/2026,7/11/2026,7/12/2026,7/12/2026,7/21/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1210655700
 50020977,Mohammed Jamal Abdulhamid Ahmad,Loan Officer CF,كفر الشيخ - الحامول - تساهيل,Fify Mohamed Moawad Salama Ali Qassem,Kafr Shikh,7/6/2026,7/11/2026,7/13/2026,7/28/2026,,Normal,0,,0,,,,1,,1,1008922412
 50020981,Mohamed Mahmoud Mohamed Mahmoudy,Loan Officer CF,الشرقية - ابوكبير - تساهيل,Samar Mahmoud Mohamed Elsayed,Sharqia,7/6/2026,7/11/2026,7/9/2026,7/22/2026,,Normal,0,,0,,,,1,,1,1035202330
-50020986,Hadeer Ahmed Hassan Hasan,Loan Officer CF,الاسماعيلية - كسفريت - تساهيل,Farid ahmed hasan mohamed ahmed ,Ismailia,7/6/2026,7/11/2026,7/14/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1015127508
+50020986,Hadeer Ahmed Hassan Hasan,Loan Officer CF,الاسماعيلية - كسفريت - تساهيل,Farid ahmed hasan mohamed ahmed ,Ismailia,7/6/2026,7/11/2026,7/14/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1015127508
 9001225,khristina nasr elias nasr,Gamaya Officer,بني سويف - الميمون - تساهيل,Amgad Ghaly Naguib Bebawy,Beny-suef,7/6/2026,7/11/2026,7/9/2026,7/9/2026,7/26/2026,Normal,0,Late,0,,,0.683333333,1,0,0.56875,1212636005
 9001229,fatma yousef mohamed anwar,Gamaya Officer,الدقهلية - ميت القرشي - تساهيل,Abdallah Hesham Elshafei Abdel Razek Mohamed,Daqhlia,7/6/2026,7/11/2026,7/8/2026,7/14/2026,7/20/2026,Normal,0,Normal,0,,0.59,0.683333333,1,1,0.823,1024978172
 9001237,Eman ragab mohamed ahmed,Gamaya Officer,اسوان - اسوان - مركزى,Moustafa Korany Mohamed Ahmed,Aswan,7/6/2026,7/6/2026,7/6/2026,7/7/2026,,Normal,0,Late,0,,,,1,0,0.5,1142449639
 20083396,Mohamad Gamal Mohamad Ramadan,Loan Officer Investment,اسيوط - وسط منفلوط - مركزى,Abdelaziz Khaled Abdelaziz Mohamed,Asseiut,7/7/2026,7/11/2026,7/9/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1040341499
 20083397,Walaa Alaa Abdelaziz ibraheem,Loan Officer,الدقهلية - السنبلاوين - تساهيل,Ahmed Fathy Elsayed Hammed Ahmed Omara,Daqhlia,7/7/2026,7/11/2026,7/13/2026,7/13/2026,,Normal,0,Late,0,,,,1,0,0.5,1012916962
-20083399,Habiba Shabaan Mohamed Morcy Ali,Loan Officer,المنيا - مغاغة غرب - مركزى,Kerolos Wasef Fahmy Wasef,Menia,7/7/2026,7/11/2026,7/13/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1061797960
+20083399,Habiba Shabaan Mohamed Morcy Ali,Loan Officer,المنيا - مغاغة غرب - مركزى,Kerolos Wasef Fahmy Wasef,Menia,7/7/2026,7/11/2026,7/13/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1061797960
 20083404,bassant kamel elsayd kamel,Loan Officer,الاسكندرية - المنتزه - تساهيل,Ahmed Gaber Aly Ahmed Aly,Alex,7/7/2026,7/11/2026,7/13/2026,7/22/2026,,Normal,0,,0,,,,1,,1,1130426211
 20083406,mahmoud shabban khaled deif allah,Loan Officer,الجيزة - الحوامديه - تساهيل,Hady Abdelnasser Hanfy Shaarawy,Giza,7/7/2026,7/11/2026,7/13/2026,7/20/2026,,Normal,0,,0,,,,1,,1,1031397716
 20083407,Ahmed Ali Ahmed Shoober,Loan Officer,الدقهلية - أجا - تساهيل,Amr Adel Mohamed Shehata,Daqhlia,7/7/2026,7/11/2026,7/9/2026,7/12/2026,7/20/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1004662981
@@ -637,8 +637,8 @@
 20083419,mahmoud eid ibrahim mohamed,Loan Officer,القليوبية - العرب - تساهيل,Eslam Ahmed Radwan Ahmed,Qalubia,7/7/2026,7/11/2026,7/12/2026,7/12/2026,7/26/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1098369052
 20083425,nabila ibrahim elsaady mohareb,Loan Officer,البحيرة - شبراخيت ثان,Gomaa Elsayed Mohamed Ghoneem,Behira,7/7/2026,7/11/2026,7/9/2026,7/12/2026,7/21/2026,Normal,0,Normal,0,,,0.707142857,1,1,0.890178571,1092835613
 20083426,Sayed Mohamed Ali Mohamed,Loan Officer,الاسكندرية - مشروع ناصر - تساهيل,Amr yehia Abdelmonem Mohamed,Alex,7/7/2026,7/11/2026,7/13/2026,7/13/2026,,Normal,0,Late,0,,,,1,0,0.5,0
-20083427,Moheb ehab qasdy isaak,Loan Officer,المنيا - ابوقرقاص ثان - تساهيل,Sherif Dahy Zakaria Ibrahem,Menia,7/7/2026,7/11/2026,7/13/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1206214311
-20083430,Aya Eid Abdul Alim Hussen,Loan Officer,المنوفية - كفر داود - تساهيل,Mohamed Zaghlol Abdelmoatty Rady,Menoufia,7/7/2026,7/11/2026,7/12/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1131525506
+20083427,Moheb ehab qasdy isaak,Loan Officer,المنيا - ابوقرقاص ثان - تساهيل,Sherif Dahy Zakaria Ibrahem,Menia,7/7/2026,7/11/2026,7/13/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1206214311
+20083430,Aya Eid Abdul Alim Hussen,Loan Officer,المنوفية - كفر داود - تساهيل,Mohamed Zaghlol Abdelmoatty Rady,Menoufia,7/7/2026,7/11/2026,7/12/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1131525506
 20083435,ebraheem samey abdelaal,Loan Officer,الدقهلية - ابو جلال - تساهيل,Karim Ahmed Badawy Hamad,Daqhlia,7/7/2026,7/11/2026,7/9/2026,7/12/2026,7/14/2026,Normal,0,Normal,0,,,0.707142857,1,1,0.890178571,1001932712
 20083437,Malak Gamal Hassanein Qubesy,Loan Officer,سوهاج - الطليحات - مركزى,Andro Samir Lahzy Ragheb,Souhag,7/7/2026,7/11/2026,7/12/2026,7/18/2026,,Normal,0,,0,,,,1,,1,1035736018
 20083438,Mohammed Said Saad Said,Loan Officer,اسيوط - المطيعه - تساهيل,Mario Khalaf Seha Zakhary,Asseiut,7/7/2026,7/11/2026,7/9/2026,7/13/2026,7/25/2026,Normal,0,Normal,0,,,0.707142857,1,1,0.890178571,1123884268
@@ -671,10 +671,10 @@
 20083452,lamis noreldin ali atallah,Loan Officer,قنا - نجع حمادي - تساهيل,Ashaaia Onsy Melad Riyad,Qena,7/8/2026,7/11/2026,7/16/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1020128956
 20083453,Doaa Alnagdy Mohamed Mohamed,Loan Officer,الغربية - شبراقاص - تساهيل,Mahmoud Mohamed Talaat Abdelreheim,Gharbya,7/8/2026,7/11/2026,7/9/2026,7/14/2026,,Normal,0,Late,0,,,,1,0,0.5,1044818530
 20083454,hamam alezaby mohamed hammouda,Loan Officer,دمياط - كفر سعد ثان,Amr Ahmed Saad Elshrabasy,Dumiatte,7/8/2026,7/11/2026,7/12/2026,7/13/2026,7/16/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1025523347
-20083455,Samr Hasanin Mahmoud Ibrahem,Loan Officer,المنيا - مدينة المنيا - تساهيل,Sherif Dahy Zakaria Ibrahem,Menia,7/8/2026,7/11/2026,7/12/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1094145624
+20083455,Samr Hasanin Mahmoud Ibrahem,Loan Officer,المنيا - مدينة المنيا - تساهيل,Sherif Dahy Zakaria Ibrahem,Menia,7/8/2026,7/11/2026,7/12/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1094145624
 20083456,ramdan fared heder already,Loan Officer,المنيا - بني مزار ثان - تساهيل,Marina Barsom Abdelmaseh Saleeb,Menia,7/8/2026,7/11/2026,7/21/2026,7/23/2026,,Late,0,,0,الاخصائى لايتواجد فى الفرع وغالبا مش هيكمل (مدير الفرع),,,0,,0,1099764978
 20083458,mario mishil fathy abdallah,Loan Officer,القاهرة - عزبة النخل - تساهيل,Mina Ibrahim Azmy Aziz,Cairo,7/8/2026,7/11/2026,7/11/2026,7/11/2026,,Normal,0,Late,0,,,,1,0,0.5,0
-20083459,mariam hany ibrahim mohamed,Loan Officer,الغربية - الدلجمون - تساهيل,Mahmoud Mohamed Talaat Abdelreheim,Gharbya,7/8/2026,7/11/2026,7/12/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1021309607
+20083459,mariam hany ibrahim mohamed,Loan Officer,الغربية - الدلجمون - تساهيل,Mahmoud Mohamed Talaat Abdelreheim,Gharbya,7/8/2026,7/11/2026,7/12/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1021309607
 20083461,Assala BahaEldin Mahmoud Mohamed,Loan Officer,اسوان - ابو الريش,Moustafa Korany Mohamed Ahmed,Aswan,7/8/2026,7/6/2026,7/5/2026,7/7/2026,,Normal,0,Late,0,,,,1,0,0.5,1115197726
 20083462,Norhan Khaled Saied Ahmed,Loan Officer,الدقهلية - المطرية - تساهيل,Eslam Mohamed Elsayed Khedr,Daqhlia,7/8/2026,7/11/2026,7/9/2026,7/15/2026,7/16/2026,Normal,0,Normal,0,اجازه لاستكمال شهاده الجامعه ,,0.707142857,1,1,0.890178571,1029239057
 9001269,mary ihab ayad abdel,Gamaya Officer,بني سويف - الواسطي ثالث - مركزى,Abram Magdy Tawfik Hana,Beny-suef,7/9/2026,7/15/2026,7/12/2026,7/13/2026,7/27/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1124007561
@@ -687,13 +687,13 @@
 50021007,samar mohamed ghazi abdelmagid,Loan Officer CF,كفر الشيخ - مسير - تساهيل,Nourhan Adel Yousef Mohamed Shehata,Kafr Shikh,7/8/2026,7/11/2026,7/9/2026,7/9/2026,,Normal,0,Late,0,,,,1,0,0.5,1036657734
 50021009,samar mohsen mohamed abdelhady,Loan Officer CF,البحيرة - الطيريه - تساهيل,Mohamed Fathy Abdelatif Abdelatif Maklad,Behira,7/8/2026,7/11/2026,7/9/2026,7/12/2026,7/22/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1021933665
 50021010,norhan taha abdelbaqy soliman,Loan Officer CF,القليوبية - بنها ثان - تساهيل,Khaled Ali Mohamed Mohamed,Qalubia,7/8/2026,7/11/2026,7/11/2026,7/14/2026,,Normal,0,Late,0,,,,1,0,0.5,1205700903
-50021011,randa adel bushra sadalla,Loan Officer CF,المنيا - دلجا - تساهيل,Kerolos Sameh Fekry Basta,Menia,7/8/2026,7/11/2026,7/12/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1208288372
+50021011,randa adel bushra sadalla,Loan Officer CF,المنيا - دلجا - تساهيل,Kerolos Sameh Fekry Basta,Menia,7/8/2026,7/11/2026,7/12/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1208288372
 50021014,shahd serag monir amean abdelaal,Loan Officer CF,القليوبية - بنها ثان - تساهيل,Khaled Ali Mohamed Mohamed,Qalubia,7/8/2026,7/11/2026,7/11/2026,7/15/2026,7/29/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1556501661
 50021016,Ahmed atteya mohamed abdullah,Loan Officer CF,الاسكندرية - ابو قير - تساهيل,Ahmed Gaber Aly Ahmed Aly,Alex,7/8/2026,7/11/2026,7/12/2026,7/13/2026,7/28/2026,Normal,0,Late,0,,0.84,0.85,1,0,0.673,1096081128
 50021018,shahd ahmed ahmed elzohairy,Loan Officer CF,القليوبية - بنها ثان - تساهيل,Khaled Ali Mohamed Mohamed,Qalubia,7/8/2026,7/11/2026,7/11/2026,7/15/2026,7/29/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1507971564
 50021019,Aya Gmal Ahmed Abdelaah,Loan Officer CF,سوهاج - طهطا - تساهيل,Ahmed Elfarghaly Elsaied Aly,Souhag,7/8/2026,7/11/2026,7/14/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1142646453
 50021020,ahmed mamdoh mohamed elhalway,Loan Officer CF,الاسكندرية - الورديان - تساهيل,Amr yehia Abdelmonem Mohamed,Alex,7/8/2026,7/11/2026,7/12/2026,7/15/2026,7/22/2026,Normal,0,Normal,0,,0.73,0.85,1,1,0.901,1279528311
-20083436,Omar Mohamed Awad Gamil,Loan Officer,الغربية - مشله - تساهيل,Mahmoud Mohamed Talaat Abdelreheim,Gharbya,7/7/2026,7/11/2026,7/12/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1274432642
+20083436,Omar Mohamed Awad Gamil,Loan Officer,الغربية - مشله - تساهيل,Mahmoud Mohamed Talaat Abdelreheim,Gharbya,7/7/2026,7/11/2026,7/12/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1274432642
 20083382,mohamed abdelmeneem abdelwahed elmkawy,Loan Officer,كفر الشيخ - ابو دنيا - تساهيل,Abdelsatar Mohamed Abdelsatar Elsandafawy,Kafr Shikh,7/6/2026,7/11/2026,7/12/2026,7/14/2026,7/15/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1092387265
 9001231,nohaa abrahim ayad rabie,Gamaya Officer,اسيوط - ساحل سليم ثان - تساهيل,Mahmoud Raslan Abo Elghaet Mohamed,Asseiut,7/5/2026,7/11/2026,7/5/2026,7/9/2026,7/26/2026,Normal,0,Late,0,,,0.85,1,0,0.63125,1210665882
 20083421,Yasmin Ibrahim Abdelhalim Elsaid Qassem,Loan Officer,كفر الشيخ - بيلا - تساهيل,Emad Atef Adly Ibrahem,Kafr Shikh,7/5/2026,7/11/2026,7/9/2026,7/13/2026,7/15/2026,Normal,0,Normal,0,,,0.707142857,1,1,0.890178571,1039346819
@@ -715,7 +715,7 @@
 50021084,ahmed samer abdallah ibrahem,Loan Officer CF,البحيرة - جناكليس - تساهيل,Khaled Mohamed Ebrahim Qoutb,Behira,7/7/2026,7/15/2026,7/14/2026,7/15/2026,7/20/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1063790794
 9001248,nahed mohamed hasanen elded,Gamaya Officer,البحيرة - ابوحمص ثان - تساهيل,Ahmed Bahaa Eldin Soliman,Behira,7/7/2026,7/15/2026,7/14/2026,7/15/2026,7/20/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1070826123
 9001255,rawda ibrahim sobhy ibrahim,Gamaya Officer,الجيزة - امبابة ثان - تساهيل,Moustafa Mohamed Mohamed Ahmed,Giza,7/7/2026,7/15/2026,7/12/2026,7/13/2026,7/28/2026,Normal,0,Late,0,,,0.85,1,0,0.63125,1021322076
-9001261,Marina Adel Abdelmalak Hanna,Gamaya Officer,المنيا - طوه - تساهيل,Sherif Dahy Zakaria Ibrahem,Menia,7/7/2026,7/15/2026,7/12/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1205018183
+9001261,Marina Adel Abdelmalak Hanna,Gamaya Officer,المنيا - طوه - تساهيل,Sherif Dahy Zakaria Ibrahem,Menia,7/7/2026,7/15/2026,7/12/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1205018183
 20024025,Ebram Ibrahim Naguib Milad,Loan Officer,المنيا - مطاي - تساهيل,Elshaimaa Osama Fahim Ahmed Farag,Menia,7/8/2026,7/15/2026,7/15/2026,7/19/2026,,Normal,0,,0,,,,1,,1,1276386862
 20043152,Walid Youssef Mohamed Mahmoud,Loan Officer,سوهاج - الشيخ مسعود - تساهيل,Andro Samir Lahzy Ragheb,Souhag,7/8/2026,7/15/2026,7/15/2026,7/19/2026,,Normal,0,,0,,,,1,,1,0
 20056768,Mahmoud Maher Mohamed Mahmoud Khalaf,Loan Officer,القاهرة - حدائق المعادي - تساهيل,Merna Maher Hamam Smamor Saleb,Cairo,7/8/2026,7/15/2026,7/20/2026,7/20/2026,,Normal,0,,0,,,,1,,1,1019938925
@@ -731,7 +731,7 @@
 20083486,Rahmah AbdelAziem Ismail Mohammed,Loan Officer,بني سويف - العواونة - تساهيل,Youssef Amin Makram Yacoub,Beny-suef,7/8/2026,7/15/2026,7/13/2026,7/27/2026,7/27/2026,Normal,0,Normal,0,,,0.707142857,1,1,0.890178571,1009336282
 20083493,fatma said ibrahim hussinnasr,Loan Officer,القليوبية - القلج - تساهيل,Eslam Ahmed Radwan Ahmed,Qalubia,7/8/2026,7/15/2026,7/15/2026,7/15/2026,7/29/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1080809609
 20083495,eman soliman hassan eid,Loan Officer,البحيرة - زاوية غزال - تساهيل,Ibrahim Reda Abdelaziz Kheerallah,Behira,7/8/2026,7/15/2026,7/15/2026,7/16/2026,7/20/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1014489048
-20083518,karim khamis mahmoud abdelrhem,Loan Officer,الجيزة - الاخصاص ثالث - مركزى,Ahmed Mostafa Mohamed Ahmed,Giza,7/8/2026,7/15/2026,7/15/2026,7/18/2026,,Normal,0,,0,,,,1,,1,1118269276
+20083518,karim khamis mahmoud abdelrhem,Loan Officer,الجيزة - الاخصاص ثالث - مركزى,Ahmed Mostafa Mohamed Ahmed,Giza,7/8/2026,7/15/2026,7/15/2026,7/18/2026,,Normal,0,,0,,,0.85,1,,0.918181818,1118269276
 20083522,hoda ahmed helmy abdelmotalb,Loan Officer,القاهرة - المطرية - تساهيل,Fatma Zaree Mohamed Salem,Cairo,7/8/2026,7/15/2026,7/15/2026,7/16/2026,7/29/2026,Normal,0,Normal,0,,,0.707142857,1,1,0.890178571,1279851403
 20083528,Nahed Mahmoud Gouda Abdelfatah,Loan Officer,القاهرة - عين شمس ثان - تساهيل,Mina Ibrahim Azmy Aziz,Cairo,7/8/2026,7/15/2026,7/12/2026,7/13/2026,7/27/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1151939881
 20083544,Rawan Abdelkawy Ahmed ZareeOsman,Loan Officer,الدقهلية - دماص - تساهيل,Ahmed Fathy Elsayed Hammed Ahmed Omara,Daqhlia,7/8/2026,7/15/2026,7/14/2026,7/26/2026,7/18/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1096575402
@@ -745,14 +745,14 @@
 50021024,Amnia Wahid ALsaid Fagel,Loan Officer CF,قنا - الشطبية - تساهيل,Ashaaia Onsy Melad Riyad,Qena,7/8/2026,7/15/2026,7/16/2026,7/23/2026,7/23/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1064036016
 50021025,Noorhan Khaled Salah Abbas,Loan Officer CF,قنا - الشطبية - تساهيل,Ashaaia Onsy Melad Riyad,Qena,7/8/2026,7/15/2026,7/16/2026,7/23/2026,7/23/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1035365532
 50021027,nesreen mahmoud neaam abdelbary,Loan Officer CF,البحيرة - كفر الدوار - تساهيل,Ahmed Kamel Abdelatif Ali Nagy,Behira,7/8/2026,7/15/2026,7/7/2026,7/8/2026,7/20/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1094207990
-50021028,Sondos Mohamed Mohamed abdelmonam,Loan Officer CF,سوهاج - جرجا ثان - تساهيل,Abelrazik Tharwat Abdelrazik Qasem,Souhag,7/8/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1065771538
+50021028,Sondos Mohamed Mohamed abdelmonam,Loan Officer CF,سوهاج - جرجا ثان - تساهيل,Abelrazik Tharwat Abdelrazik Qasem,Souhag,7/8/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1065771538
 50021033,Basma Abdelrahman  Muawad  Hassan,Loan Officer CF,الشرقية - فاقوس - مشروعي,Ahmed Ismael Abdelaal Abdelaal Ghoniem,Sharqia,7/8/2026,7/15/2026,7/16/2026,7/21/2026,,Normal,0,,0,,,,1,,1,1012804532
 50021034,Mariana Alfy Hakim Boktor,Loan Officer CF,الاقصر - الاقصر - تساهيل,Ismael Haggag Ismael Abdelhafez,Luxor,7/8/2026,7/15/2026,7/15/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1276217233
 50021037,Mariam Bara Sayed Abdelkawy,Loan Officer CF,الفيوم - اصلان - تساهيل,Ebram Samy Moawad Samaan,Fayoum,7/8/2026,7/15/2026,7/14/2026,7/15/2026,7/19/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1275646524
 50021039,habiba hasanen shaban hasanen,Loan Officer CF,القليوبية - القلج - تساهيل,Eslam Ahmed Radwan Ahmed,Qalubia,7/8/2026,7/15/2026,7/15/2026,7/15/2026,7/29/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1102942709
 50021053,Omina Magdy Bardahony Hway,Loan Officer CF,الجيزة - امبابة - تساهيل,Ramy Wafik Boshra Eshak,Giza,7/8/2026,7/15/2026,7/16/2026,7/26/2026,7/28/2026,Normal,0,Normal,0,,,0.516666667,1,1,0.81875,1119019478
 50021073,Mohamed elsayed tawfik mahmoud,Loan Officer CF,الاسكندرية - الورديان - تساهيل,Amr yehia Abdelmonem Mohamed,Alex,7/8/2026,7/15/2026,7/14/2026,7/15/2026,7/22/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1205649062
-9001239,nasma salah abdullah mohamed,Gamaya Officer,سوهاج - جهينه - تساهيل,Andro Samir Lahzy Ragheb,Souhag,7/8/2026,7/15/2026,7/14/2026,7/20/2026,,Normal,0,,0,,,,1,,1,1211058404
+9001239,nasma salah abdullah mohamed,Gamaya Officer,سوهاج - جهينه - تساهيل,Andro Samir Lahzy Ragheb,Souhag,7/8/2026,7/15/2026,7/14/2026,7/20/2026,,Normal,0,,0,,0.79,,1,,0.906666667,1211058404
 9001320,christen adel mokhtar angly,Gamaya Officer,المنيا - الروضه ثان - تساهيل,Sandy Wageh Zakaria Rizk,Menia,7/18/2026,7/19/2026,7/19/2026,7/21/2026,,Normal,0,,0,تم عمل الاستبيان اكتر من مرة و مش مسمع ف الشيت,,,1,,1,1128804715
 9001322,engy amgad ibrahem khlel,Gamaya Officer,المنيا - الروضه ثان - تساهيل,Sandy Wageh Zakaria Rizk,Menia,7/19/2026,7/19/2026,7/19/2026,7/21/2026,,Normal,0,,0,تم عمل الاستبيان اكتر من مرة و مش مسمع ف الشيت,,,1,,1,1226596917
 9001256,ezzat nasr boqtor shehata,Gamaya Officer,القاهرة - دار السلام ثان - مركزى,Merna Maher Hamam Smamor Saleb,Cairo,7/8/2026,7/15/2026,7/8/2026,7/8/2026,7/25/2026,Normal,0,Late,0,,,0.85,1,0,0.63125,1227038516
@@ -804,7 +804,7 @@
 20071388,mohamed abdelrazk mohamed abdelrazek,Loan Officer,الدقهلية - بلقاس - تساهيل,Mahmoud Mohsen Ahmed Abdallah Aldawlatly,Daqhlia,7/12/2026,7/15/2026,7/22/2026,7/25/2026,7/28/2026,Late,0,Normal,0,,,0.85,0,1,0.63125,1030213110
 20077377,sherine adel labib mahawad,Loan Officer,سوهاج - الشيخ مسعود - تساهيل,Andro Samir Lahzy Ragheb,Souhag,7/12/2026,7/15/2026,7/15/2026,7/19/2026,,Normal,0,,0,,,,1,,1,1287568996
 20083512,jihad elsayed elbadry elsayed,Loan Officer,سوهاج - طما - تساهيل,Ahmed Rashad Mostafa Soliman,Souhag,7/12/2026,7/15/2026,7/14/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1092984425
-20083514,reham rafat abdelaziz abdelhady,Loan Officer,الغربية - شوني - تساهيل,Ahmed Samir fathi Elganainy,Gharbya,7/12/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1225029628
+20083514,reham rafat abdelaziz abdelhady,Loan Officer,الغربية - شوني - تساهيل,Ahmed Samir fathi Elganainy,Gharbya,7/12/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1225029628
 20083527,Malak Ashraf Mahmoud osman,Loan Officer,القاهرة - عين شمس ثان - تساهيل,Mina Ibrahim Azmy Aziz,Cairo,7/12/2026,7/15/2026,7/12/2026,7/13/2026,7/27/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1124478198
 20083543,mai hany salah abdelmaboud,Loan Officer,الشرقية - ابوحماد - مشروعي,Samar Mahmoud Mohamed Elsayed,Sharqia,7/12/2026,7/15/2026,7/19/2026,7/21/2026,,Normal,0,,0,,,,1,,1,1220094157
 20083546,lodgy mamdoh sand hendy tadros,Loan Officer,اسيوط - الغنايم - تساهيل,Mario Khalaf Seha Zakhary,Asseiut,7/12/2026,7/15/2026,7/13/2026,7/15/2026,7/29/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1274585597
@@ -816,7 +816,7 @@
 20083566,Mira Adly Saleh Mikhael,Loan Officer,الاسكندرية - فلمنج - تساهيل,Amr yehia Abdelmonem Mohamed,Alex,7/12/2026,7/15/2026,7/16/2026,7/25/2026,,Normal,0,,0,,,,1,,1,1550717733
 20083568,nancy atef halim nashied,Loan Officer Investment,المنيا - مطاي - تساهيل,Elshaimaa Osama Fahim Ahmed Farag,Menia,7/12/2026,7/15/2026,7/15/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1210359218
 20083570,Youstina AbdElmasih Gohar Tamsah,Loan Officer Investment,المنيا - ابوان - تساهيل,Elshaimaa Osama Fahim Ahmed Farag,Menia,7/12/2026,7/15/2026,7/15/2026,7/16/2026,,Normal,0,,0,,0.78,,1,,0.902222222,1158803807
-20083572,rasha elsayed mohamed ahmed,Loan Officer,الغربية - الدلجمون - تساهيل,Mahmoud Mohamed Talaat Abdelreheim,Gharbya,7/12/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1211027319
+20083572,rasha elsayed mohamed ahmed,Loan Officer,الغربية - الدلجمون - تساهيل,Mahmoud Mohamed Talaat Abdelreheim,Gharbya,7/12/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1211027319
 20083575,mohamed tharwat abdeltawab mohamed,Loan Officer,الجيزة - الحوامديه - تساهيل,Hady Abdelnasser Hanfy Shaarawy,Giza,7/12/2026,7/15/2026,7/13/2026,7/20/2026,,Normal,0,,0,,,,1,,1,1129418179
 20083576,safa gamal ahmed abdelalem,Loan Officer,الجيزة - بولاق الدكرور - تساهيل,Ramy Wafik Boshra Eshak,Giza,7/12/2026,7/15/2026,7/16/2026,7/20/2026,7/27/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1145742968
 20083577,Nabil Eiid shahata Farg allah,Loan Officer,المنيا - ابا البلد - تساهيل,Kerolos Wasef Fahmy Wasef,Menia,7/12/2026,7/15/2026,7/15/2026,7/19/2026,,Normal,0,,0,,0.78,,1,,0.902222222,1228213821
@@ -828,7 +828,7 @@
 20083586,Fatma mousa mohamed mostafa araby,Loan Officer,القليوبية - بنها ثان - تساهيل,Khaled Ali Mohamed Mohamed,Qalubia,7/12/2026,7/15/2026,7/13/2026,7/15/2026,7/29/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1552797001
 20083589,mohamed abdelbaset mahmod mohamed,Loan Officer,الجيزة - السادس من اكتوبر - تساهيل,Hady Abdelnasser Hanfy Shaarawy,Giza,7/12/2026,7/15/2026,7/19/2026,7/19/2026,,Normal,0,,0,,,,1,,1,0
 20083590,Toka gamal hosny shehata,Loan Officer,الجيزة - السادس من اكتوبر - تساهيل,Hady Abdelnasser Hanfy Shaarawy,Giza,7/12/2026,7/15/2026,7/21/2026,7/21/2026,,Late,0,,0,الموظفة لن تحضر الى الفرع حتى يتم التكويد بتعليمات من مدير الفرع,,,0,,0,0
-20083593,nermin sayed hussein ismail,Loan Officer,القاهرة - المقطم - تساهيل,Omar Ashraf Abdelfattah Atya,Cairo,7/12/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1018591214
+20083593,nermin sayed hussein ismail,Loan Officer,القاهرة - المقطم - تساهيل,Omar Ashraf Abdelfattah Atya,Cairo,7/12/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1018591214
 20083596,Samia Ashref Gallal Moustafa,Loan Officer,القليوبية - الخصوص - تساهيل,Nourhan Ahmed Mohamed Abdelwahab,Qalubia,7/12/2026,7/15/2026,7/15/2026,7/16/2026,7/20/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,112694906
 20083597,tahany ibrahim abdelrhman omar,Loan Officer,الشرقية - القنايات - تساهيل,Mohamed Ashraf Ahmed Metwally,Sharqia,7/12/2026,7/15/2026,7/16/2026,7/22/2026,,Normal,0,,0,,,,1,,1,1145373416
 20083600,zhraa salah antar elsawy,Loan Officer,المنوفية - الشهداء ثان - تساهيل,Ibrahim Mohamed Mohamed Elkber,Menoufia,7/12/2026,7/15/2026,7/15/2026,7/18/2026,,Normal,0,,0,,,,1,,1,1083789219
@@ -874,7 +874,7 @@
 20083626,Mena Magdy Saba Naeam,Loan Officer,المنيا - جزيره شارونه - تساهيل,Kerolos Wasef Fahmy Wasef,Menia,7/13/2026,7/15/2026,7/15/2026,7/19/2026,,Normal,0,,0,,,,1,,1,1126735788
 20083628,habiba ahmed abdelazez deaf,Loan Officer,البحيرة - الجنبيهي - تساهيل,Ahmed Samir Mohamed Moustafa Abohassan,Behira,7/13/2026,7/15/2026,7/15/2026,7/16/2026,7/20/2026,Normal,0,Normal,0,,,0.564285714,1,1,0.836607143,1222587451
 20083631,reem elsaid hassn ahmed,Loan Officer,الشرقية - الاخيوه - تساهيل,Mohamed Ebrahem Mohamed Boray,Sharqia,7/13/2026,7/15/2026,7/16/2026,7/20/2026,,Normal,0,,0,,,,1,,1,1130870885
-20083632,hanan labad badran amid,Loan Officer,الاسماعيلية - القنطره غرب - تساهيل,Bola Ata Fakhry Tadros,Ismailia,7/13/2026,7/15/2026,7/13/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1018708677
+20083632,hanan labad badran amid,Loan Officer,الاسماعيلية - القنطره غرب - تساهيل,Bola Ata Fakhry Tadros,Ismailia,7/13/2026,7/15/2026,7/13/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1018708677
 20083633,Manal Habib Fouad Habib Rizk,Loan Officer,الغربية - سنباط - تساهيل,Tamer Ali Kamal Elfalah,Gharbya,7/13/2026,7/15/2026,7/15/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1201929143
 20083637,Walaa Sherif Zakaria Roshdy,Loan Officer Investment,البحيرة - الرحمانيه - تساهيل,Gomaa Elsayed Mohamed Ghoneem,Behira,7/13/2026,7/15/2026,7/16/2026,7/18/2026,7/29/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,0
 20083640,anas qadri hamed abdelkarim,Loan Officer,سوهاج - اخميم ثان - تساهيل,Maysara Mohamed Helmy Abdulrahman,Souhag,7/13/2026,7/15/2026,7/19/2026,7/21/2026,7/21/2026,Normal,0,Normal,0,الاخصائي غير متواجد بالفرع لاستكمال الاوراق,,0.707142857,1,1,0.890178571,1095202945
@@ -904,7 +904,7 @@
 50021099,wala abdelfatah elsayed ebrahem,Loan Officer CF,كفر الشيخ - سيدي غازي - تساهيل,Emad Atef Adly Ibrahem,Kafr Shikh,7/13/2026,7/15/2026,7/15/2026,7/16/2026,7/16/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1022343812
 50021100,amany ahmed mohamed elsayed,Loan Officer CF,الاسماعيلية - فايد ثان,Farid ahmed hasan mohamed ahmed ,Ismailia,7/13/2026,7/15/2026,7/14/2026,7/15/2026,7/20/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1033941181
 50021101,heba gamal mohamed hassan,Loan Officer CF,الشرقية - ابوحماد - مشروعي,Samar Mahmoud Mohamed Elsayed,Sharqia,7/13/2026,7/15/2026,7/21/2026,7/21/2026,,Late,0,,0,,,,0,,0,1514122481
-20083489,Amira Saad Abdelrahman Khalil,Loan Officer,اسيوط - العفادرة - تساهيل,Mahmoud Raslan Abo Elghaet Mohamed,Asseiut,7/9/2026,7/15/2026,7/14/2026,7/15/2026,,Normal,0,,0,,0.89,,1,,0.951111111,1095271135
+20083489,Amira Saad Abdelrahman Khalil,Loan Officer,اسيوط - العفادرة - تساهيل,Mahmoud Raslan Abo Elghaet Mohamed,Asseiut,7/9/2026,7/15/2026,7/14/2026,7/15/2026,,Normal,0,Late,0,,0.89,,1,0,0.611428571,1095271135
 20083473,Mariam Samer Salama lotfy AwadAllah,Loan Officer,كفر الشيخ - بلطيم - تساهيل,Fify Mohamed Moawad Salama Ali Qassem,Kafr Shikh,7/7/2026,7/15/2026,7/15/2026,7/26/2026,7/28/2026,Normal,0,Normal,0,,,0.278571429,1,1,0.729464286,1032345506
 20083506,Mohamed Hosny Saadeldeen Naser,Loan Officer,اسيوط - البدارى - مركزى,Mahmoud Raslan Abo Elghaet Mohamed,Asseiut,7/9/2026,7/15/2026,7/14/2026,7/16/2026,,Normal,0,,0,,0.78,,1,,0.902222222,1555758234
 20083508,Mona Aboda Ibrahem Mandour,Loan Officer,كفر الشيخ - بلطيم - تساهيل,Fify Mohamed Moawad Salama Ali Qassem,Kafr Shikh,7/9/2026,7/15/2026,7/15/2026,7/26/2026,7/28/2026,Normal,0,Normal,0,,,0.707142857,1,1,0.890178571,1038636607
@@ -979,7 +979,7 @@
 20083339,Rawda Mohamed Abdelrazek Ahmed Elseedy,Loan Officer Investment,كفر الشيخ - مسير - تساهيل,Nourhan Adel Yousef Mohamed Shehata,Kafr Shikh,7/1/2026,7/15/2026,7/15/2026,7/16/2026,7/16/2026,Normal,0,Normal,0,,0.89,0.85,1,1,0.933,1001649136
 20083347,Karema Esmael Mohamed Ahmed,Loan Officer,الجيزة - المنيب - تساهيل,Hossam Gamal Faried Othman,Giza,6/27/2026,7/15/2026,7/20/2026,7/22/2026,,Normal,0,,0,,0.94,,1,,0.973333333,1124984015
 20083348,zinab ahmed ramadan ismail,Loan Officer,الجيزة - العياط ثان - تساهيل,Ahmed Mostafa Mohamed Ahmed,Giza,7/1/2026,7/15/2026,7/16/2026,7/20/2026,7/27/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1142845498
-20083349,wageha samy mohamed elsaid eltabee,Loan Officer,الدقهلية - ميت سلسيل - مشروعي,Eslam Mohamed Elsayed Khedr,Daqhlia,7/1/2026,7/15/2026,7/19/2026,7/20/2026,7/20/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1204129824
+20083349,wageha samy mohamed elsaid eltabee,Loan Officer,الدقهلية - ميت سلسيل - مشروعي,Eslam Mohamed Elsayed Khedr,Daqhlia,7/1/2026,7/15/2026,7/19/2026,7/20/2026,7/20/2026,Normal,0,Normal,0,,0.99,0.85,1,1,0.953,1204129824
 20083360,Elham Saber Ahmed Mohamed,Loan Officer,البحيرة - الدسانسه,Ahmed Kamel Abdelatif Ali Nagy,Behira,6/22/2026,7/15/2026,7/16/2026,7/18/2026,7/20/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1031554016
 20083367,Amal mahmpud ahmed mohamed,Loan Officer,الدقهلية - ابو دشيشه - تساهيل,Mahmoud Mohsen Ahmed Abdallah Aldawlatly,Daqhlia,6/28/2026,7/15/2026,7/18/2026,7/19/2026,7/20/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1014301314
 20083376,nada elsayed ebrahem hasan,Loan Officer,الدقهلية - طناح - تساهيل,Amr Adel Mohamed Shehata,Daqhlia,7/1/2026,7/15/2026,7/18/2026,7/20/2026,7/20/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1270245757
@@ -1028,19 +1028,19 @@
 20083703,Shahed Adel Abas Hessien,Loan Officer,اسيوط - المطيعه - تساهيل,Mario Khalaf Seha Zakhary,Asseiut,7/14/2026,7/15/2026,7/15/2026,7/19/2026,,Normal,0,,0,,0.68,,1,,0.857777778,1110154667
 20083704,Yasmen Aeman Kamel Hassen,Loan Officer,الجيزة - المنيب - تساهيل,Hossam Gamal Faried Othman,Giza,7/14/2026,7/15/2026,7/20/2026,7/22/2026,,Normal,0,,0,,,,1,,1,1126382226
 20083706,ragdy abdella mohamed ali,Loan Officer,الشرقية - قهبونه - تساهيل,Mohamed Ebrahem Mohamed Boray,Sharqia,7/14/2026,7/15/2026,7/16/2026,7/19/2026,,Normal,0,,0,,,,1,,1,1276789309
-20083707,mahmoud magdy duab mabrook,Loan Officer,المنيا - تانوف - تساهيل,Kerolos Sameh Fekry Basta,Menia,7/14/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1154482785
-20083710,Habiba Mohamed Khairy khaled,Loan Officer,البحيرة - ابوالمطامير ثان - مركزى,Karim Zakarya Mohamed Abdel,Behira,7/9/2026,7/15/2026,7/14/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1069337715
+20083707,mahmoud magdy duab mabrook,Loan Officer,المنيا - تانوف - تساهيل,Kerolos Sameh Fekry Basta,Menia,7/14/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1154482785
+20083710,Habiba Mohamed Khairy khaled,Loan Officer,البحيرة - ابوالمطامير ثان - مركزى,Karim Zakarya Mohamed Abdel,Behira,7/9/2026,7/15/2026,7/14/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1069337715
 20083711,Esraa Ibrahiem Ahmed.AbdElmotlb@tasaheelfinance.com Matar,Loan Officer,دمياط - سيف الدين - تساهيل,Walid Elsayed Mohamed Atwa Elmongy ,Dumiatte,7/14/2026,7/15/2026,7/19/2026,7/26/2026,,Normal,0,,0,,,,1,,1,0
 20083712,Amgad Mohamed Mahmoud Abdelaziz,Loan Officer,الغربية - مشله - تساهيل,Mahmoud Mohamed Talaat Abdelreheim,Gharbya,7/14/2026,7/15/2026,7/20/2026,7/21/2026,,Normal,0,,0,,,,1,,1,1095723429
 20083714,Asala morsi elsayed mohamed,Loan Officer,البحيرة - خط الوسطاني - تساهيل,Ahmed Kamel Abdelatif Ali Nagy,Behira,7/14/2026,7/15/2026,7/15/2026,7/16/2026,7/20/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1125942346
 20083715,mobarak eaed mobarak ghatas,Loan Officer,المنيا - طحا الاعمدة - تساهيل,Abanoub Emad Thabet Farag,Menia,7/14/2026,7/15/2026,7/15/2026,7/26/2026,,Normal,0,,0,,,,1,,1,1112430205
 20083716,Hana Eisa shokr alla Gad elsayed,Loan Officer,المنيا - اطسا المحطة - تساهيل,Abanoub Emad Thabet Farag,Menia,7/14/2026,7/15/2026,7/15/2026,7/21/2026,7/25/2026,Normal,0,Normal,0,,,0.707142857,1,1,0.890178571,1148699514
 20083719,eman mohmed taha mahmoud,Loan Officer,الاسماعيلية - القنطره غرب - تساهيل,Bola Ata Fakhry Tadros,Ismailia,7/14/2026,7/15/2026,7/14/2026,7/25/2026,7/19/2026,Normal,0,Normal,0,,,0.707142857,1,1,0.890178571,1001278529
-50011790,yostena adel samer abdelsayed,Loan Officer CF,بني سويف - سمسطا - تساهيل,Peter Samy Mahfouz Makhlof,Beny-suef,7/1/2026,7/5/2026,7/1/2026,7/5/2026,7/22/2026,Normal,0,Late,0,,,0.683333333,1,0,0.56875,1207775792
+50011790,yostena adel samer abdelsayed,Loan Officer CF,بني سويف - سمسطا - تساهيل,Peter Samy Mahfouz Makhlof,Beny-suef,7/1/2026,7/5/2026,7/1/2026,7/5/2026,7/22/2026,Normal,0,Late,0,,0.79,0.683333333,1,0,0.613,1207775792
 50011846,Donia Mohamed Elsayed Elshrbiny Elagamy,Loan Officer CF,الدقهلية - برامون - تساهيل,Abdallah Sabry Abdallah Barakat,Daqhlia,7/1/2026,7/15/2026,7/29/2026,7/29/2026,,Late,0,,0,تم تقديم الاستقاله يوم 25/7/2026,,,0,,0,1050922608
 50012180,asmaa mostafa ismail ali ismail,Loan Officer CF,الجيزة - بولاق الدكرور - تساهيل,Ramy Wafik Boshra Eshak,Giza,7/1/2026,7/15/2026,7/16/2026,7/19/2026,7/27/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1150177133
 50013449,Mahmoud Karrm Mahmoud Elshahat,Loan Officer CF,الشرقية - الزقازيق - تساهيل,Mohamed Yasser AbdelSadek Ibrahim,Sharqia,7/1/2026,7/15/2026,7/16/2026,7/18/2026,,Normal,0,,0,,,,1,,1,1200264529
-50014765,Rewan Mahmoud Ahmed Ali,Loan Officer CF,الاسماعيلية - كسفريت - تساهيل,Farid ahmed hasan mohamed ahmed ,Ismailia,7/1/2026,7/15/2026,7/14/2026,7/15/2026,,Normal,0,,0,,0.85,,1,,0.933333333,1091840421
+50014765,Rewan Mahmoud Ahmed Ali,Loan Officer CF,الاسماعيلية - كسفريت - تساهيل,Farid ahmed hasan mohamed ahmed ,Ismailia,7/1/2026,7/15/2026,7/14/2026,7/15/2026,,Normal,0,Late,0,,0.85,,1,0,0.6,1091840421
 50014890,ahmed jameah sahah sadiq,Loan Officer CF,القاهرة - زهراء المعادي - مشروعي,Merna Maher Hamam Smamor Saleb,Cairo,7/1/2026,7/15/2026,7/16/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1153123882
 50019975,amany mohamed kadry elsayed,Loan Officer CF,البحيرة - كوم حماده ثان - تساهيل,Mohamed Fathy Abdelatif Abdelatif Maklad,Behira,7/1/2026,7/15/2026,7/16/2026,7/18/2026,7/18/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1030280270
 5002052,Ziad Ali AbuZaid Ali,Loan Officer CF,المنوفية - البرانيه - تساهيل,Mohamed Nagah Mahmoud Khamis,Menoufia,6/24/2026,7/15/2026,7/22/2026,7/22/2026,7/16/2026,Late,0,Normal,0,,,0.516666667,0,1,0.50625,1018556996
@@ -1096,7 +1096,7 @@
 50021058,shahd mohamed ahmed khalefa,Loan Officer CF,الجيزة - العياط ثالث - مركزى,Ahmed Mostafa Mohamed Ahmed,Giza,7/1/2026,7/15/2026,7/16/2026,7/18/2026,7/27/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1113305871
 50021061,Zahra Gouda Omran Jaafary,Loan Officer CF,الاقصر - القرايا - تساهيل,Michael Milad Salama Ebrahim,Luxor,7/6/2026,7/15/2026,7/15/2026,7/18/2026,,Normal,0,,0,,,,1,,1,1009516129
 50021068,Donia Mohamed badr Mohamed Badr,Loan Officer CF,المنوفية - صراوة - تساهيل,Mohamed Nagah Mahmoud Khamis,Menoufia,7/5/2026,7/15/2026,7/21/2026,7/22/2026,,Late,0,,0,,,,0,,0,1012292509
-50021074,Asmaa Mohamed Karem Ibrahim,Loan Officer CF,المنيا - بني مزار - تساهيل,Marina Barsom Abdelmaseh Saleeb,Menia,7/6/2026,7/15/2026,7/15/2026,7/21/2026,,Normal,0,,0,,,,1,,1,1151791421
+50021074,Asmaa Mohamed Karem Ibrahim,Loan Officer CF,المنيا - بني مزار - تساهيل,Marina Barsom Abdelmaseh Saleeb,Menia,7/6/2026,7/15/2026,7/15/2026,7/21/2026,,Normal,0,,0,,0.33,,1,,0.702222222,1151791421
 50021078,Fatma abdelnaser hassan abady,Loan Officer CF,البحر الاحمر - سفاجا - مركزى,Doaa Abdelqader Mohamed Mahmoud ,Red sea,7/1/2026,7/15/2026,7/9/2026,7/12/2026,,Normal,0,Late,0,,0.79,,1,0,0.582857143,1024292279
 50021089,Salow Koyez Halamy Mohamed,Loan Officer CF,سوهاج - جرجا - تساهيل,Abelrazik Tharwat Abdelrazik Qasem,Souhag,7/1/2026,7/15/2026,7/14/2026,7/14/2026,,Normal,0,Late,0,,,,1,0,0.5,1558221546
 50021093,basmala mohamed ahmed ahmed,Loan Officer CF,القاهرة - الزاويه الحمراء - تساهيل,Fatma Zaree Mohamed Salem,Cairo,7/1/2026,7/6/2026,7/6/2026,7/7/2026,7/25/2026,Normal,0,Late,0,,,0.85,1,0,0.63125,1096720039
@@ -1113,7 +1113,7 @@
 50021111,Rwaa Radwan Fahmey Mohamed Shokr,Loan Officer CF,كفر الشيخ - مطوبس ثان,Abdelsatar Mohamed Abdelsatar Elsandafawy,Kafr Shikh,7/14/2026,7/15/2026,7/15/2026,7/16/2026,7/16/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1090915042
 50021113,marena reda fawzy fouad,Loan Officer CF,المنيا - قلوصنا - تساهيل,Elshaimaa Osama Fahim Ahmed Farag,Menia,7/14/2026,7/15/2026,7/15/2026,7/16/2026,,Normal,0,,0,,0.78,,1,,0.902222222,1104128191
 50021114,abdallha mohamed hanfy abdo,Loan Officer CF,الاسكندرية - شرق سموحه - مركزى,Omar Farid Ismail Ghalab,Alex,7/14/2026,7/15/2026,7/21/2026,7/22/2026,7/22/2026,Late,0,Normal,0,,,0.85,0,1,0.63125,1226745705
-50021115,eman ahmed hamdy hemdan,Loan Officer CF,سوهاج - بني حميل - تساهيل,Hamdy Fawzy Mahmoud Abdelrahem,Souhag,7/14/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1155160892
+50021115,eman ahmed hamdy hemdan,Loan Officer CF,سوهاج - بني حميل - تساهيل,Hamdy Fawzy Mahmoud Abdelrahem,Souhag,7/14/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1155160892
 50021116,Abdelbaky Mohamed Ahmed Abaky,Loan Officer CF,المنيا - صنيم - تساهيل,Karim Khaled Yahia Abdelghany,Menia,7/14/2026,7/15/2026,7/15/2026,7/20/2026,,Normal,0,,0,,,,1,,1,1151276982
 50021117,Madona Refat Mihawd Nasrallah,Loan Officer CF,سوهاج - البلينا - تساهيل,Ahmed Mohamed Salman Mohamed,Souhag,7/14/2026,7/15/2026,7/16/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1286818059
 50021118,Elaria Rezk Mekhaeel Khalil,Loan Officer CF,المنيا - صنيم - تساهيل,Karim Khaled Yahia Abdelghany,Menia,7/13/2026,7/15/2026,7/15/2026,7/19/2026,,Normal,0,,0,,0.83,,1,,0.924444444,1559462959
@@ -1130,7 +1130,7 @@
 9001208,aya aliwa mohamed eldesouky,Gamaya Officer,دمياط - سيف الدين - تساهيل,Walid Elsayed Mohamed Atwa Elmongy ,Dumiatte,6/23/2026,7/15/2026,7/19/2026,7/22/2026,,Normal,0,,0,,,,1,,1,1283344207
 9001211,reda fawzy kamel elsayed hassan,Gamaya Officer,البحيرة - قافله - تساهيل,Ahmed Kamel Abdelatif Ali Nagy,Behira,6/28/2026,7/15/2026,7/19/2026,7/20/2026,7/21/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1226552672
 50020845,martina hany saleb sabet,Loan Officer CF,المنيا - البراجيل قبلى - تساهيل,Sandy Wageh Zakaria Rizk,Menia,7/1/2026,7/5/2026,7/5/2026,7/6/2026,7/21/2026,Normal,0,Late,0,,,0.683333333,1,0,0.56875,1202276054
-9001220,kawser hosny mohamed abdelaal,Gamaya Officer,سوهاج - نجع النجار - تساهيل,Khaled Hagag Mohamed Mahmoud,Souhag,7/1/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1140431212
+9001220,kawser hosny mohamed abdelaal,Gamaya Officer,سوهاج - نجع النجار - تساهيل,Khaled Hagag Mohamed Mahmoud,Souhag,7/1/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1140431212
 9001221,Asmaa sayeh abbas ahmed,Gamaya Officer,قنا - الجبلاو - تساهيل,Eslam Ahmed Mahmoud Abdallah,Qena,7/1/2026,7/15/2026,7/15/2026,7/21/2026,,Normal,0,,0,,,,1,,1,1090027353
 9001223,shrouk adel boury ismael,Gamaya Officer,القاهرة - السيده عائشه - تساهيل,Omar Ashraf Abdelfattah Atya,Cairo,7/1/2026,7/15/2026,7/13/2026,7/13/2026,7/29/2026,Normal,0,Late,0,,,0.683333333,1,0,0.56875,1150951032
 9001226,Mariam Magdy Malak Fahmi,Gamaya Officer,بني سويف - العواونة - تساهيل,Youssef Amin Makram Yacoub,Beny-suef,7/1/2026,7/15/2026,7/9/2026,7/13/2026,7/23/2026,Normal,0,Normal,0,,,0.516666667,1,1,0.81875,1273940857
@@ -1146,13 +1146,13 @@
 9001245,Abeer Abdelhamid Ebrahim Elsaadany,Gamaya Officer,كفر الشيخ - مسير - تساهيل,Nourhan Adel Yousef Mohamed Shehata,Kafr Shikh,7/1/2026,7/15/2026,7/15/2026,7/16/2026,7/16/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1097139335
 9001246,Niera rada atia ebrahem,Gamaya Officer,الدقهلية - الكردي - تساهيل,Alaa Eldin Ahmed Ibrahim Ahmed Sengab,Daqhlia,7/5/2026,7/15/2026,7/8/2026,7/14/2026,7/20/2026,Normal,0,Normal,0,,,0.516666667,1,1,0.81875,1023560791
 50020906,Marko Wajdi Waleem Shafiq,Loan Officer CF,المنيا - ملوي ثان - تساهيل,Sandy Wageh Zakaria Rizk,Menia,7/1/2026,7/5/2026,7/5/2026,7/6/2026,7/21/2026,Normal,0,Late,0,,,0.683333333,1,0,0.56875,1097808512
-9001254,Manar Nabil Mounir Hanna,Gamaya Officer,المنيا - منشية الدهب - تساهيل,Sherif Dahy Zakaria Ibrahem,Menia,7/5/2026,7/15/2026,7/12/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1273208742
+9001254,Manar Nabil Mounir Hanna,Gamaya Officer,المنيا - منشية الدهب - تساهيل,Sherif Dahy Zakaria Ibrahem,Menia,7/5/2026,7/15/2026,7/12/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1273208742
 9001257,nagham gamal mahmoud ibrahim,Gamaya Officer,الجيزة - مزغونه ثان,Ahmed Mostafa Mohamed Ahmed,Giza,7/1/2026,7/15/2026,7/16/2026,7/18/2026,7/27/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1158910997
 9001258,yasmin khaled ali ibrahim,Gamaya Officer,الجيزة - بولاق الدكرور - تساهيل,Ramy Wafik Boshra Eshak,Giza,7/1/2026,7/15/2026,7/16/2026,7/19/2026,7/27/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1116133746
 9001259,Mary Saad Amin Suleiman,Gamaya Officer,الشرقية - ام الزين - مشروعي,Mohamed Ashraf Ahmed Metwally,Sharqia,6/27/2026,7/15/2026,7/16/2026,7/20/2026,,Normal,0,,0,,,,1,,1,1141918202
 9001260,noura mahmoud huessien abdo,Gamaya Officer,الدقهلية - نجير - تساهيل,Alaa Eldin Ahmed Ibrahim Ahmed Sengab,Daqhlia,7/1/2026,7/15/2026,7/12/2026,7/15/2026,7/15/2026,Normal,0,Normal,0,,,0.516666667,1,1,0.81875,1094696785
 9001265,Rania Ragheb Salem El-dreeny,Gamaya Officer,الغربية - المحلة الكبري - تساهيل,Ahmed Samir fathi Elganainy,Gharbya,7/1/2026,7/15/2026,7/16/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1224777907
-9001266,Hatem Mohamed Hamed Abdelrahman,Gamaya Officer,الاسكندرية - ابو قير - تساهيل,Ahmed Gaber Aly Ahmed Aly,Alex,7/5/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1281382588
+9001266,Hatem Mohamed Hamed Abdelrahman,Gamaya Officer,الاسكندرية - ابو قير - تساهيل,Ahmed Gaber Aly Ahmed Aly,Alex,7/5/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1281382588
 9001271,Esraa Abdelsalam Ahmed Ragab,Gamaya Officer,بني سويف - سمسطا - تساهيل,Peter Samy Mahfouz Makhlof,Beny-suef,7/1/2026,7/5/2026,7/1/2026,7/5/2026,7/22/2026,Normal,0,Late,0,,,0.683333333,1,0,0.56875,1554673292
 9001275,shaimaa samir abdelbast elwahab,Gamaya Officer,كفر الشيخ - شابه - تساهيل,Nourhan Adel Yousef Mohamed Shehata,Kafr Shikh,7/5/2026,7/15/2026,7/15/2026,7/16/2026,7/19/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1033731491
 50020984,Alhasan Adel Ikram Abdjabr,Loan Officer CF,المنيا - ملوي ثان - تساهيل,Sandy Wageh Zakaria Rizk,Menia,7/7/2026,7/11/2026,7/7/2026,7/12/2026,7/27/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1069600134
@@ -1166,7 +1166,7 @@
 20083526,Yostina Eshak Kromal Saed,Loan Officer,المنيا - ملوي ثان - تساهيل,Sandy Wageh Zakaria Rizk,Menia,7/9/2026,7/15/2026,7/12/2026,7/14/2026,7/29/2026,Normal,0,Late,0,,,0.85,1,0,0.63125,1205160723
 50021035,zynab gamal abdelhamed fadl,Loan Officer CF,المنيا - اتليدم - تساهيل,Sandy Wageh Zakaria Rizk,Menia,7/6/2026,7/15/2026,7/15/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1062129210
 9001288,Safy Alaaeldeen Abdelwahab Arfa,Gamaya Officer,الشرقية - الزقازيق - تساهيل,Mohamed Yasser AbdelSadek Ibrahim,Sharqia,7/5/2026,7/15/2026,7/16/2026,7/19/2026,,Normal,0,,0,,,,1,,1,1203898621
-9001289,Dimeana Safwat Abdelmaseh Tawfeq,Gamaya Officer,سوهاج - البلينا - تساهيل,Ahmed Mohamed Salman Mohamed,Souhag,7/1/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,,0,,0.89,,1,,0.951111111,1515261533
+9001289,Dimeana Safwat Abdelmaseh Tawfeq,Gamaya Officer,سوهاج - البلينا - تساهيل,Ahmed Mohamed Salman Mohamed,Souhag,7/1/2026,7/15/2026,7/15/2026,7/15/2026,,Normal,0,Late,0,,0.89,,1,0,0.611428571,1515261533
 9001290,Sara Mohamed Reyad Mohamed,Gamaya Officer,السويس - السويس - تساهيل,Ahmed Shaban Ali Shaban,Suez,7/13/2026,7/15/2026,7/14/2026,7/20/2026,7/28/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1124696254
 9001291,Shahd Ali Mahdy Ahmed,Gamaya Officer,السويس - الجناين - تساهيل,Ahmed Shaban Ali Shaban,Suez,7/5/2026,7/15/2026,7/15/2026,7/21/2026,7/21/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1150457438
 9001213,Dmiana Saeed Adly Gied,Gamaya Officer,المنيا - البراجيل قبلى - تساهيل,Sandy Wageh Zakaria Rizk,Menia,6/22/2026,7/15/2026,7/12/2026,7/12/2026,,Normal,0,Late,0,,,,1,0,0.5,1221681059
@@ -1239,7 +1239,7 @@
 9001302,Maiar Salah Mahmoud Khadir,Gamaya Officer,المنوفية - زاوية الناعوره - تساهيل,Mohamed Abel Hamed Fathallah,Menoufia,7/15/2026,7/16/2026,7/19/2026,7/20/2026,,Normal,0,,0,,,,1,,1,1026978588
 9001303,Nesma Rizk Boshra Nashed,Gamaya Officer,المنيا - بني مزار - تساهيل,Marina Barsom Abdelmaseh Saleeb,Menia,7/15/2026,7/16/2026,7/15/2026,7/21/2026,,Normal,0,,0,,,,1,,1,1222411539
 9001304,manar ahmed abdelmotlb elshanawy,Gamaya Officer,كفر الشيخ - سيدي سالم - تساهيل,Ahmed Mahgoub Ibrahim Mahgoub,Kafr Shikh,7/14/2026,7/16/2026,7/16/2026,7/27/2026,7/28/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1112774837
-9001279,joy youssef mazouz rezk,Gamaya Officer,المنيا - ملوي ثان - تساهيل,Sandy Wageh Zakaria Rizk,Menia,7/12/2026,7/16/2026,7/12/2026,7/15/2026,,Normal,0,,0,,,,1,,1,1206603377
+9001279,joy youssef mazouz rezk,Gamaya Officer,المنيا - ملوي ثان - تساهيل,Sandy Wageh Zakaria Rizk,Menia,7/12/2026,7/16/2026,7/12/2026,7/15/2026,,Normal,0,Late,0,,,,1,0,0.5,1206603377
 9001306,Abdallah Mohamed Abdallah Aboqren,Gamaya Officer,قنا - نقاده ثان - تساهيل,Abdelrahman ahmed mohamed Abdelrahem,Qena,7/15/2026,7/16/2026,7/19/2026,7/20/2026,7/21/2026,Normal,0,Normal,0,,,0.516666667,1,1,0.81875,1007806424
 20083788,demyana fawzy ebrahim samaan,Loan Officer,القاهرة - حدائق القبه - تساهيل,Fatma Zaree Mohamed Salem,Cairo,7/1/2026,7/20/2026,7/20/2026,7/21/2026,7/28/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1101735933
 9001319,Omnia Ayman Abdellatif Mosa Sheha,Gamaya Officer,الغربية - السنطة - تساهيل,Mahmoud Mohamed Talaat Abdelreheim,Gharbya,7/1/2026,7/20/2026,7/20/2026,7/20/2026,7/20/2026,Normal,0,Normal,0,,,0.35,1,1,0.75625,1146974362
@@ -1275,7 +1275,7 @@
 20083782,Ragaa Abdulrahman Suliman Moqbel,Loan Officer,الشرقية - دوار سلامه,Ahmed Ismael Abdelaal Abdelaal Ghoniem,Sharqia,7/14/2026,7/20/2026,7/19/2026,7/19/2026,,Normal,0,,0,,,,1,,1,1041858452
 20083783,aya mohamad rfay sayed,Loan Officer,اسيوط - ابو تيج غرب - مركزى,Mario Khalaf Seha Zakhary,Asseiut,7/16/2026,7/20/2026,7/19/2026,7/21/2026,,Normal,0,,0,,,,1,,1,1111766771
 20083784,mohamed nasser mostafa abdelhafez,Loan Officer,القليوبية - العرب - تساهيل,Eslam Ahmed Radwan Ahmed,Qalubia,7/15/2026,7/20/2026,,,,,0,,0,الموظف اجازه مرضي كسر قدم,,,,,,1061475651
-20083785,mahmoud mohamed mohamed morsi,Loan Officer,الشرقية - بدر - تساهيل,Mohamed Ashraf Ahmed Metwally,Sharqia,7/9/2026,7/20/2026,7/27/2026,7/27/2026,,Late,0,,0,الاخصائي كان اجازه لظروف خاصه به وسوف يتم تدريبه يوم 27/7/2026,,,0,,0,1115598206
+20083785,mahmoud mohamed mohamed morsi,Loan Officer,الشرقية - بدر - تساهيل,Mohamed Ashraf Ahmed Metwally,Sharqia,7/9/2026,7/20/2026,7/27/2026,7/27/2026,,Late,0,,0,,,,0,,0,1115598206
 20083786,essam ali ali haasen,Loan Officer,اسيوط - الدوير - تساهيل,Mario Khalaf Seha Zakhary,Asseiut,7/18/2026,7/20/2026,7/19/2026,7/22/2026,,Normal,0,,0,,,,1,,1,1026276925
 20083787,Mina Sami Rofael Abdo,Loan Officer,الاسكندرية - المنشية - تساهيل,Mohamed Hassan Gendy Hassan Saed,Alex,7/15/2026,7/20/2026,7/28/2026,7/28/2026,,Late,0,,0,,,,0,,0,1205933947
 20083790,Sanaa Mohamed Rashad Esmaiel,Loan Officer,كفر الشيخ - البرلس - تساهيل,Fify Mohamed Moawad Salama Ali Qassem,Kafr Shikh,7/16/2026,7/20/2026,7/23/2026,7/28/2026,,Normal,0,,0,,,,1,,1,1284484079
@@ -1343,7 +1343,7 @@
 9001316,rawan tarek abdelati abdelhalim,Gamaya Officer,الجيزة - كرداسة - تساهيل,Mohamed Saeed Hosny Shazly,Giza,7/15/2026,7/20/2026,7/21/2026,7/28/2026,,Normal,0,,0,,,,1,,1,1146337010
 9001318,Mirna Walid Abdelhamid Ahmed,Gamaya Officer,الشرقية - ابوحماد - مشروعي,Samar Mahmoud Mohamed Elsayed,Sharqia,7/14/2026,7/20/2026,7/19/2026,7/21/2026,,Normal,0,,0,,,,1,,1,1007149833
 9001292,martina emad farouk sadek,Gamaya Officer,المنيا - الروضه ثان - تساهيل,Sandy Wageh Zakaria Rizk,Menia,7/14/2026,7/20/2026,7/15/2026,7/16/2026,,Normal,0,,0,,,,1,,1,1021628233
-9001321,Zekraa Nasr Said Nasr,Gamaya Officer,كفر الشيخ - فوه - تساهيل,Abdelsatar Mohamed Abdelsatar Elsandafawy,Kafr Shikh,7/8/2026,7/20/2026,7/20/2026,7/20/2026,7/21/2026,Normal,0,Normal,0,,,0.683333333,1,1,0.88125,1033870287
+9001321,Zekraa Nasr Said Nasr,Gamaya Officer,كفر الشيخ - فوه - تساهيل,Abdelsatar Mohamed Abdelsatar Elsandafawy,Kafr Shikh,7/8/2026,7/20/2026,7/20/2026,7/20/2026,7/21/2026,Normal,0,Normal,0,,1,0.683333333,1,1,0.905,1033870287
 9001305,marian osama isahk melek,Gamaya Officer,المنيا - بندر ملوي - مركزى,Sandy Wageh Zakaria Rizk,Menia,7/13/2026,7/20/2026,7/15/2026,7/18/2026,,Normal,0,,0,,,,1,,1,1553703442
 9001323,Nader Gad Fekry Fahim,Gamaya Officer,اسيوط - البدارى ثان,Mahmoud Raslan Abo Elghaet Mohamed,Asseiut,7/13/2026,7/20/2026,7/20/2026,7/21/2026,7/27/2026,Normal,0,Normal,0,,,0.85,1,1,0.94375,1270279211
 9001324,Fatma Said Hassan Ahmed,Gamaya Officer,الاقصر - الحبيل - تساهيل,Mostafa Eltayeb Mostafa Mohamed,Luxor,7/16/2026,7/20/2026,7/21/2026,7/21/2026,,Normal,0,,0,,,,1,,1,1025538086
