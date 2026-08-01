@@ -330,6 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
             renderHQValidationSection(scopedSupRecords);
             processTab4CasesPipeline(scopedData, metrics);
             renderMeasureOfSuccessTab();
+            renderResignationAuditTab(); // Trigger New Audit Tab Render
         }
     }
 
@@ -616,7 +617,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const table = document.getElementById(tableId);
         if (!table) return;
 
-        const headers = table.querySelectorAll('th[data-sort], th[data-sup-gov-sort], th[data-sup-detail-sort], th[data-hq-sort], th[data-mos-sort]');
+        const headers = table.querySelectorAll('th[data-sort], th[data-sup-gov-sort], th[data-sup-detail-sort], th[data-hq-sort], th[data-mos-sort], th[data-audit-sort]');
         headers.forEach((th, colIdx) => {
             th.style.cursor = 'pointer';
             th.onclick = () => {
@@ -693,25 +694,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span class="flow-step-title">TOTAL HIRED</span>
                 <span class="flow-step-sub">Employees</span>
             </div>
-
             <div class="flow-arrow-separator">→</div>
-
             <div class="flow-step-item">
                 <span class="flow-step-pct text-danger">${m.resignedPct.toFixed(1)}%</span>
                 <span class="flow-step-title">RESIGNED</span>
                 <span class="flow-step-sub">${m.resignedCount.toLocaleString()} of total hired</span>
             </div>
-
             <div class="flow-arrow-separator">→</div>
-
             <div class="flow-step-item">
                 <span class="flow-step-pct text-purple">${activePct}%</span>
                 <span class="flow-step-title">ACTIVE EMPLOYEES</span>
                 <span class="flow-step-sub">${m.effectivePopulation.toLocaleString()} remaining</span>
             </div>
-
             <div class="flow-arrow-separator">→</div>
-
             <div class="flow-group-box">
                 <span class="flow-group-title">TRAINING STATUS (% of Active)</span>
                 <div class="flow-group-row">
@@ -729,9 +724,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
             </div>
-
             <div class="flow-arrow-separator">→</div>
-
             <div class="flow-group-box">
                 <span class="flow-group-title">FOLLOW-UP (% of Active Base)</span>
                 <div class="flow-group-row">
@@ -1348,7 +1341,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return num;
     }
-
     function aggregateSupervisorData(rawRecords) {
         if (rawRecords.length === 0) return { supervisors: [], rawValids: [], rawQuestValids: [], raw72hValids: [], rawHqValids: [] };
 
@@ -1653,7 +1645,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="kpi-exec-denom">Based on <strong>${uniqueFinalOfficers.toLocaleString()}</strong> evaluated officers</div>
                 ${card1Spark}
             </div>
-
             <div class="metric-card kpi-exec-card">
                 <div class="kpi-exec-title">KNOWLEDGE PERFORMANCE</div>
                 <div class="kpi-exec-val-row">
@@ -1663,7 +1654,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="kpi-exec-denom">Based on <strong>${uniqueQuestOfficers.toLocaleString()}</strong> evaluated officers</div>
                 ${card2Spark}
             </div>
-
             <div class="metric-card kpi-exec-card">
                 <div class="kpi-exec-title">SLA COMPLIANCE PERFORMANCE</div>
                 <div class="kpi-exec-val-row">
@@ -1673,7 +1663,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="kpi-exec-denom">Based on <strong>${unique72hOfficers.toLocaleString()}</strong> evaluated officers</div>
                 ${card3Spark}
             </div>
-
             <div class="metric-card kpi-exec-card">
                 <div class="kpi-exec-title">HQ VALIDATION PERFORMANCE</div>
                 <div class="kpi-exec-val-row">
@@ -1731,7 +1720,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="seg-card-sub">Result ≥ ${medResult.toFixed(1)}% & Workload ≥ ${medWorkload.toFixed(0)} officers</div>
                     <div class="seg-sup-list">${renderSegTopSups(seg1)}</div>
                 </div>
-
                 <div class="seg-card seg-card-blue">
                     <div class="seg-card-head">
                         <span class="seg-card-title">STRONG PERFORMANCE / LOWER VOLUME</span>
@@ -1740,7 +1728,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="seg-card-sub">Result ≥ ${medResult.toFixed(1)}% & Workload < ${medWorkload.toFixed(0)} officers</div>
                     <div class="seg-sup-list">${renderSegTopSups(seg2)}</div>
                 </div>
-
                 <div class="seg-card seg-card-orange">
                     <div class="seg-card-head">
                         <span class="seg-card-title">HIGH VOLUME / LOWER PERFORMANCE</span>
@@ -1749,7 +1736,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     <div class="seg-card-sub">Result < ${medResult.toFixed(1)}% & Workload ≥ ${medWorkload.toFixed(0)} officers</div>
                     <div class="seg-sup-list">${renderSegTopSups(seg3)}</div>
                 </div>
-
                 <div class="seg-card seg-card-gray">
                     <div class="seg-card-head">
                         <span class="seg-card-title">LOWER PERFORMANCE / LOWER VOLUME</span>
@@ -2250,9 +2236,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==========================================================================
-    // TAB 4: HQ VALIDATION CALLS ENGINE
-    // ==========================================================================
     function isValidHQVal(val) {
         if (val === undefined || val === null) return false;
         const str = String(val).trim();
@@ -2374,7 +2357,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="kpi-exec-denom"><strong>${calledOfficers.toLocaleString()}</strong> of <strong>${totalOfficers.toLocaleString()}</strong> Officers</div>
                 ${hqSparkSVG}
             </div>
-
             <div class="metric-card kpi-exec-card">
                 <div class="kpi-exec-title">HQ VALIDATION PERFORMANCE</div>
                 <div class="kpi-exec-val-row">
@@ -2384,7 +2366,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="kpi-exec-denom">Based on <strong>${evaluatedOfficersCount.toLocaleString()}</strong> evaluated officers</div>
                 ${hqSparkSVG}
             </div>
-
             <div class="metric-card kpi-exec-card">
                 <div class="kpi-exec-title">SUPERVISORS VALIDATED</div>
                 <div class="kpi-exec-val-row">
@@ -2393,7 +2374,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="kpi-exec-sub">Supervisors with ≥1 validated officer call</div>
                 <div class="kpi-exec-denom">Active supervisory team unit context</div>
             </div>
-
             <div class="metric-card kpi-exec-card">
                 <div class="kpi-exec-title">AVG VALIDATED / SUPERVISOR</div>
                 <div class="kpi-exec-val-row">
@@ -2533,10 +2513,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         attachUniversalTableSorting('hq-validation-table');
     }
-
-    // ==========================================================================
-    // TAB 5: OPERATIONAL CASES CORE PIPELINE
-    // ==========================================================================
 
     let opFilters = {
         '72h': { gov: 'all', sup: 'all', search: '' },
@@ -2783,10 +2759,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         containerNode.innerHTML = html;
     }
-
-    // ==========================================================================
-    // TAB 6: MEASURE OF SUCCESS ENGINE (REFINED)
-    // ==========================================================================
 
     function parseDDMMYYYY(dateStr) {
         if (!dateStr || typeof dateStr !== 'string') return null;
@@ -3354,6 +3326,403 @@ document.addEventListener('DOMContentLoaded', () => {
 
         attachUniversalTableSorting('mos-gov-table');
     }
+ // ==========================================================================
+    // TAB 7: RESIGNATION AUDIT ENGINE (WORKING DAYS LOGIC)
+    // ==========================================================================
+    let auditRecordsGlobal = [];
+    let auditFilters = { gov: 'all', sup: 'all', status: 'all', search: '' };
+    
+    // Sort configuration for the summary table
+    let currentAuditGovSort = { key: 'total', dir: 'desc' };
+
+    function safeKey(key) {
+        if (key === null || key === undefined) return '';
+        return String(key).trim().toLowerCase().replace(/^0+/, ''); 
+    }
+
+    // Helper: Calculate pure working days between two dates (Excluding Friday=5, Saturday=6)
+    function getWorkingDaysDiff(startDate, endDate) {
+        if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return null;
+        if (endDate < startDate) return 0;
+        
+        let workingDays = 0;
+        let currentDate = new Date(startDate);
+        currentDate.setHours(0,0,0,0);
+        let end = new Date(endDate);
+        end.setHours(0,0,0,0);
+        
+        // Loop from the day AFTER start date, up to and including end date
+        currentDate.setDate(currentDate.getDate() + 1);
+        while (currentDate <= end) {
+            const day = currentDate.getDay();
+            // In JavaScript: 0=Sunday, 1=Monday, ... 5=Friday, 6=Saturday
+            if (day !== 5 && day !== 6) { 
+                workingDays++;
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+        return workingDays;
+    }
+
+    function renderResignationAuditTab() {
+        if (!globalDataset || globalDataset.length === 0) return;
+        if (!turnoverDatasetGlobal || turnoverDatasetGlobal.length === 0) return;
+
+        // Apply Global Month Filter based on Hiring Date
+        const chosenMonth = monthFilterSelect ? monthFilterSelect.value : 'all';
+        let scopedOpData = globalDataset;
+        if (chosenMonth !== 'all') {
+            scopedOpData = globalDataset.filter(row => parseMonthKey(row['Hiring Date']) === chosenMonth);
+        }
+
+        // Build HR Source of Truth Map from turnover.csv
+        const systemMap = {};
+        turnoverDatasetGlobal.forEach(hrRow => {
+            const empCodeRaw = hrRow['Employee Code'];
+            const key = safeKey(empCodeRaw);
+            if (key && key !== 'nan') {
+                const hDate = parseDDMMYYYY(hrRow['Hiring Date']);
+                const tDate = parseDDMMYYYY(hrRow['Termination Date']);
+                const hasTerm = tDate !== null && !isNaN(tDate.getTime());
+                
+                let workingDaysToExit = null;
+                if (hasTerm && hDate && !isNaN(hDate.getTime())) {
+                    workingDaysToExit = getWorkingDaysDiff(hDate, tDate);
+                }
+
+                const hrRecordInfo = {
+                    rawRow: hrRow,
+                    hasTerm: hasTerm,
+                    termDateStr: hasTerm ? hrRow['Termination Date'].trim() : '',
+                    termType: hrRow['Termination Type - English'] ? hrRow['Termination Type - English'].trim() : '',
+                    workingDaysToExit: workingDaysToExit
+                };
+
+                if (systemMap[key]) {
+                    if (hasTerm) {
+                        systemMap[key] = hrRecordInfo; 
+                    }
+                } else {
+                    systemMap[key] = hrRecordInfo;
+                }
+            }
+        });
+
+        auditRecordsGlobal = [];
+        let opReportedCount = 0;
+        let hrConfirmedLeaversCount = 0;
+        let matchedCount = 0;
+        let falseResignationCount = 0;
+        let fakeTrainingCount = 0;
+        let normalExitCount = 0;
+
+        scopedOpData.forEach(opRow => {
+            const hrCodeRaw = opRow['HR Code'];
+            const opKey = safeKey(hrCodeRaw);
+            if(!opKey) return;
+            
+            const opGov = opRow['Governorate'] ? opRow['Governorate'].trim() : 'Unknown';
+            const opBranch = opRow['Branch'] ? opRow['Branch'].trim() : 'Unknown';
+            const opSup = opRow['Supervisor'] ? opRow['Supervisor'].trim() : 'Unknown';
+            const opName = opRow['Officer Name'] ? opRow['Officer Name'].trim() : 'Unknown';
+            const rawComment = opRow['Comment'] && opRow['Comment'].trim() !== '' ? opRow['Comment'].trim() : 'No Comment';
+            
+            const opStatusRaw = (opRow['Training Status'] || '').trim().toLowerCase();
+            const isOpResigned = opStatusRaw === 'resigned';
+
+            if (isOpResigned) {
+                opReportedCount++;
+            }
+
+            const hrData = systemMap[opKey];
+
+            let auditStatus = '';
+            let hrStatusText = '';
+            let termDate = '';
+            
+            if (!hrData) {
+                hrStatusText = 'Active (Not Found in Exits)';
+                termDate = 'N/A';
+                if (isOpResigned) {
+                    auditStatus = 'False Resignation Claim'; 
+                    falseResignationCount++;
+                } else {
+                    auditStatus = 'ACTIVE MATCH';
+                }
+            } else {
+                termDate = hrData.termDateStr || 'N/A';
+                const hasTerm = hrData.hasTerm;
+
+                if (hasTerm) {
+                    hrConfirmedLeaversCount++;
+                    hrStatusText = `Terminated (${hrData.termType || 'Other'})`;
+                } else {
+                    hrStatusText = 'Active (No Termination)';
+                }
+
+                if (isOpResigned && hasTerm) {
+                    auditStatus = 'Matched Resigned';
+                    matchedCount++;
+                } else if (isOpResigned && !hasTerm) {
+                    auditStatus = 'False Resignation Claim'; 
+                    falseResignationCount++;
+                } else if (!isOpResigned && hasTerm) {
+                    // Applying the new 3 WORKING DAYS Rule!
+                    if (hrData.workingDaysToExit !== null && hrData.workingDaysToExit <= 3) {
+                        auditStatus = 'Fake Training Claim';
+                        fakeTrainingCount++;
+                    } else {
+                        auditStatus = 'Normal Exit';
+                        normalExitCount++;
+                    }
+                } else {
+                    auditStatus = 'ACTIVE MATCH';
+                }
+            }
+
+            auditRecordsGlobal.push({
+                hrCode: hrCodeRaw || 'N/A',
+                empName: opName,
+                supervisor: opSup,
+                governorate: opGov,
+                branch: opBranch,
+                opStatus: isOpResigned ? 'Resigned' : 'Active / In Training',
+                hrStatus: hrStatusText,
+                termDate: termDate,
+                auditStatus: auditStatus,
+                comment: rawComment,
+                isException: auditStatus === 'False Resignation Claim' || auditStatus === 'Fake Training Claim' || auditStatus === 'Normal Exit'
+            });
+        });
+
+        renderAuditKPIs(opReportedCount, hrConfirmedLeaversCount, matchedCount, falseResignationCount);
+        renderAuditHealthText(falseResignationCount, fakeTrainingCount, normalExitCount);
+        renderAuditTopSummaries(auditRecordsGlobal);
+        setupAuditControls();
+        renderAuditTable();
+    }
+
+    function renderAuditKPIs(opReported, hrTotal, matched, criticalCount) {
+        const opEl = document.getElementById('audit-op-reported');
+        const hrEl = document.getElementById('audit-hr-total');
+        const matchedEl = document.getElementById('audit-matched');
+        const criticalEl = document.getElementById('audit-critical');
+
+        if (opEl) opEl.textContent = opReported.toLocaleString();
+        if (hrEl) hrEl.textContent = hrTotal.toLocaleString();
+        if (matchedEl) matchedEl.textContent = matched.toLocaleString();
+        if (criticalEl) criticalEl.textContent = criticalCount.toLocaleString();
+    }
+
+    function renderAuditHealthText(falseRes, fakeTrain, normalExit) {
+        const falseEl = document.getElementById('audit-insight-false');
+        const fakeEl = document.getElementById('audit-insight-fake');
+        const normalEl = document.getElementById('audit-insight-normal');
+
+        if (falseEl) {
+            falseEl.innerHTML = `There are <strong>${falseRes} employees</strong> actively working according to HR, but operational supervisors reported them as resigned.`;
+        }
+        if (fakeEl) {
+            fakeEl.innerHTML = `There are <strong>${fakeTrain} employees</strong> who officially exited within their first <strong>3 working days</strong>, yet supervisors kept them marked as actively in-training.`;
+        }
+        if (normalEl) {
+            normalEl.innerHTML = `There are <strong>${normalExit} employees</strong> who naturally exited after completing their initial <strong>3 working days</strong> without direct supervisor resignation reports.`;
+        }
+    }
+
+    function renderAuditTopSummaries(records) {
+        const govContainer = document.getElementById('audit-top-govs');
+        const supContainer = document.getElementById('audit-top-sups');
+        const summaryTbody = document.getElementById('audit-gov-summary-body');
+        
+        const govMap = {};
+        const supMap = {};
+
+        records.forEach(r => {
+            const isFalseRes = r.auditStatus === 'False Resignation Claim';
+            const isFakeTrain = r.auditStatus === 'Fake Training Claim';
+
+            if (isFalseRes || isFakeTrain) {
+                const g = r.governorate;
+                const s = r.supervisor;
+                
+                if (!govMap[g]) govMap[g] = { gov: g, falseRes: 0, fakeTrain: 0, total: 0 };
+                if (!supMap[s]) supMap[s] = { name: s, count: 0 };
+
+                if (isFalseRes) govMap[g].falseRes++;
+                if (isFakeTrain) govMap[g].fakeTrain++;
+                
+                govMap[g].total++;
+                supMap[s].count++;
+            }
+        });
+
+        const sortedGovs = Object.values(govMap).map(k => ({ name: k.gov, count: k.total })).sort((a, b) => b.count - a.count).slice(0, 5);
+        const sortedSups = Object.values(supMap).sort((a, b) => b.count - a.count).slice(0, 5);
+
+        const renderList = (container, list, color) => {
+            if(!container) return;
+            container.innerHTML = '';
+            if (list.length === 0) {
+                container.innerHTML = '<div style="font-size:11px; color:var(--text-muted); padding:8px 0;">No discrepancies found</div>';
+                return;
+            }
+            const maxCount = Math.max(...list.map(i => i.count), 1);
+            
+            list.forEach((item, idx) => {
+                const pct = (item.count / maxCount) * 100;
+                const row = document.createElement('div');
+                row.className = 'leader-row-item';
+                row.innerHTML = `
+                    <div class="leader-rank-badge">${idx + 1}</div>
+                    <div class="leader-region-name" title="${item.name}">${item.name}</div>
+                    <div class="leader-track-bar">
+                        <div class="leader-fill-bar" style="width: ${pct}%; background-color: ${color};"></div>
+                    </div>
+                    <div class="leader-pct-value" style="width:auto; min-width:30px;">${item.count}</div>
+                `;
+                container.appendChild(row);
+            });
+        };
+
+        renderList(govContainer, sortedGovs, 'var(--red)');
+        renderList(supContainer, sortedSups, 'var(--brand-purple)');
+
+        if (summaryTbody) {
+            const allGovList = Object.values(govMap).filter(g => g.total > 0);
+            
+            if (allGovList.length === 0) {
+                summaryTbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--text-muted);">No discrepancies found across all governorates.</td></tr>`;
+                return;
+            }
+
+            // Utilize Universal Table Sorting Logic
+            const k = tableSortStates['audit-gov-summary-table'] ? Object.keys(allGovList[0])[tableSortStates['audit-gov-summary-table'].colIdx] || 'total' : 'total';
+            const dir = tableSortStates['audit-gov-summary-table'] && tableSortStates['audit-gov-summary-table'].dir === 'asc' ? 1 : -1;
+            
+            const keyMap = { 0: 'gov', 1: 'falseRes', 2: 'fakeTrain', 3: 'total' };
+            const sortKey = tableSortStates['audit-gov-summary-table'] ? keyMap[tableSortStates['audit-gov-summary-table'].colIdx] : 'total';
+
+            allGovList.sort((a, b) => {
+                let valA = a[sortKey];
+                let valB = b[sortKey];
+                if (typeof valA === 'string') return valA.localeCompare(valB) * dir;
+                return (valA - valB) * dir;
+            });
+
+            summaryTbody.innerHTML = '';
+            allGovList.forEach(g => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><strong>${g.gov}</strong></td>
+                    <td class="text-danger"><strong>${g.falseRes}</strong></td>
+                    <td class="text-warning"><strong>${g.fakeTrain}</strong></td>
+                    <td><strong>${g.total}</strong></td>
+                `;
+                summaryTbody.appendChild(tr);
+            });
+            attachUniversalTableSorting('audit-gov-summary-table');
+        }
+    }
+
+    function setupAuditControls() {
+        const govSel = document.getElementById('audit-filter-gov');
+        const supSel = document.getElementById('audit-filter-sup');
+        const statSel = document.getElementById('audit-filter-status');
+        const searchInp = document.getElementById('audit-search');
+
+        const exceptionRecords = auditRecordsGlobal.filter(r => r.isException);
+        const govs = Array.from(new Set(exceptionRecords.map(r => r.governorate).filter(g => g !== 'Unknown'))).sort();
+        const sups = Array.from(new Set(exceptionRecords.map(r => r.supervisor).filter(s => s !== 'Unknown'))).sort();
+
+        if (govSel && govSel.options.length <= 1) {
+            govs.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g;
+                opt.textContent = g;
+                govSel.appendChild(opt);
+            });
+            govSel.onchange = () => { auditFilters.gov = govSel.value; renderAuditTable(); };
+        }
+
+        if (supSel && supSel.options.length <= 1) {
+            sups.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s;
+                opt.textContent = s;
+                supSel.appendChild(opt);
+            });
+            supSel.onchange = () => { auditFilters.sup = supSel.value; renderAuditTable(); };
+        }
+
+        if(statSel) statSel.onchange = () => { auditFilters.status = statSel.value; renderAuditTable(); };
+        if(searchInp) searchInp.oninput = () => { auditFilters.search = searchInp.value.trim().toLowerCase(); renderAuditTable(); };
+    }
+
+    function renderAuditTable() {
+        const tbody = document.getElementById('audit-table-body');
+        const badge = document.getElementById('audit-table-badge');
+        if (!tbody) return;
+
+        let filtered = auditRecordsGlobal.filter(r => {
+            if (auditFilters.gov !== 'all' && r.governorate !== auditFilters.gov) return false;
+            if (auditFilters.sup !== 'all' && r.supervisor !== auditFilters.sup) return false;
+            if (auditFilters.status !== 'all' && r.auditStatus !== auditFilters.status) return false;
+            if (auditFilters.status === 'all' && r.auditStatus === 'ACTIVE MATCH') return false; 
+            if (auditFilters.search !== '') {
+                const s = auditFilters.search;
+                return r.hrCode.toLowerCase().includes(s) || r.empName.toLowerCase().includes(s);
+            }
+            return true;
+        });
+
+        if (badge) badge.textContent = `${filtered.length} Cases`;
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:var(--text-muted);">No records match the current filters.</td></tr>`;
+            return;
+        }
+
+        const statusRank = {
+            'False Resignation Claim': 1,
+            'Fake Training Claim': 2,
+            'Normal Exit': 3,
+            'Matched Resigned': 4,
+            'ACTIVE MATCH': 5
+        };
+
+        filtered.sort((a, b) => {
+            const rankA = statusRank[a.auditStatus] || 99;
+            const rankB = statusRank[b.auditStatus] || 99;
+            if (rankA !== rankB) return rankA - rankB;
+            return a.empName.localeCompare(b.empName);
+        });
+
+        tbody.innerHTML = filtered.map(r => {
+            let statusCls = 'audit-status-neutral';
+            if (r.auditStatus === 'False Resignation Claim') statusCls = 'audit-status-conflict';
+            else if (r.auditStatus === 'Fake Training Claim') statusCls = 'audit-status-warn';
+            else if (r.auditStatus === 'Normal Exit') statusCls = 'audit-status-neutral';
+            else if (r.auditStatus === 'Matched Resigned') statusCls = 'audit-status-match';
+
+            const hrCodeHtml = r.hrCode !== 'N/A' ? `<br><span class="op-hr-code" style="margin-left:0;">(${r.hrCode})</span>` : '';
+            const commentHtml = r.comment !== 'No Comment' ? `<span class="op-comment-text">${r.comment}</span>` : `<span class="op-comment-muted">No Comment</span>`;
+
+            return `
+                <tr>
+                    <td><strong>${r.governorate}</strong></td>
+                    <td>${r.branch}</td>
+                    <td>${r.supervisor}</td>
+                    <td><strong>${r.empName}</strong>${hrCodeHtml}</td>
+                    <td style="color:${r.opStatus==='Resigned'?'var(--red)':'var(--text-main)'}; font-weight:600;">${r.opStatus}</td>
+                    <td style="font-weight:600; color:${r.hrStatus.includes('Active') ? 'var(--primary)' : 'var(--orange)'};">${r.hrStatus}</td>
+                    <td>${r.termDate}</td>
+                    <td><span class="audit-status-badge ${statusCls}">${r.auditStatus}</span></td>
+                    <td>${commentHtml}</td>
+                </tr>
+            `;
+        }).join('');
+    }
 
     // Dynamic Resize Listener
     window.addEventListener('resize', () => {
@@ -3407,6 +3776,7 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(csvText => {
             turnoverDatasetGlobal = parseCSVDataEngine(csvText);
             renderMeasureOfSuccessTab();
+            renderResignationAuditTab();
         })
         .catch(err => {
             console.warn("turnover.csv File Offline or Unreachable:", err);

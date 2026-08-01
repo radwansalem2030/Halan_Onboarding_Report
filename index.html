@@ -55,15 +55,15 @@
                 <span class="tab-icon">🎯</span>
                 <span class="tab-label">MEASURE OF SUCCESS</span>
             </button>
+            <button class="nav-tab-btn" data-tab="tab-audit">
+                <span class="tab-icon">🔍</span>
+                <span class="tab-label">RESIGNATION AUDIT</span>
+            </button>
         </nav>
 
-        <!-- ========================================================================== -->
-        <!-- TAB 1: ONBOARDING OVERVIEW                                                 -->
-        <!-- ========================================================================== -->
+        <!-- TAB 1: ONBOARDING OVERVIEW -->
         <div id="tab-overview" class="tab-content active">
-            
             <div class="metrics-grid">
-                
                 <div class="metric-card main-kpi">
                     <div class="card-header">
                         <div class="label-group">
@@ -152,7 +152,6 @@
                         </div>
                     </div>
                 </div>
-
             </div>
 
             <div class="middle-charts-layout">
@@ -210,7 +209,6 @@
                     </div>
                     <div class="leaderboard-list" id="top5-gov-list"></div>
                 </div>
-
                 <div class="metric-card">
                     <div class="section-title-container">
                         <h3>Bottom 5 Governorate Ratios</h3>
@@ -219,19 +217,14 @@
                     <div class="leaderboard-list" id="bottom5-gov-list"></div>
                 </div>
             </div>
-
         </div>
 
-        <!-- ========================================================================== -->
-        <!-- TAB 2: ONBOARDING ANALYTICS                                                -->
-        <!-- ========================================================================== -->
+        <!-- TAB 2: ONBOARDING ANALYTICS -->
         <div id="tab-analytics" class="tab-content">
-            
             <div class="analytics-header-block">
                 <h2>ONBOARDING ANALYTICS</h2>
                 <p class="subtitle">Deeper analysis of hiring, training performance and operational differences across governorates.</p>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card compact-flow-card">
                     <div class="section-title-container">
@@ -241,7 +234,6 @@
                     <div class="flow-strip-container" id="flow-strip-wrapper"></div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="middle-charts-layout">
                     <div class="metric-card chart-container">
@@ -251,7 +243,6 @@
                         </div>
                         <div id="daily-hiring-chart" class="svg-chart-render" style="height: 220px; position: relative;"></div>
                     </div>
-
                     <div class="metric-card">
                         <div class="section-title-container">
                             <h3>Hiring Summary</h3>
@@ -282,7 +273,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container" style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px;">
@@ -292,31 +282,26 @@
                         </div>
                         <button id="btn-toggle-gov-perf" class="btn-resignation-toggle" style="align-self: center;">View All Governorates</button>
                     </div>
-                    
                     <div class="map-and-callouts-grid">
                         <div class="matrix-quadrant-wrapper">
                             <div id="gov-training-performance-container" class="gov-perf-list-wrapper"></div>
                         </div>
-
                         <div class="callouts-side-column">
                             <div class="callout-card">
                                 <span class="callout-label">Largest Onboarding Population</span>
                                 <strong class="callout-main-text" id="callout-largest-gov">-</strong>
                                 <span class="callout-sub-text" id="callout-largest-pop">0 active employees</span>
                             </div>
-
                             <div class="callout-card">
                                 <span class="callout-label">Highest Completion at Scale</span>
                                 <strong class="callout-main-text" id="callout-scale-gov">-</strong>
                                 <span class="callout-sub-text" id="callout-scale-rate">0% completion</span>
                             </div>
-
                             <div class="callout-card">
                                 <span class="callout-label">High Volume / Lower Completion</span>
                                 <strong class="callout-main-text" id="callout-highlow-gov">-</strong>
                                 <span class="callout-sub-text" id="callout-highlow-info">0 active employees</span>
                             </div>
-
                             <div class="callout-card">
                                 <span class="callout-label">Highest Not Trained Volume</span>
                                 <strong class="callout-main-text" id="callout-nottrained-gov">-</strong>
@@ -326,14 +311,12 @@
                     </div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container">
                         <h3>GOVERNORATE PERFORMANCE</h3>
                         <p class="section-subtitle">Detailed onboarding status by governorate</p>
                     </div>
-                    
                     <div class="matrix-table-container">
                         <table class="premium-matrix-table" id="gov-matrix-table">
                             <thead>
@@ -355,7 +338,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="leaderboards-grid">
                     <div class="metric-card">
@@ -365,7 +347,6 @@
                         </div>
                         <div class="leaderboard-list" id="resignation-gov-list"></div>
                     </div>
-
                     <div class="metric-card">
                         <div class="section-title-container">
                             <h3>RESIGNATIONS BY SPECIALIZATION</h3>
@@ -375,7 +356,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card insights-wrapper-card">
                     <div class="section-title-container">
@@ -385,44 +365,34 @@
                     <div class="insights-grid-container" id="executive-insights-grid"></div>
                 </div>
             </div>
-
         </div>
 
-        <!-- ========================================================================== -->
-        <!-- TAB 3: SUPERVISOR PERFORMANCE                                              -->
-        <!-- ========================================================================== -->
+        <!-- TAB 3: SUPERVISOR PERFORMANCE -->
         <div id="tab-supervisor" class="tab-content">
-            
             <div class="analytics-header-block">
                 <h2>SUPERVISOR PERFORMANCE</h2>
                 <p class="subtitle">Operational scale, evaluation coverage, and result analysis across supervision team.</p>
             </div>
-
             <div class="analytics-section">
                 <div class="sup-executive-summary-strip" id="sup-op-scope-strip"></div>
             </div>
-
             <div class="analytics-section">
                 <div class="kpi-executive-cards-grid" id="sup-primary-kpi-grid"></div>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container">
                         <h3>PERFORMANCE × WORKLOAD</h3>
                         <p class="section-subtitle">Supervisory classification based on dynamic median workload and performance thresholds</p>
                     </div>
-
                     <div class="map-and-callouts-grid">
                         <div class="matrix-quadrant-wrapper">
                             <div id="sup-performance-segmentation-container" class="sup-segmentation-grid"></div>
                         </div>
-
                         <div class="callouts-side-column" id="sup-analytical-highlights"></div>
                     </div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
@@ -432,11 +402,9 @@
                         </div>
                         <div id="ranking-range-filters" class="ranking-filter-bar"></div>
                     </div>
-
                     <div id="sup-performance-ranking-container" class="sup-ranking-wrapper" style="margin-top: 16px;"></div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="leaderboards-grid">
                     <div class="metric-card">
@@ -446,7 +414,6 @@
                         </div>
                         <div id="sup-perf-dist-container" class="distribution-bars-wrapper"></div>
                     </div>
-
                     <div class="metric-card">
                         <div class="section-title-container">
                             <h3>WORKLOAD DISTRIBUTION</h3>
@@ -456,7 +423,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container">
@@ -482,7 +448,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
@@ -494,7 +459,6 @@
                             <option value="all">All Governorates</option>
                         </select>
                     </div>
-
                     <div class="matrix-table-container">
                         <table class="premium-matrix-table" id="sup-details-table">
                             <thead>
@@ -513,7 +477,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card insights-wrapper-card">
                     <div class="section-title-container">
@@ -523,23 +486,17 @@
                     <div class="insights-grid-container" id="sup-insights-grid"></div>
                 </div>
             </div>
-
         </div>
 
-        <!-- ========================================================================== -->
-        <!-- TAB 4: HQ VALIDATION CALLS                                                 -->
-        <!-- ========================================================================== -->
+        <!-- TAB 4: HQ VALIDATION CALLS -->
         <div id="tab-hq-calls" class="tab-content">
-            
             <div class="analytics-header-block">
                 <h2>HQ VALIDATION CALLS</h2>
                 <p class="subtitle">Recorded HQ validation activity across current officers</p>
             </div>
-
             <div class="analytics-section">
                 <div class="kpi-executive-cards-grid" id="hq-kpi-grid"></div>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container">
@@ -549,7 +506,6 @@
                     <div id="hq-perf-dist-container" class="distribution-bars-wrapper" style="margin-top: 16px;"></div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card hq-validation-card">
                     <div class="hq-validation-header">
@@ -562,7 +518,6 @@
                             <button id="hq-toggle-sup" class="hq-toggle-btn">BY SUPERVISOR</button>
                         </div>
                     </div>
-
                     <div class="hq-summary-row">
                         <div class="hq-summary-main">
                             <span class="hq-main-statement" id="hq-summary-statement">0 of 0 Officers</span>
@@ -574,7 +529,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="matrix-table-container hq-table-container">
                         <table class="premium-matrix-table" id="hq-validation-table">
                             <thead id="hq-table-thead"></thead>
@@ -583,19 +537,14 @@
                     </div>
                 </div>
             </div>
-
         </div>
 
-        <!-- ========================================================================== -->
-        <!-- TAB 5: OPERATIONAL CASES                                                   -->
-        <!-- ========================================================================== -->
+        <!-- TAB 5: OPERATIONAL CASES -->
         <div id="tab-cases" class="tab-content">
-            
             <div class="analytics-header-block">
                 <h2>OPERATIONAL CASES</h2>
                 <p class="subtitle">Detailed onboarding cases requiring operational follow-up</p>
             </div>
-
             <div class="analytics-section" id="sec-72h-anchor">
                 <div class="metric-card op-case-module">
                     <div class="op-section-header">
@@ -607,7 +556,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="op-controls-row">
                         <div class="op-filter-group">
                             <label for="filter-72h-gov">Governorate</label>
@@ -626,11 +574,9 @@
                             <input type="text" id="search-72h" class="premium-input op-input" placeholder="Search Officer Name or HR Code...">
                         </div>
                     </div>
-
                     <div id="container-72h-cases" class="op-cases-container"></div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card op-case-module">
                     <div class="op-section-header">
@@ -642,7 +588,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="op-controls-row">
                         <div class="op-filter-group">
                             <label for="filter-quest-gov">Governorate</label>
@@ -661,11 +606,9 @@
                             <input type="text" id="search-quest" class="premium-input op-input" placeholder="Search Officer Name or HR Code...">
                         </div>
                     </div>
-
                     <div id="container-quest-cases" class="op-cases-container"></div>
                 </div>
             </div>
-
             <div class="analytics-section">
                 <div class="metric-card op-case-module">
                     <div class="op-section-header">
@@ -677,7 +620,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="op-controls-row">
                         <div class="op-filter-group">
                             <label for="filter-decl-gov">Governorate</label>
@@ -696,28 +638,20 @@
                             <input type="text" id="search-decl" class="premium-input op-input" placeholder="Search Officer Name or HR Code...">
                         </div>
                     </div>
-
                     <div id="container-decl-cases" class="op-cases-container"></div>
                 </div>
             </div>
-
         </div>
 
-        <!-- ========================================================================== -->
-        <!-- TAB 6: MEASURE OF SUCCESS (NEW TAB)                                        -->
-        <!-- ========================================================================== -->
+        <!-- TAB 6: MEASURE OF SUCCESS -->
         <div id="tab-measure-success" class="tab-content">
-            
             <div class="analytics-header-block">
                 <h2>MEASURE OF SUCCESS</h2>
                 <p class="subtitle">Analytical impact evaluation of the onboarding project on early employee voluntary resignation.</p>
             </div>
-
-            <!-- COMPARISON CONTROLS BAR -->
             <div class="analytics-section">
                 <div class="metric-card" style="padding: 16px 24px; min-height: auto;">
                     <div class="mos-controls-bar">
-                        
                         <div class="mos-control-group">
                             <span class="mos-control-label">BEFORE PROJECT</span>
                             <div class="mos-inputs-row">
@@ -726,7 +660,6 @@
                                 <input type="date" id="mos-base-to" class="premium-input mos-date-input">
                             </div>
                         </div>
-
                         <div class="mos-control-group">
                             <span class="mos-control-label">AFTER PROJECT</span>
                             <div class="mos-inputs-row">
@@ -735,7 +668,6 @@
                                 <input type="date" id="mos-proj-to" class="premium-input mos-date-input">
                             </div>
                         </div>
-
                         <div class="mos-control-group">
                             <span class="mos-control-label">MEASURE RESIGNATION WITHIN</span>
                             <div class="mos-window-btn-group">
@@ -744,27 +676,20 @@
                                 <button class="mos-window-btn" data-window="90">90 Days</button>
                             </div>
                         </div>
-
                         <div class="mos-control-group">
                             <span class="mos-control-label">GOVERNORATE</span>
                             <select id="mos-gov-filter" class="premium-select" style="min-width: 170px;">
                                 <option value="all">All Governorates ▼</option>
                             </select>
                         </div>
-
                     </div>
                 </div>
             </div>
-
-            <!-- EXECUTIVE IMPACT KPIS -->
             <div class="analytics-section">
                 <div class="kpi-executive-cards-grid" id="mos-kpi-grid"></div>
             </div>
-
-            <!-- BEFORE VS AFTER VISUAL IMPACT & RETENTION / SURVIVAL VIEW -->
             <div class="analytics-section">
                 <div class="middle-charts-layout">
-                    
                     <div class="metric-card">
                         <div class="section-title-container">
                             <h3>PROJECT EARLY RESIGNATION IMPACT</h3>
@@ -772,7 +697,6 @@
                         </div>
                         <div id="mos-impact-visual-container" style="margin-top: 16px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center;"></div>
                     </div>
-
                     <div class="metric-card">
                         <div class="section-title-container">
                             <h3>EMPLOYEE RETENTION</h3>
@@ -780,11 +704,8 @@
                         </div>
                         <div id="mos-retention-container" class="capacity-stats-list" style="margin-top: 16px;"></div>
                     </div>
-
                 </div>
             </div>
-
-            <!-- COHORT TREND WITH LAUNCH MARKER -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container" style="display:flex; justify-content:space-between; align-items:center;">
@@ -800,8 +721,6 @@
                     <div id="mos-cohort-trend-container" class="pure-line-chart-wrapper" style="margin-top: 16px; height: 220px;"></div>
                 </div>
             </div>
-
-            <!-- EXIT TIMING BANDS -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container">
@@ -811,8 +730,6 @@
                     <div id="mos-exit-timing-container" style="margin-top: 16px;"></div>
                 </div>
             </div>
-
-            <!-- GOVERNORATE IMPACT MATRIX -->
             <div class="analytics-section">
                 <div class="metric-card">
                     <div class="section-title-container">
@@ -835,7 +752,183 @@
                     </div>
                 </div>
             </div>
+        </div>
 
+        <!-- ========================================================================== -->
+        <!-- TAB 7: RESIGNATION AUDIT (BUSINESS-FOCUSED & ACCURATE)                     -->
+        <!-- ========================================================================== -->
+        <div id="tab-audit" class="tab-content">
+            <div class="analytics-header-block">
+                <h2>RESIGNATION AUDIT & RECONCILIATION</h2>
+                <p class="subtitle">Ensuring alignment between operational supervisor reports and official HR records</p>
+            </div>
+
+            <!-- EXECUTIVE KPIS (4 Core Pillars) -->
+            <div class="analytics-section">
+                <div class="kpi-executive-cards-grid" id="audit-kpi-grid">
+                    <div class="metric-card kpi-exec-card">
+                        <div class="kpi-exec-title">Operational Reported</div>
+                        <div class="kpi-exec-val-row"><span class="main-value" id="audit-op-reported">0</span></div>
+                        <div class="kpi-exec-sub">Total resignations reported by supervisors in the selected period.</div>
+                    </div>
+                    <div class="metric-card kpi-exec-card">
+                        <div class="kpi-exec-title">HR Total Leavers</div>
+                        <div class="kpi-exec-val-row"><span class="main-value text-muted" id="audit-hr-total">0</span></div>
+                        <div class="kpi-exec-sub">Total official exits (Resignations, Terminations, etc.) recorded in HR for this cohort.</div>
+                    </div>
+                    <div class="metric-card kpi-exec-card">
+                        <div class="kpi-exec-title">Matched Resignations</div>
+                        <div class="kpi-exec-val-row"><span class="main-value text-success" id="audit-matched">0</span></div>
+                        <div class="kpi-exec-sub">Cases perfectly matched between supervisor and HR system.</div>
+                    </div>
+                    <div class="metric-card kpi-exec-card" style="border: 1px solid var(--red); background: rgba(239,68,68,0.02);">
+                        <div class="kpi-exec-title" style="color: var(--red);">Critical Mismatches</div>
+                        <div class="kpi-exec-val-row"><span class="main-value text-danger" id="audit-critical">0</span></div>
+                        <div class="kpi-exec-sub">Reported resigned by supervisor, but still <strong>Active</strong> in HR!</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- HEALTH & INSIGHTS (Plain Business Language) -->
+            <div class="analytics-section">
+                <div class="metric-card insights-wrapper-card">
+                    <div class="section-title-container">
+                        <h3>Audit Findings & Insights</h3>
+                        <p class="section-subtitle">Key conclusions from matching operational data against HR records</p>
+                    </div>
+                    <div class="insights-grid-container" id="audit-health-grid">
+                        <div class="op-insight-card" style="border-left-color: var(--red);">
+                            <div class="op-insight-header">
+                                <span class="op-insight-icon">🚨</span>
+                                <h4 class="op-insight-title">False Resignation Claims</h4>
+                            </div>
+                            <p class="explanation-text" style="font-size:12px; color:var(--text-main); margin-top:6px;" id="audit-insight-false">
+                                Analyzing data...
+                            </p>
+                        </div>
+                        <div class="op-insight-card" style="border-left-color: var(--orange);">
+                            <div class="op-insight-header">
+                                <span class="op-insight-icon">⚠️</span>
+                                <h4 class="op-insight-title">Fake Training Claims (≤ 3 Working Days)</h4>
+                            </div>
+                            <p class="explanation-text" style="font-size:12px; color:var(--text-main); margin-top:6px;" id="audit-insight-fake">
+                                Analyzing data...
+                            </p>
+                        </div>
+                        <div class="op-insight-card" style="border-left-color: var(--text-muted);">
+                            <div class="op-insight-header">
+                                <span class="op-insight-icon">✅</span>
+                                <h4 class="op-insight-title">Normal Post-Training Exits</h4>
+                            </div>
+                            <p class="explanation-text" style="font-size:12px; color:var(--text-main); margin-top:6px;" id="audit-insight-normal">
+                                Analyzing data...
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TOP OFFENDERS & COMPREHENSIVE GOVERNORATE TABLE -->
+            <div class="analytics-section">
+                <div class="leaderboards-grid">
+                    <div class="metric-card">
+                        <div class="section-title-container">
+                            <h3>Top 5 Governorates (Discrepancies)</h3>
+                            <p class="section-subtitle">Regions with highest false claims or fake training</p>
+                        </div>
+                        <div class="leaderboard-list" id="audit-top-govs"></div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="section-title-container">
+                            <h3>Top 5 Supervisors (Discrepancies)</h3>
+                            <p class="section-subtitle">Supervisors needing immediate accountability</p>
+                        </div>
+                        <div class="leaderboard-list" id="audit-top-sups"></div>
+                    </div>
+                </div>
+                
+<div class="metric-card" style="margin-top: 20px;">
+                    <div class="section-title-container">
+                        <h3>Comprehensive Governorate Summary</h3>
+                        <p class="section-subtitle">Complete breakdown of all problematic records by Governorate</p>
+                    </div>
+                    <div class="matrix-table-container" style="max-height: 300px; overflow-y: auto;">
+                        <table class="premium-matrix-table" id="audit-gov-summary-table">
+                            <thead>
+                                <tr>
+                                    <th data-audit-sort="gov">Governorate ↕</th>
+                                    <th data-audit-sort="falseRes">False Resignation Claims ↕</th>
+                                    <th data-audit-sort="fakeTrain">Fake Training (≤ 3 Working Days) ↕</th>
+                                    <th data-audit-sort="total">Total Discrepancies ↕</th>
+                                </tr>
+                            </thead>
+                            <tbody id="audit-gov-summary-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            <!-- ACTION CENTER (Detailed Table) -->
+            <div class="analytics-section">
+                <div class="metric-card op-case-module">
+                    <div class="op-section-header">
+                        <div class="op-title-group">
+                            <span class="card-icon-wrapper pending-icon" style="background:rgba(99,102,241,0.1); color:var(--brand-purple);">📋</span>
+                            <div>
+                                <h3>Action Center: Detailed Records <span class="op-count-badge" id="audit-table-badge" style="color:var(--text-main);">0 Cases</span></h3>
+                                <p class="section-subtitle">Filter and review individual employee discrepancies</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="op-controls-row">
+                        <div class="op-filter-group">
+                            <label>Governorate</label>
+                            <select id="audit-filter-gov" class="premium-select op-select">
+                                <option value="all">All Governorates</option>
+                            </select>
+                        </div>
+                        <div class="op-filter-group">
+                            <label>Supervisor</label>
+                            <select id="audit-filter-sup" class="premium-select op-select">
+                                <option value="all">All Supervisors</option>
+                            </select>
+                        </div>
+                        <div class="op-filter-group">
+                            <label>Audit Status</label>
+                            <select id="audit-filter-status" class="premium-select op-select">
+                                <option value="all">All Relevant Cases</option>
+                                <option value="False Resignation Claim">False Resignation Claim (Active in HR)</option>
+                                <option value="Fake Training Claim">Fake Training Claim (Exited ≤ 3 Working Days)</option>
+                                <option value="Normal Exit">Normal Post-Training Exit (> 3 Working Days)</option>
+                                <option value="Matched Resigned">Matched Resigned</option>
+                            </select>
+                        </div>
+                        <div class="op-filter-group op-search-group">
+                            <label>Search</label>
+                            <input type="text" id="audit-search" class="premium-input op-input" placeholder="Search HR Code or Name...">
+                        </div>
+                    </div>
+
+                    <div class="matrix-table-container">
+                        <table class="premium-matrix-table" id="audit-table">
+                            <thead>
+                                <tr>
+                                    <th>Governorate</th>
+                                    <th>Branch</th>
+                                    <th>Supervisor</th>
+                                    <th>Employee Name</th>
+                                    <th>Operational Status</th>
+                                    <th>HR Status</th>
+                                    <th>Termination Date</th>
+                                    <th>Audit Status</th>
+                                    <th>Comment / Reason</th>
+                                </tr>
+                            </thead>
+                            <tbody id="audit-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
 
     </div>
