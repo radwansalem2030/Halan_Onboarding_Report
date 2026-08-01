@@ -3326,8 +3326,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         attachUniversalTableSorting('mos-gov-table');
     }
- // ==========================================================================
-    // TAB 7: RESIGNATION AUDIT ENGINE (WORKING DAYS LOGIC)
+// ==========================================================================
+    // TAB 7: RESIGNATION AUDIT ENGINE (WORKING DAYS LOGIC + FULL DATES)
     // ==========================================================================
     let auditRecordsGlobal = [];
     let auditFilters = { gov: 'all', sup: 'all', status: 'all', search: '' };
@@ -3351,11 +3351,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let end = new Date(endDate);
         end.setHours(0,0,0,0);
         
-        // Loop from the day AFTER start date, up to and including end date
         currentDate.setDate(currentDate.getDate() + 1);
         while (currentDate <= end) {
             const day = currentDate.getDay();
-            // In JavaScript: 0=Sunday, 1=Monday, ... 5=Friday, 6=Saturday
             if (day !== 5 && day !== 6) { 
                 workingDays++;
             }
@@ -3393,7 +3391,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const hrRecordInfo = {
                     rawRow: hrRow,
                     hasTerm: hasTerm,
-                    hiringDateStr: hrRow['Hiring Date'] ? hrRow['Hiring Date'].trim() : 'N/A', // <--- ضيف السطر ده
+                    hiringDateStr: hrRow['Hiring Date'] ? hrRow['Hiring Date'].trim() : 'N/A',
                     termDateStr: hasTerm ? hrRow['Termination Date'].trim() : '',
                     termType: hrRow['Termination Type - English'] ? hrRow['Termination Type - English'].trim() : '',
                     workingDaysToExit: workingDaysToExit
@@ -3468,7 +3466,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     auditStatus = 'False Resignation Claim'; 
                     falseResignationCount++;
                 } else if (!isOpResigned && hasTerm) {
-                    // Applying the new 3 WORKING DAYS Rule!
+                    // Applying the new 3 WORKING DAYS Rule
                     if (hrData.workingDaysToExit !== null && hrData.workingDaysToExit <= 3) {
                         auditStatus = 'Fake Training Claim';
                         fakeTrainingCount++;
@@ -3489,7 +3487,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 branch: opBranch,
                 opStatus: isOpResigned ? 'Resigned' : 'Active / In Training',
                 hrStatus: hrStatusText,
-                hiringDate: hrData ? hrData.hiringDateStr : (opRow['Hiring Date'] ? opRow['Hiring Date'].trim() : 'N/A'), // <--- ضيف السطر ده
+                hiringDate: hrData && hrData.hiringDateStr !== 'N/A' ? hrData.hiringDateStr : (opRow['Hiring Date'] ? opRow['Hiring Date'].trim() : 'N/A'),
                 termDate: termDate,
                 auditStatus: auditStatus,
                 comment: rawComment,
@@ -3598,7 +3596,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            // Utilize Universal Table Sorting Logic
             const k = tableSortStates['audit-gov-summary-table'] ? Object.keys(allGovList[0])[tableSortStates['audit-gov-summary-table'].colIdx] || 'total' : 'total';
             const dir = tableSortStates['audit-gov-summary-table'] && tableSortStates['audit-gov-summary-table'].dir === 'asc' ? 1 : -1;
             
@@ -3661,7 +3658,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(searchInp) searchInp.oninput = () => { auditFilters.search = searchInp.value.trim().toLowerCase(); renderAuditTable(); };
     }
 
-function renderAuditTable() {
+    function renderAuditTable() {
         const tbody = document.getElementById('audit-table-body');
         const badge = document.getElementById('audit-table-badge');
         if (!tbody) return;
@@ -3681,7 +3678,7 @@ function renderAuditTable() {
         if (badge) badge.textContent = `${filtered.length} Cases`;
 
         if (filtered.length === 0) {
-            // Updated colspan to 10 to match the new number of columns
+            // Updated colspan to 10 to match your HTML Headers
             tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:var(--text-muted);">No records match the current filters.</td></tr>`;
             return;
         }
@@ -3711,7 +3708,6 @@ function renderAuditTable() {
             const hrCodeHtml = r.hrCode !== 'N/A' ? `<br><span class="op-hr-code" style="margin-left:0;">(${r.hrCode})</span>` : '';
             const commentHtml = r.comment !== 'No Comment' ? `<span class="op-comment-text">${r.comment}</span>` : `<span class="op-comment-muted">No Comment</span>`;
 
-            // هنا الـ 10 أعمدة بالترتيب المظبوط والتواريخ جنب بعض
             return `
                 <tr>
                     <td><strong>${r.governorate}</strong></td>
