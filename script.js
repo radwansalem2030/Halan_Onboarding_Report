@@ -3661,7 +3661,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(searchInp) searchInp.oninput = () => { auditFilters.search = searchInp.value.trim().toLowerCase(); renderAuditTable(); };
     }
 
-    function renderAuditTable() {
+function renderAuditTable() {
         const tbody = document.getElementById('audit-table-body');
         const badge = document.getElementById('audit-table-badge');
         if (!tbody) return;
@@ -3681,7 +3681,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (badge) badge.textContent = `${filtered.length} Cases`;
 
         if (filtered.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:30px; color:var(--text-muted);">No records match the current filters.</td></tr>`;
+            // Updated colspan to 10 to match the new number of columns
+            tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:var(--text-muted);">No records match the current filters.</td></tr>`;
             return;
         }
 
@@ -3710,6 +3711,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const hrCodeHtml = r.hrCode !== 'N/A' ? `<br><span class="op-hr-code" style="margin-left:0;">(${r.hrCode})</span>` : '';
             const commentHtml = r.comment !== 'No Comment' ? `<span class="op-comment-text">${r.comment}</span>` : `<span class="op-comment-muted">No Comment</span>`;
 
+            // هنا الـ 10 أعمدة بالترتيب المظبوط والتواريخ جنب بعض
             return `
                 <tr>
                     <td><strong>${r.governorate}</strong></td>
@@ -3718,8 +3720,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td><strong>${r.empName}</strong>${hrCodeHtml}</td>
                     <td style="color:${r.opStatus==='Resigned'?'var(--red)':'var(--text-main)'}; font-weight:600;">${r.opStatus}</td>
                     <td style="font-weight:600; color:${r.hrStatus.includes('Active') ? 'var(--primary)' : 'var(--orange)'};">${r.hrStatus}</td>
-                    <td>${r.hiringDate}</td> <!-- السطر الجديد أهو -->
-                    <td>${r.termDate}</td>
+                    <td><strong>${r.hiringDate}</strong></td>
+                    <td class="text-danger"><strong>${r.termDate}</strong></td>
                     <td><span class="audit-status-badge ${statusCls}">${r.auditStatus}</span></td>
                     <td>${commentHtml}</td>
                 </tr>
