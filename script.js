@@ -3393,6 +3393,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const hrRecordInfo = {
                     rawRow: hrRow,
                     hasTerm: hasTerm,
+                    hiringDateStr: hrRow['Hiring Date'] ? hrRow['Hiring Date'].trim() : 'N/A', // <--- ضيف السطر ده
                     termDateStr: hasTerm ? hrRow['Termination Date'].trim() : '',
                     termType: hrRow['Termination Type - English'] ? hrRow['Termination Type - English'].trim() : '',
                     workingDaysToExit: workingDaysToExit
@@ -3488,6 +3489,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 branch: opBranch,
                 opStatus: isOpResigned ? 'Resigned' : 'Active / In Training',
                 hrStatus: hrStatusText,
+                hiringDate: hrData ? hrData.hiringDateStr : (opRow['Hiring Date'] ? opRow['Hiring Date'].trim() : 'N/A'), // <--- ضيف السطر ده
                 termDate: termDate,
                 auditStatus: auditStatus,
                 comment: rawComment,
@@ -3716,6 +3718,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td><strong>${r.empName}</strong>${hrCodeHtml}</td>
                     <td style="color:${r.opStatus==='Resigned'?'var(--red)':'var(--text-main)'}; font-weight:600;">${r.opStatus}</td>
                     <td style="font-weight:600; color:${r.hrStatus.includes('Active') ? 'var(--primary)' : 'var(--orange)'};">${r.hrStatus}</td>
+                    <td>${r.hiringDate}</td> <!-- السطر الجديد أهو -->
                     <td>${r.termDate}</td>
                     <td><span class="audit-status-badge ${statusCls}">${r.auditStatus}</span></td>
                     <td>${commentHtml}</td>
