@@ -3783,3 +3783,44 @@ document.addEventListener('DOMContentLoaded', () => {
             console.warn("turnover.csv File Offline or Unreachable:", err);
         });
 });
+// ==========================================================================
+// LOGIN FUNCTIONALITY
+// ==========================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    const loginBtn = document.getElementById('login-btn');
+    const loginUser = document.getElementById('login-user');
+    const loginPass = document.getElementById('login-pass');
+    const loginError = document.getElementById('login-error');
+    const loginOverlay = document.getElementById('login-overlay');
+    const dashboardContainer = document.querySelector('.dashboard-container');
+
+    function handleLogin() {
+        // اليوزر والباسورد بتوعك
+        const userVal = loginUser.value.trim();
+        const passVal = loginPass.value.trim();
+
+        if (userVal === 'DT' && passVal === '@12345') {
+            // لو صح، اخفي اللوجن واظهر الداشبورد
+            if(loginOverlay) loginOverlay.style.display = 'none';
+            if(dashboardContainer) dashboardContainer.style.display = 'flex';
+        } else {
+            // لو غلط، طلع رسالة الخطأ وفضي الباسورد
+            if(loginError) loginError.style.display = 'block';
+            if(loginPass) {
+                loginPass.value = ''; 
+                loginPass.focus();
+            }
+        }
+    }
+
+    if(loginBtn) {
+        loginBtn.addEventListener('click', handleLogin);
+    }
+
+    // عشان اللوجن يشتغل لما تدوس Enter
+    const triggerEnter = (e) => {
+        if (e.key === 'Enter') handleLogin();
+    };
+    if(loginUser) loginUser.addEventListener('keypress', triggerEnter);
+    if(loginPass) loginPass.addEventListener('keypress', triggerEnter);
+});
