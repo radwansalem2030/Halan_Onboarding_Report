@@ -9,28 +9,7 @@
     <script src="script.js" defer></script>
 </head>
 <body>
-    <!-- شاشة اللوجن -->
-    <div id="login-overlay">
-        <div class="login-box">
-            <div class="login-header">
-                <h2>Executive Dashboard</h2>
-                <p>Please enter your credentials to continue</p>
-            </div>
-            <div class="login-form">
-                <div class="input-group">
-                    <label for="login-user">Username</label>
-                    <input type="text" id="login-user" class="premium-input" placeholder="Enter username">
-                </div>
-                <div class="input-group">
-                    <label for="login-pass">Password</label>
-                    <input type="password" id="login-pass" class="premium-input" placeholder="Enter password">
-                </div>
-                <div id="login-error" class="login-error" style="display: none;">Invalid Username or Password!</div>
-                <button id="login-btn" class="login-btn">Login</button>
-            </div>
-        </div>
-    </div>
-    <div class="dashboard-container" style="display: none>
+    <div class="dashboard-container">
         
         <!-- Header Section -->
         <header class="dashboard-header">
@@ -958,39 +937,4 @@
     <!-- Universal Dynamic Chart Tooltip Overlay -->
     <div id="dashboard-tooltip" class="custom-dashboard-tooltip"></div>
 </body>
-    <!-- سكريبت اللوجن -->
-    <script>
-        const loginBtn = document.getElementById('login-btn');
-        const loginUser = document.getElementById('login-user');
-        const loginPass = document.getElementById('login-pass');
-        const loginError = document.getElementById('login-error');
-        const loginOverlay = document.getElementById('login-overlay');
-        const dashboardContainer = document.querySelector('.dashboard-container');
-
-        function handleLogin() {
-            const userVal = loginUser.value.trim();
-            const passVal = loginPass.value.trim();
-
-            if (userVal === 'DT' && passVal === '@12345') {
-                if(loginOverlay) loginOverlay.style.display = 'none';
-                if(dashboardContainer) dashboardContainer.style.display = 'flex';
-            } else {
-                if(loginError) loginError.style.display = 'block';
-                if(loginPass) {
-                    loginPass.value = ''; 
-                    loginPass.focus();
-                }
-            }
-        }
-
-        if(loginBtn) {
-            loginBtn.addEventListener('click', handleLogin);
-        }
-
-        const triggerEnter = (e) => {
-            if (e.key === 'Enter') handleLogin();
-        };
-        if(loginUser) loginUser.addEventListener('keypress', triggerEnter);
-        if(loginPass) loginPass.addEventListener('keypress', triggerEnter);
-    </script>
 </html>
