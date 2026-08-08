@@ -1,4 +1,162 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // ==========================================================================
+    // AUTHENTICATION & SESSION MANAGEMENT
+    // ==========================================================================
+    const SESSION_KEY = 'mnt_halan_dashboard_session';
+    const SESSION_DURATION_MS = 72 * 60 * 60 * 1000; // 72 hours
+
+    // Auth UI Elements
+    const loginOverlay = document.getElementById('login-overlay');
+    const appShell = document.getElementById('app-shell');
+    const loginForm = document.getElementById('login-form');
+    const loginUsernameInput = document.getElementById('login-username');
+    const loginPasswordInput = document.getElementById('login-password');
+    const loginErrorMsg = document.getElementById('login-error-msg');
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    
+    // Top Bar & Sidebar User Elements
+    const topWelcomeMessage = document.getElementById('top-welcome-message');
+    const topUserAvatar = document.getElementById('top-user-avatar');
+    
+    const sidebarUserName = document.getElementById('sidebar-user-name');
+    const sidebarUserRole = document.getElementById('sidebar-user-role');
+    const sidebarAvatar = document.getElementById('sidebar-avatar');
+    
+    const logoutBtn = document.getElementById('logout-btn');
+
+    // Sidebar Toggle Logic
+    const sidebarToggleBtn = document.getElementById('sidebar-toggle');
+    if (sidebarToggleBtn && appShell) {
+        sidebarToggleBtn.addEventListener('click', () => {
+            appShell.classList.toggle('sidebar-collapsed');
+        });
+    }
+
+    // Derived Hash Function for Client-Side Storage Avoidance
+    function simpleHash(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        return hash.toString(36);
+    }
+
+    // Application Users Registry
+    const USERS = {
+        'radwan': {
+            hash: simpleHash('R@123456'),
+            displayName: 'Radwan Salem',
+            role: 'User'
+        },
+        'DT': {
+            hash: simpleHash('D@123456'),
+            displayName: 'DT Team',
+            role: 'Team User'
+        }
+    };
+
+    function showDashboard(displayName, role) {
+        if (loginOverlay) loginOverlay.style.display = 'none';
+        if (appShell) appShell.style.display = 'flex';
+        
+        if (sidebarUserName) sidebarUserName.textContent = displayName;
+        if (sidebarUserRole) sidebarUserRole.textContent = role;
+        if (sidebarAvatar) sidebarAvatar.textContent = displayName.charAt(0).toUpperCase();
+
+        if (topWelcomeMessage) topWelcomeMessage.textContent = displayName;
+        if (topUserAvatar) topUserAvatar.textContent = displayName.charAt(0).toUpperCase();
+    }
+
+    function handleLogout() {
+        localStorage.removeItem(SESSION_KEY);
+        if (loginOverlay) loginOverlay.style.display = 'flex';
+        if (appShell) appShell.style.display = 'none';
+        if (loginUsernameInput) loginUsernameInput.value = '';
+        if (loginPasswordInput) loginPasswordInput.value = '';
+        if (loginErrorMsg) loginErrorMsg.style.display = 'none';
+    }
+
+    function createSession(username) {
+        const user = USERS[username];
+        const now = new Date().getTime();
+        const session = {
+            authenticated: true,
+            username: username,
+            displayName: user.displayName,
+            role: user.role,
+            loginTimestamp: now,
+            expiration: now + SESSION_DURATION_MS
+        };
+        localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+        showDashboard(user.displayName, user.role);
+    }
+
+    function checkSession() {
+        const sessionData = localStorage.getItem(SESSION_KEY);
+        if (sessionData) {
+            try {
+                const session = JSON.parse(sessionData);
+                const now = new Date().getTime();
+                if (session.authenticated && session.expiration > now) {
+                    showDashboard(session.displayName, session.role);
+                    return true;
+                } else {
+                    handleLogout(); // Session expired
+                }
+            } catch (e) {
+                handleLogout(); // Malformed session
+            }
+        } else {
+            handleLogout(); // No session exists
+        }
+        return false;
+    }
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const username = loginUsernameInput.value.trim();
+            const password = loginPasswordInput.value;
+            
+            if (USERS[username]) {
+                const inputHash = simpleHash(password);
+                if (inputHash === USERS[username].hash) {
+                    if (loginErrorMsg) loginErrorMsg.style.display = 'none';
+                    createSession(username);
+                    return;
+                }
+            }
+            if (loginErrorMsg) {
+                loginErrorMsg.style.display = 'block';
+                loginErrorMsg.textContent = 'Invalid username or password.';
+            }
+        });
+    }
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+    
+    if (togglePasswordBtn) {
+        togglePasswordBtn.addEventListener('click', () => {
+            if (loginPasswordInput.type === 'password') {
+                loginPasswordInput.type = 'text';
+                togglePasswordBtn.textContent = 'Hide';
+            } else {
+                loginPasswordInput.type = 'password';
+                togglePasswordBtn.textContent = 'Show';
+            }
+        });
+    }
+
+    // Initialize session state on load
+    checkSession();
+
+    // ==========================================================================
+    // UI ELEMENTS BINDER & GLOBALS
+    // ==========================================================================
     // UI Elements Binder - Tab 1
     const txtTotalHired = document.getElementById('total-hired-val');
     const txtResignedCount = document.getElementById('resigned-count-val');
@@ -32,6 +190,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Dataset Globals
     let globalDataset = [];
     let supervisorDataset = [];
+    let supervisorGlobalMetrics = {};
     let rawSupervisorRecordsGlobal = [];
     let turnoverDatasetGlobal = []; // New Tab Dataset
 
@@ -323,19 +482,32 @@ document.addEventListener('DOMContentLoaded', () => {
         const metrics = calculateCentralMetrics(scopedData);
 
         processMetricsPipeline(scopedData, metrics);
-        processTab2AnalyticsPipeline(scopedData, metrics);
-        processTab3SupervisorPipeline(scopedSupRecords);
         
+        if (typeof processTab2AnalyticsPipeline === 'function') {
+            processTab2AnalyticsPipeline(scopedData, metrics);
+        }
+        if (typeof processTab3SupervisorPipeline === 'function') {
+            processTab3SupervisorPipeline(scopedSupRecords);
+        }
         if(typeof renderHQValidationSection === 'function') {
             renderHQValidationSection(scopedSupRecords);
+        }
+        if (typeof processTab4CasesPipeline === 'function') {
             processTab4CasesPipeline(scopedData, metrics);
+        }
+        if (typeof renderMeasureOfSuccessTab === 'function') {
             renderMeasureOfSuccessTab();
-            renderResignationAuditTab(); // Trigger New Audit Tab Render
+        }
+        if (typeof renderResignationAuditTab === 'function') {
+            renderResignationAuditTab(); 
+        }
+        if (typeof renderHRReconciliationGapDiagnostics === 'function') {
+            renderHRReconciliationGapDiagnostics();
         }
     }
 
     monthFilterSelect.addEventListener('change', applyDynamicFiltering);
-    setupOpControlsListeners();
+    if (typeof setupOpControlsListeners === 'function') setupOpControlsListeners();
 
     function processMetricsPipeline(rawRecords, metrics) {
         txtTotalHired.textContent = metrics.totalNewHired.toLocaleString();
@@ -524,7 +696,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const labelInterval = Math.max(1, Math.ceil(totalPoints / 7));
 
         points.forEach((pt, idx) => {
-            const fullD = formatFullDate(pt.dateStr);
+            const fullD = formatFullDate(pt.dateStr) || { dateStr: pt.dateStr, dayOfWeek: '' };
             const ttHtml = `
                 <div class="tt-title">${fullD.dateStr} (${fullD.dayOfWeek})</div>
                 <div class="tt-row"><span>Daily New Hires:</span> <strong>${pt.val}</strong></div>
@@ -720,7 +892,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                     <div class="flow-sub-stat">
                         <span class="stat-pct text-muted">${m.notTrainedPct.toFixed(1)}%</span>
-                        <span class="stat-lbl">Not Trained (${m.notTrainedCount})</span>
+                        <span class="stat-lbl">Session Not Started (${m.notTrainedCount})</span>
                     </div>
                 </div>
             </div>
@@ -1341,100 +1513,182 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         return num;
     }
+
+// ==========================================================================
+    // TAB 3: SUPERVISOR PERFORMANCE ENGINE & RENDERING
+    // ==========================================================================
     function aggregateSupervisorData(rawRecords) {
-        if (rawRecords.length === 0) return { supervisors: [], rawValids: [], rawQuestValids: [], raw72hValids: [], rawHqValids: [] };
+        if (rawRecords.length === 0) {
+            return { 
+                supervisors: [], 
+                rawQuestValids: [], raw72hValids: [], rawSlaQuestValids: [], rawHqValids: [],
+                globalCoveredOfficers: 0, globalBranches: 0, globalTrainedOfficers: 0 
+            };
+        }
 
         const sample = rawRecords[0];
         const supCol = findColumnName(sample, ['Supervisor Name', 'Supervisor', 'Direct Manager', 'Manager']);
         const govCol = findColumnName(sample, ['Gov', 'Governorate', 'Region', 'Branch Governorate']);
         const officerCol = findColumnName(sample, ['Officer HR Code', 'HR Code', 'Officer Code', 'Officer Name', 'Employee ID']);
         const branchCol = findColumnName(sample, ['Branch', 'Branch Name', 'Branch Code']);
-        const resultCol = findColumnName(sample, ['Final Result', 'KPI Result', 'Average Result', 'Result']);
+        
         const questCol = findColumnName(sample, ['Questionnaire Result', 'Test Result', 'Knowledge Result']);
         const sla72Col = findColumnName(sample, ['72 hours Lateness Result', '72h Lateness Result', '72h SLA Result']);
+        const slaQuestCol = findColumnName(sample, ['Questionnaire Lateness Result', 'Quest SLA Result', 'Questionnaire SLA']);
         const hqCol = findColumnName(sample, ['HQ Call Result', 'HQ Call', 'HQ Validation']);
+        
+        // يعتمد حساب عبء العمل على توفر تاريخ انتهاء التدريب لضمان دقة الأرقام
+        const lastDateCol = findColumnName(sample, ['Last Date Training', 'Last Training Date', 'Completion Date']);
 
         const supMap = {};
-        const rawValids = [];
+        
         const rawQuestValids = [];
         const raw72hValids = [];
+        const rawSlaQuestValids = [];
         const rawHqValids = [];
+        
+        const globalCoveredOfficers = new Set();
+        const globalTrainedOfficers = new Set();
+        const globalBranches = new Set();
 
-        rawRecords.forEach(row => {
+        rawRecords.forEach((row, idx) => {
             const supName = row[supCol] ? row[supCol].trim() : '';
             if (!supName) return;
 
             const gov = row[govCol] ? row[govCol].trim() : 'Unknown';
-            const officerId = row[officerCol] ? row[officerCol].trim() : null;
+            // المعالجة الدائمة لمشكلة اختفاء عمود الـ ID
+            const officerId = row[officerCol] ? row[officerCol].trim() : "ROW_" + idx;
             const branchId = row[branchCol] ? row[branchCol].trim() : null;
-            const rawRes = row[resultCol];
-            const parsedRes = parseFinalResult(rawRes);
-
+            
             const parsedQuest = questCol ? parseFinalResult(row[questCol]) : null;
             const parsed72h = sla72Col ? parseFinalResult(row[sla72Col]) : null;
+            const parsedSlaQuest = slaQuestCol ? parseFinalResult(row[slaQuestCol]) : null;
             const parsedHq = hqCol ? parseFinalResult(row[hqCol]) : null;
+            
+            const lastDateVal = lastDateCol ? String(row[lastDateCol]).trim() : '';
+            const isTrained = lastDateVal !== '' && lastDateVal.toLowerCase() !== 'nan' && lastDateVal.toLowerCase() !== 'null';
 
-            if (parsedRes !== null) rawValids.push({ val: parsedRes, officerId });
-            if (parsedQuest !== null) rawQuestValids.push({ val: parsedQuest, officerId });
-            if (parsed72h !== null) raw72hValids.push({ val: parsed72h, officerId });
-            if (parsedHq !== null) rawHqValids.push({ val: parsedHq, officerId });
+            const hasValidEvaluation = (parsedQuest !== null || parsed72h !== null || parsedSlaQuest !== null || parsedHq !== null);
 
             if (!supMap[supName]) {
                 supMap[supName] = {
                     supervisor: supName,
                     governorate: gov,
-                    officersSet: new Set(),
+                    coveredOfficersSet: new Set(),
+                    trainedOfficersSet: new Set(),
                     branchesSet: new Set(),
-                    evaluatedCount: 0,
-                    validResultsSum: 0,
-                    questSum: 0,
-                    questCount: 0
+                    
+                    questSum: 0, questCount: 0,
+                    sla72Sum: 0, sla72Count: 0,
+                    slaQuestSum: 0, slaQuestCount: 0,
+                    hqSum: 0, hqCount: 0
                 };
             }
 
-            if (officerId) supMap[supName].officersSet.add(officerId);
-            if (branchId) supMap[supName].branchesSet.add(branchId);
-
-            if (parsedRes !== null) {
-                supMap[supName].evaluatedCount++;
-                supMap[supName].validResultsSum += parsedRes;
+            if (hasValidEvaluation) {
+                supMap[supName].coveredOfficersSet.add(officerId);
+                globalCoveredOfficers.add(officerId);
+            }
+            if (isTrained) {
+                supMap[supName].trainedOfficersSet.add(officerId);
+                globalTrainedOfficers.add(officerId);
+            }
+            
+            if (branchId) {
+                if (hasValidEvaluation || isTrained) {
+                    supMap[supName].branchesSet.add(branchId);
+                    globalBranches.add(branchId);
+                }
             }
 
             if (parsedQuest !== null) {
                 supMap[supName].questCount++;
                 supMap[supName].questSum += parsedQuest;
+                rawQuestValids.push({ val: parsedQuest, officerId });
+            }
+            if (parsed72h !== null) {
+                supMap[supName].sla72Count++;
+                supMap[supName].sla72Sum += parsed72h;
+                raw72hValids.push({ val: parsed72h, officerId });
+            }
+            if (parsedSlaQuest !== null) {
+                supMap[supName].slaQuestCount++;
+                supMap[supName].slaQuestSum += parsedSlaQuest;
+                rawSlaQuestValids.push({ val: parsedSlaQuest, officerId });
+            }
+            if (parsedHq !== null) {
+                supMap[supName].hqCount++;
+                supMap[supName].hqSum += parsedHq;
+                rawHqValids.push({ val: parsedHq, officerId });
             }
         });
 
         const compiledSupervisors = Object.values(supMap).map(s => {
-            const uniqueOfficers = s.officersSet.size;
+            const coveredOfficers = s.coveredOfficersSet.size;
+            const trainedWorkload = s.trainedOfficersSet.size;
             const uniqueBranches = s.branchesSet.size;
-            const evaluatedOfficers = s.evaluatedCount;
-            const avgFinalResult = evaluatedOfficers > 0 ? (s.validResultsSum / evaluatedOfficers) : null;
-            const avgQuestResult = s.questCount > 0 ? (s.questSum / s.questCount) : null;
-            const evaluationCoverage = uniqueOfficers > 0 ? (evaluatedOfficers / uniqueOfficers) * 100 : 0;
+            
+            const avgQuest = s.questCount > 0 ? (s.questSum / s.questCount) : null;
+            const avgSla72 = s.sla72Count > 0 ? (s.sla72Sum / s.sla72Count) : null;
+            const avgSlaQuest = s.slaQuestCount > 0 ? (s.slaQuestSum / s.slaQuestCount) : null;
+            const avgHq = s.hqCount > 0 ? (s.hqSum / s.hqCount) : null;
+            
+            let slaPerformance = null;
+            let slaPillars = 0;
+            let slaTotal = 0;
+            if (avgSla72 !== null) { slaTotal += avgSla72; slaPillars++; }
+            if (avgSlaQuest !== null) { slaTotal += avgSlaQuest; slaPillars++; }
+            if (slaPillars > 0) { slaPerformance = slaTotal / slaPillars; }
+            
+            let overallTotal = 0;
+            let overallPillars = 0;
+            if (avgQuest !== null) { overallTotal += avgQuest; overallPillars++; }
+            if (slaPerformance !== null) { overallTotal += slaPerformance; overallPillars++; }
+            if (avgHq !== null) { overallTotal += avgHq; overallPillars++; }
+            
+            const overallPerformance = overallPillars > 0 ? (overallTotal / overallPillars) : null;
 
             return {
                 supervisor: s.supervisor,
                 governorate: s.governorate,
-                uniqueOfficers,
+                coveredOfficers,
+                trainedWorkload,
                 uniqueBranches,
-                evaluatedOfficers,
-                avgFinalResult,
-                avgQuestResult,
-                evaluationCoverage
+                avgQuestResult: avgQuest,
+                avgSla72: avgSla72,
+                avgSlaQuest: avgSlaQuest,
+                avgSlaCombined: slaPerformance,
+                avgHqResult: avgHq,
+                overallPerformance,
+                
+                questCount: s.questCount,
+                sla72Count: s.sla72Count,
+                slaQuestCount: s.slaQuestCount,
+                hqCount: s.hqCount
             };
         });
 
-        return { supervisors: compiledSupervisors, rawValids, rawQuestValids, raw72hValids, rawHqValids };
+        return { 
+            supervisors: compiledSupervisors, 
+            rawQuestValids, 
+            raw72hValids, 
+            rawSlaQuestValids, 
+            rawHqValids,
+            globalCoveredOfficers: globalCoveredOfficers.size,
+            globalBranches: globalBranches.size,
+            globalTrainedOfficers: globalTrainedOfficers.size
+        };
     }
 
     function processTab3SupervisorPipeline(supRecords) {
-        const { supervisors, rawValids, rawQuestValids, raw72hValids, rawHqValids } = aggregateSupervisorData(supRecords);
+        const metricsObj = aggregateSupervisorData(supRecords);
+        const { supervisors, rawQuestValids, raw72hValids, rawSlaQuestValids, rawHqValids } = metricsObj;
+        
         supervisorDataset = supervisors;
+        supervisorGlobalMetrics = metricsObj;
 
-        renderSupervisorOperationalScope(supervisors);
-        renderSupervisorPrimaryKPIs(rawValids, rawQuestValids, raw72hValids, rawHqValids, supRecords);
+        renderSupervisorOperationalScope(supervisors, metricsObj);
+        renderSupervisorPrimaryKPIs(rawQuestValids, raw72hValids, rawSlaQuestValids, rawHqValids, supRecords);
         renderPerformanceWorkloadSegmentation(supervisors);
         renderSupervisorAnalyticalHighlights(supervisors);
         renderSupervisorPerformanceRanking(supervisors, activeRankingRangeFilter);
@@ -1445,7 +1699,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderSupervisorInsights(supervisors, supRecords);
     }
 
-    function renderSupervisorOperationalScope(supervisors) {
+    function renderSupervisorOperationalScope(supervisors, globalMetrics) {
         const container = document.getElementById('sup-op-scope-strip');
         if (!container) return;
 
@@ -1453,10 +1707,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const govSet = new Set(supervisors.map(s => s.governorate));
         const activeGovs = govSet.size;
 
-        const totalOfficers = supervisors.reduce((acc, s) => acc + s.uniqueOfficers, 0);
-        const totalBranches = supervisors.reduce((acc, s) => acc + s.uniqueBranches, 0);
+        const totalCoveredOfficers = globalMetrics.globalCoveredOfficers || 0;
+        const totalBranches = globalMetrics.globalBranches || 0;
 
-        const avgOfficersPerSup = totalSupervisors > 0 ? (totalOfficers / totalSupervisors) : 0;
+        const avgOfficersPerSup = totalSupervisors > 0 ? (totalCoveredOfficers / totalSupervisors) : 0;
         const avgBranchesPerSup = totalSupervisors > 0 ? (totalBranches / totalSupervisors) : 0;
 
         container.innerHTML = `
@@ -1477,7 +1731,7 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
             <div class="sup-exec-card">
                 <span class="sup-card-lbl">Officers Covered</span>
-                <span class="sup-card-val">${totalOfficers.toLocaleString()}</span>
+                <span class="sup-card-val">${totalCoveredOfficers.toLocaleString()}</span>
                 <span class="sup-card-sub">Avg ${avgOfficersPerSup.toFixed(1)} / Sup</span>
             </div>
         `;
@@ -1611,21 +1865,31 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    function renderSupervisorPrimaryKPIs(rawValids, rawQuestValids, raw72hValids, rawHqValids, supRecords) {
+    function renderSupervisorPrimaryKPIs(rawQuestValids, raw72hValids, rawSlaQuestValids, rawHqValids, supRecords) {
         const container = document.getElementById('sup-primary-kpi-grid');
         if (!container) return;
 
-        const uniqueFinalOfficers = new Set(rawValids.map(item => item.officerId).filter(Boolean)).size;
-        const uniqueQuestOfficers = new Set(rawQuestValids.map(item => item.officerId).filter(Boolean)).size;
-        const unique72hOfficers = new Set(raw72hValids.map(item => item.officerId).filter(Boolean)).size;
-        const uniqueHqOfficers = new Set(rawHqValids.map(item => item.officerId).filter(Boolean)).size;
+        const questAvg = rawQuestValids.length > 0 ? (rawQuestValids.reduce((a, b) => a + b.val, 0) / rawQuestValids.length) : null;
+        
+        const sla72Avg = raw72hValids.length > 0 ? (raw72hValids.reduce((a, b) => a + b.val, 0) / raw72hValids.length) : null;
+        const slaQuestAvg = rawSlaQuestValids.length > 0 ? (rawSlaQuestValids.reduce((a, b) => a + b.val, 0) / rawSlaQuestValids.length) : null;
+        
+        let slaTotal = 0;
+        let slaPillars = 0;
+        if (sla72Avg !== null) { slaTotal += sla72Avg; slaPillars++; }
+        if (slaQuestAvg !== null) { slaTotal += slaQuestAvg; slaPillars++; }
+        const combinedSlaAvg = slaPillars > 0 ? (slaTotal / slaPillars) : null;
 
-        const overallAvg = rawValids.length > 0 ? (rawValids.reduce((a, b) => a + b.val, 0) / rawValids.length) : 0;
-        const questAvg = rawQuestValids.length > 0 ? (rawQuestValids.reduce((a, b) => a + b.val, 0) / rawQuestValids.length) : 0;
-        const sla72Avg = raw72hValids.length > 0 ? (raw72hValids.reduce((a, b) => a + b.val, 0) / raw72hValids.length) : 0;
-        const hqAvg = rawHqValids.length > 0 ? (rawHqValids.reduce((a, b) => a + b.val, 0) / rawHqValids.length) : 0;
+        const hqAvg = rawHqValids.length > 0 ? (rawHqValids.reduce((a, b) => a + b.val, 0) / rawHqValids.length) : null;
+        
+        let overallTotal = 0;
+        let overallPillars = 0;
+        if (questAvg !== null) { overallTotal += questAvg; overallPillars++; }
+        if (combinedSlaAvg !== null) { overallTotal += combinedSlaAvg; overallPillars++; }
+        if (hqAvg !== null) { overallTotal += hqAvg; overallPillars++; }
+        const overallAvg = overallPillars > 0 ? (overallTotal / overallPillars) : 0;
 
-        const overallTrend = computeCohortTrendSeries(supRecords, 'Final Result');
+        const overallTrend = computeCohortTrendSeries(supRecords, 'Final Result'); 
         const questTrend = computeCohortTrendSeries(supRecords, 'Questionnaire Result');
         const sla72Trend = computeCohortTrendSeries(supRecords, '72 hours Lateness Result');
         const hqTrend = computeCohortTrendSeries(supRecords, 'HQ Call Result');
@@ -1639,37 +1903,37 @@ document.addEventListener('DOMContentLoaded', () => {
             <div class="metric-card kpi-exec-card">
                 <div class="kpi-exec-title">OVERALL PERFORMANCE</div>
                 <div class="kpi-exec-val-row">
-                    <span class="main-value text-purple">${overallAvg.toFixed(1)}%</span>
+                    <span class="main-value text-purple">${overallPillars > 0 ? overallAvg.toFixed(1) + '%' : 'N/A'}</span>
                 </div>
-                <div class="kpi-exec-sub">Average Final Result across supervisory evaluations</div>
-                <div class="kpi-exec-denom">Based on <strong>${uniqueFinalOfficers.toLocaleString()}</strong> evaluated officers</div>
+                <div class="kpi-exec-sub" style="max-width: 55%; font-size: 10px; line-height: 1.4;">Average across<br>Knowledge, SLA & HQ</div>
+                <div class="kpi-exec-denom" style="max-width: 55%; font-size: 9.5px; line-height: 1.4;">Calculated from<br><strong>${overallPillars}</strong> active metrics</div>
                 ${card1Spark}
             </div>
             <div class="metric-card kpi-exec-card">
                 <div class="kpi-exec-title">KNOWLEDGE PERFORMANCE</div>
                 <div class="kpi-exec-val-row">
-                    <span class="main-value text-success">${questAvg > 0 ? questAvg.toFixed(1) + '%' : 'N/A'}</span>
+                    <span class="main-value text-success">${questAvg !== null ? questAvg.toFixed(1) + '%' : 'N/A'}</span>
                 </div>
-                <div class="kpi-exec-sub">Average Questionnaire / Test result score</div>
-                <div class="kpi-exec-denom">Based on <strong>${uniqueQuestOfficers.toLocaleString()}</strong> evaluated officers</div>
+                <div class="kpi-exec-sub" style="max-width: 55%; font-size: 10px; line-height: 1.4;">Average Questionnaire<br>or Test result score</div>
+                <div class="kpi-exec-denom" style="max-width: 55%; font-size: 9.5px; line-height: 1.4;">Based on<br><strong>${rawQuestValids.length.toLocaleString()}</strong> valid results</div>
                 ${card2Spark}
             </div>
             <div class="metric-card kpi-exec-card">
-                <div class="kpi-exec-title">SLA COMPLIANCE PERFORMANCE</div>
+                <div class="kpi-exec-title">SLA COMPLIANCE</div>
                 <div class="kpi-exec-val-row">
-                    <span class="main-value text-orange-main">${sla72Avg > 0 ? sla72Avg.toFixed(1) + '%' : 'N/A'}</span>
+                    <span class="main-value text-orange-main">${combinedSlaAvg !== null ? combinedSlaAvg.toFixed(1) + '%' : 'N/A'}</span>
                 </div>
-                <div class="kpi-exec-sub">Initial 72-hour onboarding phase SLA lateness score</div>
-                <div class="kpi-exec-denom">Based on <strong>${unique72hOfficers.toLocaleString()}</strong> evaluated officers</div>
+                <div class="kpi-exec-sub" style="max-width: 55%; font-size: 10px; line-height: 1.4;">Combined 72h &<br>Quest. Overdue SLA</div>
+                <div class="kpi-exec-denom" style="max-width: 55%; font-size: 9.5px; line-height: 1.4;"><strong>${raw72hValids.length.toLocaleString()}</strong> 72h cases<br><strong>${rawSlaQuestValids.length.toLocaleString()}</strong> Quest cases</div>
                 ${card3Spark}
             </div>
             <div class="metric-card kpi-exec-card">
-                <div class="kpi-exec-title">HQ VALIDATION PERFORMANCE</div>
+                <div class="kpi-exec-title">HQ VALIDATION</div>
                 <div class="kpi-exec-val-row">
-                    <span class="main-value" style="color: #3B82F6;">${hqAvg > 0 ? hqAvg.toFixed(1) + '%' : 'N/A'}</span>
+                    <span class="main-value" style="color: #3B82F6;">${hqAvg !== null ? hqAvg.toFixed(1) + '%' : 'N/A'}</span>
                 </div>
-                <div class="kpi-exec-sub">Average HQ validation call score result</div>
-                <div class="kpi-exec-denom">Based on <strong>${uniqueHqOfficers.toLocaleString()}</strong> evaluated officers</div>
+                <div class="kpi-exec-sub" style="max-width: 55%; font-size: 10px; line-height: 1.4;">Average HQ validation<br>call score result</div>
+                <div class="kpi-exec-denom" style="max-width: 55%; font-size: 9.5px; line-height: 1.4;">Based on<br><strong>${rawHqValids.length.toLocaleString()}</strong> valid results</div>
                 ${card4Spark}
             </div>
         `;
@@ -1679,33 +1943,33 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('sup-performance-segmentation-container');
         if (!container) return;
 
-        const validSups = supervisors.filter(s => s.avgFinalResult !== null);
+        const validSups = supervisors.filter(s => s.overallPerformance !== null);
         if (validSups.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding:40px; font-size:12px; color:var(--text-muted)">No valid supervisor performance results available</div>';
             return;
         }
 
-        const workloads = validSups.map(s => s.uniqueOfficers);
-        const results = validSups.map(s => s.avgFinalResult);
+        const workloads = validSups.map(s => s.trainedWorkload);
+        const results = validSups.map(s => s.overallPerformance);
 
         const medWorkload = calculateMedian(workloads);
         const medResult = calculateMedian(results);
 
-        const seg1 = validSups.filter(s => s.avgFinalResult >= medResult && s.uniqueOfficers >= medWorkload);
-        const seg2 = validSups.filter(s => s.avgFinalResult >= medResult && s.uniqueOfficers < medWorkload);
-        const seg3 = validSups.filter(s => s.avgFinalResult < medResult && s.uniqueOfficers >= medWorkload);
-        const seg4 = validSups.filter(s => s.avgFinalResult < medResult && s.uniqueOfficers < medWorkload);
+        const seg1 = validSups.filter(s => s.overallPerformance >= medResult && s.trainedWorkload >= medWorkload);
+        const seg2 = validSups.filter(s => s.overallPerformance >= medResult && s.trainedWorkload < medWorkload);
+        const seg3 = validSups.filter(s => s.overallPerformance < medResult && s.trainedWorkload >= medWorkload);
+        const seg4 = validSups.filter(s => s.overallPerformance < medResult && s.trainedWorkload < medWorkload);
 
         const renderSegTopSups = (list) => {
             if (list.length === 0) return '<div class="seg-empty-txt">No supervisors in segment</div>';
-            const top3 = [...list].sort((a,b) => b.avgFinalResult - a.avgFinalResult).slice(0, 3);
+            const top3 = [...list].sort((a,b) => b.overallPerformance - a.overallPerformance).slice(0, 3);
             return top3.map(s => `
                 <div class="seg-sup-item">
                     <div style="display:flex; flex-direction:column; gap:1px; overflow:hidden;">
                         <span class="seg-sup-name" title="${s.supervisor}">${s.supervisor}</span>
                         <span style="font-size:10px; color:var(--text-muted);">${s.governorate}</span>
                     </div>
-                    <span class="seg-sup-val"><strong>${s.avgFinalResult.toFixed(1)}%</strong> (${s.evaluatedOfficers}/${s.uniqueOfficers} off.)</span>
+                    <span class="seg-sup-val"><strong>${s.overallPerformance.toFixed(1)}%</strong> (${s.trainedWorkload} trained)</span>
                 </div>
             `).join('');
         };
@@ -1717,7 +1981,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="seg-card-title">STRONG PERFORMANCE AT SCALE</span>
                         <span class="seg-card-count text-success">${seg1.length} Supervisors</span>
                     </div>
-                    <div class="seg-card-sub">Result ≥ ${medResult.toFixed(1)}% & Workload ≥ ${medWorkload.toFixed(0)} officers</div>
+                    <div class="seg-card-sub">Result ≥ ${medResult.toFixed(1)}% & Workload ≥ ${medWorkload.toFixed(0)} trained officers</div>
                     <div class="seg-sup-list">${renderSegTopSups(seg1)}</div>
                 </div>
                 <div class="seg-card seg-card-blue">
@@ -1725,7 +1989,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="seg-card-title">STRONG PERFORMANCE / LOWER VOLUME</span>
                         <span class="seg-card-count text-purple">${seg2.length} Supervisors</span>
                     </div>
-                    <div class="seg-card-sub">Result ≥ ${medResult.toFixed(1)}% & Workload < ${medWorkload.toFixed(0)} officers</div>
+                    <div class="seg-card-sub">Result ≥ ${medResult.toFixed(1)}% & Workload < ${medWorkload.toFixed(0)} trained officers</div>
                     <div class="seg-sup-list">${renderSegTopSups(seg2)}</div>
                 </div>
                 <div class="seg-card seg-card-orange">
@@ -1733,7 +1997,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="seg-card-title">HIGH VOLUME / LOWER PERFORMANCE</span>
                         <span class="seg-card-count text-orange-main">${seg3.length} Supervisors</span>
                     </div>
-                    <div class="seg-card-sub">Result < ${medResult.toFixed(1)}% & Workload ≥ ${medWorkload.toFixed(0)} officers</div>
+                    <div class="seg-card-sub">Result < ${medResult.toFixed(1)}% & Workload ≥ ${medWorkload.toFixed(0)} trained officers</div>
                     <div class="seg-sup-list">${renderSegTopSups(seg3)}</div>
                 </div>
                 <div class="seg-card seg-card-gray">
@@ -1741,7 +2005,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <span class="seg-card-title">LOWER PERFORMANCE / LOWER VOLUME</span>
                         <span class="seg-card-count text-muted">${seg4.length} Supervisors</span>
                     </div>
-                    <div class="seg-card-sub">Result < ${medResult.toFixed(1)}% & Workload < ${medWorkload.toFixed(0)} officers</div>
+                    <div class="seg-card-sub">Result < ${medResult.toFixed(1)}% & Workload < ${medWorkload.toFixed(0)} trained officers</div>
                     <div class="seg-sup-list">${renderSegTopSups(seg4)}</div>
                 </div>
             </div>
@@ -1752,42 +2016,42 @@ document.addEventListener('DOMContentLoaded', () => {
         const highlightsBox = document.getElementById('sup-analytical-highlights');
         if (!highlightsBox) return;
 
-        const validSups = supervisors.filter(s => s.avgFinalResult !== null);
+        const validSups = supervisors.filter(s => s.overallPerformance !== null);
         if (validSups.length === 0) {
             highlightsBox.innerHTML = '<div style="font-size:12px; color:var(--text-muted); padding:20px 0;">No matching supervisor data</div>';
             return;
         }
 
-        const workloads = validSups.map(s => s.uniqueOfficers);
+        const workloads = validSups.map(s => s.trainedWorkload);
         const medWorkload = calculateMedian(workloads);
 
-        const atScale = validSups.filter(s => s.uniqueOfficers >= medWorkload);
+        const atScale = validSups.filter(s => s.trainedWorkload >= medWorkload);
 
-        const highestWk = [...validSups].sort((a,b) => b.uniqueOfficers - a.uniqueOfficers)[0];
-        const strongScale = [...atScale].sort((a,b) => b.avgFinalResult - a.avgFinalResult)[0];
-        const highLowScale = [...atScale].sort((a,b) => a.avgFinalResult - b.avgFinalResult)[0];
+        const highestWk = [...validSups].sort((a,b) => b.trainedWorkload - a.trainedWorkload)[0];
+        const strongScale = [...atScale].sort((a,b) => b.overallPerformance - a.overallPerformance)[0];
+        const highLowScale = [...atScale].sort((a,b) => a.overallPerformance - b.overallPerformance)[0];
         const bestKnowledge = [...atScale].filter(s => s.avgQuestResult !== null).sort((a,b) => b.avgQuestResult - a.avgQuestResult)[0];
 
         highlightsBox.innerHTML = `
             <div class="callout-card">
-                <span class="callout-label">Highest Workload</span>
+                <span class="callout-label">Highest Training Workload</span>
                 <strong class="callout-main-text">${highestWk ? highestWk.supervisor : '-'}</strong>
-                <span class="callout-sub-text">${highestWk ? `${highestWk.governorate} • ${highestWk.avgFinalResult.toFixed(1)}% Result · ${highestWk.uniqueOfficers} officers managed (${highestWk.evaluatedOfficers} evaluated)` : '-'}</span>
+                <span class="callout-sub-text">${highestWk ? `${highestWk.governorate} • ${highestWk.overallPerformance.toFixed(1)}% Result · ${highestWk.trainedWorkload} trained officers (${highestWk.coveredOfficers} evaluated)` : '-'}</span>
             </div>
             <div class="callout-card">
                 <span class="callout-label">Strongest Performance at Scale</span>
                 <strong class="callout-main-text">${strongScale ? strongScale.supervisor : '-'}</strong>
-                <span class="callout-sub-text">${strongScale ? `${strongScale.governorate} • ${strongScale.avgFinalResult.toFixed(1)}% Result · ${strongScale.evaluatedOfficers} evaluated officers` : '-'}</span>
+                <span class="callout-sub-text">${strongScale ? `${strongScale.governorate} • ${strongScale.overallPerformance.toFixed(1)}% Result · ${strongScale.coveredOfficers} evaluated officers` : '-'}</span>
             </div>
             <div class="callout-card">
                 <span class="callout-label">High Workload / Lower Performance</span>
                 <strong class="callout-main-text">${highLowScale ? highLowScale.supervisor : '-'}</strong>
-                <span class="callout-sub-text">${highLowScale ? `${highLowScale.governorate} • ${highLowScale.avgFinalResult.toFixed(1)}% Result · ${highLowScale.evaluatedOfficers} evaluated officers` : '-'}</span>
+                <span class="callout-sub-text">${highLowScale ? `${highLowScale.governorate} • ${highLowScale.overallPerformance.toFixed(1)}% Result · ${highLowScale.coveredOfficers} evaluated officers` : '-'}</span>
             </div>
             <div class="callout-card">
                 <span class="callout-label">Highest Knowledge Result at Scale</span>
                 <strong class="callout-main-text">${bestKnowledge ? bestKnowledge.supervisor : '-'}</strong>
-                <span class="callout-sub-text">${bestKnowledge ? `${bestKnowledge.governorate} • ${bestKnowledge.avgQuestResult.toFixed(1)}% Knowledge Result · ${bestKnowledge.uniqueOfficers} officers` : '-'}</span>
+                <span class="callout-sub-text">${bestKnowledge ? `${bestKnowledge.governorate} • ${bestKnowledge.avgQuestResult.toFixed(1)}% Knowledge Result · ${bestKnowledge.trainedWorkload} trained officers` : '-'}</span>
             </div>
         `;
     }
@@ -1799,7 +2063,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         activeRankingRangeFilter = rangeFilter;
 
-        const validSups = supervisors.filter(s => s.avgFinalResult !== null);
+        const validSups = supervisors.filter(s => s.overallPerformance !== null);
         if (validSups.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding:40px; font-size:12px; color:var(--text-muted)">No valid supervisor performance results available</div>';
             if (filterBar) filterBar.innerHTML = '';
@@ -1808,10 +2072,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const counts = {
             'ALL': validSups.length,
-            '90-100': validSups.filter(s => s.avgFinalResult >= 90).length,
-            '80-89': validSups.filter(s => s.avgFinalResult >= 80 && s.avgFinalResult < 90).length,
-            '70-79': validSups.filter(s => s.avgFinalResult >= 70 && s.avgFinalResult < 80).length,
-            'BELOW-70': validSups.filter(s => s.avgFinalResult < 70).length
+            '90-100': validSups.filter(s => s.overallPerformance >= 90).length,
+            '80-89': validSups.filter(s => s.overallPerformance >= 80 && s.overallPerformance < 90).length,
+            '70-79': validSups.filter(s => s.overallPerformance >= 70 && s.overallPerformance < 80).length,
+            'BELOW-70': validSups.filter(s => s.overallPerformance < 70).length
         };
 
         if (filterBar) {
@@ -1832,12 +2096,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         let filtered = [...validSups];
-        if (activeRankingRangeFilter === '90-100') filtered = filtered.filter(s => s.avgFinalResult >= 90);
-        else if (activeRankingRangeFilter === '80-89') filtered = filtered.filter(s => s.avgFinalResult >= 80 && s.avgFinalResult < 90);
-        else if (activeRankingRangeFilter === '70-79') filtered = filtered.filter(s => s.avgFinalResult >= 70 && s.avgFinalResult < 80);
-        else if (activeRankingRangeFilter === 'BELOW-70') filtered = filtered.filter(s => s.avgFinalResult < 70);
+        if (activeRankingRangeFilter === '90-100') filtered = filtered.filter(s => s.overallPerformance >= 90);
+        else if (activeRankingRangeFilter === '80-89') filtered = filtered.filter(s => s.overallPerformance >= 80 && s.overallPerformance < 90);
+        else if (activeRankingRangeFilter === '70-79') filtered = filtered.filter(s => s.overallPerformance >= 70 && s.overallPerformance < 80);
+        else if (activeRankingRangeFilter === 'BELOW-70') filtered = filtered.filter(s => s.overallPerformance < 70);
 
-        filtered.sort((a, b) => b.avgFinalResult - a.avgFinalResult);
+        filtered.sort((a, b) => b.overallPerformance - a.overallPerformance);
 
         if (filtered.length === 0) {
             container.innerHTML = '<div style="text-align:center; padding:30px; font-size:12px; color:var(--text-muted)">No supervisors in selected performance range</div>';
@@ -1846,7 +2110,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let html = '<div class="sup-ranking-list">';
         filtered.forEach((s, idx) => {
-            const resPct = s.avgFinalResult.toFixed(1);
+            const resPct = s.overallPerformance.toFixed(1);
             const rankBadge = idx + 1;
 
             html += `
@@ -1859,12 +2123,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="sup-ranking-bar-group">
                             <div class="sup-ranking-bar-track">
-                                <div class="sup-ranking-bar-fill" style="width: ${Math.min(s.avgFinalResult, 100)}%;"></div>
+                                <div class="sup-ranking-bar-fill" style="width: ${Math.min(s.overallPerformance, 100)}%;"></div>
                             </div>
                             <span class="sup-ranking-val-pct">${resPct}%</span>
                         </div>
                         <div class="sup-ranking-sample-context">
-                            <strong>${s.evaluatedOfficers} evaluated</strong> • ${s.uniqueOfficers} officers handled
+                            <strong>${s.coveredOfficers} evaluated</strong> • ${s.trainedWorkload} trained officers managed
                         </div>
                     </div>
                 </div>
@@ -1880,7 +2144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const workBox = document.getElementById('sup-workload-dist-container');
 
         if (perfBox) {
-            const validSups = supervisors.filter(s => s.avgFinalResult !== null);
+            const validSups = supervisors.filter(s => s.overallPerformance !== null);
             const ranges = [
                 { label: '90% – 100%', rangeKey: '90-100', min: 90, max: 100.01, count: 0 },
                 { label: '80% – 89%', rangeKey: '80-89', min: 80, max: 90, count: 0 },
@@ -1889,7 +2153,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ];
 
             validSups.forEach(s => {
-                const res = s.avgFinalResult;
+                const res = s.overallPerformance;
                 for (const r of ranges) {
                     if (res >= r.min && res < r.max) {
                         r.count++;
@@ -1926,19 +2190,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (workBox) {
-            const officersList = supervisors.map(s => s.uniqueOfficers);
+            const officersList = supervisors.map(s => s.trainedWorkload);
             const med = calculateMedian(officersList);
             const maxW = Math.max(...officersList, 0);
 
             const wRanges = [
-                { label: '1 – 5 Officers', min: 1, max: 6, count: 0 },
-                { label: '6 – 15 Officers', min: 6, max: 16, count: 0 },
-                { label: '16 – 25 Officers', min: 16, max: 26, count: 0 },
-                { label: '26+ Officers', min: 26, max: 999, count: 0 }
+                { label: '1 – 5 Trained', min: 1, max: 6, count: 0 },
+                { label: '6 – 15 Trained', min: 6, max: 16, count: 0 },
+                { label: '16 – 25 Trained', min: 16, max: 26, count: 0 },
+                { label: '26+ Trained', min: 26, max: 999, count: 0 }
             ];
 
             supervisors.forEach(s => {
-                const w = s.uniqueOfficers;
+                const w = s.trainedWorkload;
                 for (const r of wRanges) {
                     if (w >= r.min && w < r.max) {
                         r.count++;
@@ -1967,7 +2231,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             html += `
                 <div style="font-size: 11px; color: var(--text-muted); margin-top: 8px; border-top: 1px dashed var(--border-color); padding-top: 8px;">
-                    Median Workload: <strong>${med.toFixed(0)} Officers/Sup</strong> • Highest Workload: <strong>${maxW} Officers</strong>
+                    Median Workload: <strong>${med.toFixed(0)} Trained Officers/Sup</strong> • Highest Workload: <strong>${maxW} Trained Officers</strong>
                 </div>
             `;
             workBox.innerHTML = html;
@@ -1978,14 +2242,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const tbody = document.getElementById('sup-gov-matrix-tbody');
         if (!tbody) return;
 
-        if (!rawRecords || rawRecords.length === 0) {
+        if (!supervisors || supervisors.length === 0) {
             tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px; color:var(--text-muted);">No records for selected month</td></tr>';
             return;
         }
-
-        const sample = rawRecords[0];
-        const resultCol = findColumnName(sample, ['Final Result', 'KPI Result', 'Average Result', 'Result']);
-        const govCol = findColumnName(sample, ['Gov', 'Governorate', 'Region', 'Branch Governorate']);
 
         const govMap = {};
 
@@ -1995,35 +2255,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 govMap[g] = {
                     gov: g,
                     supervisorsCount: 0,
-                    officersCount: 0,
+                    trainedWorkload: 0,
                     branchesCount: 0,
-                    evaluatedCount: 0,
+                    coveredCount: 0,
                     supAverages: []
                 };
             }
             govMap[g].supervisorsCount++;
-            govMap[g].officersCount += s.uniqueOfficers;
+            govMap[g].trainedWorkload += s.trainedWorkload;
             govMap[g].branchesCount += s.uniqueBranches;
-            govMap[g].evaluatedCount += s.evaluatedOfficers;
-            if (s.avgFinalResult !== null) {
-                govMap[g].supAverages.push(s.avgFinalResult);
-            }
-        });
-
-        const rawGovValids = {};
-        rawRecords.forEach(row => {
-            const g = row[govCol] ? row[govCol].trim() : 'Unknown';
-            const parsed = parseFinalResult(row[resultCol]);
-            if (parsed !== null) {
-                if (!rawGovValids[g]) rawGovValids[g] = [];
-                rawGovValids[g].push(parsed);
+            govMap[g].coveredCount += s.coveredOfficers;
+            if (s.overallPerformance !== null) {
+                govMap[g].supAverages.push(s.overallPerformance);
             }
         });
 
         const govList = Object.values(govMap).map(g => {
-            const valids = rawGovValids[g.gov] || [];
-            const avgFinalResult = valids.length > 0 ? (valids.reduce((a, b) => a + b, 0) / valids.length) : null;
-            const coverage = g.officersCount > 0 ? (g.evaluatedCount / g.officersCount) * 100 : 0;
+            const avgFinalResult = g.supAverages.length > 0 ? (g.supAverages.reduce((a, b) => a + b, 0) / g.supAverages.length) : null;
+            const coverage = g.trainedWorkload > 0 ? (g.coveredCount / g.trainedWorkload) * 100 : 0;
 
             let gap = null;
             if (g.supAverages.length > 1) {
@@ -2059,11 +2308,11 @@ document.addEventListener('DOMContentLoaded', () => {
             tr.innerHTML = `
                 <td><strong>${r.gov}</strong></td>
                 <td>${r.supervisorsCount}</td>
-                <td>${r.officersCount}</td>
+                <td>${r.trainedWorkload}</td>
                 <td>${r.branchesCount}</td>
-                <td>${r.evaluatedCount}</td>
+                <td>${r.coveredCount}</td>
                 <td>${r.coverage.toFixed(1)}%</td>
-                <td><strong>${resStr}</strong> <span class="sample-size-tag">n=${r.evaluatedCount}</span></td>
+                <td><strong>${resStr}</strong> <span class="sample-size-tag">n=${r.coveredCount}</span></td>
                 <td>${gapStr}</td>
             `;
             tbody.appendChild(tr);
@@ -2108,11 +2357,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const keyMap = {
             'supervisor': 'supervisor',
             'gov': 'governorate',
-            'officers': 'uniqueOfficers',
+            'officers': 'trainedWorkload',
             'branches': 'uniqueBranches',
-            'evaluated': 'evaluatedOfficers',
-            'coverage': 'evaluationCoverage',
-            'avgResult': 'avgFinalResult'
+            'evaluated': 'coveredOfficers',
+            'coverage': 'evaluationCoverage', 
+            'avgResult': 'overallPerformance'
         };
         const actualKey = keyMap[k] || k;
 
@@ -2137,16 +2386,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tbody.innerHTML = '';
         scoped.forEach(s => {
-            const resStr = s.avgFinalResult !== null ? `${s.avgFinalResult.toFixed(1)}%` : 'N/A';
+            const resStr = s.overallPerformance !== null ? `${s.overallPerformance.toFixed(1)}%` : 'N/A';
+            const coverage = s.trainedWorkload > 0 ? (s.coveredOfficers / s.trainedWorkload) * 100 : 0;
             const tr = document.createElement('tr');
             tr.innerHTML = `
                 <td><strong>${s.supervisor}</strong></td>
                 <td>${s.governorate}</td>
-                <td>${s.uniqueOfficers}</td>
+                <td>${s.trainedWorkload}</td>
                 <td>${s.uniqueBranches}</td>
-                <td>${s.evaluatedOfficers}</td>
-                <td>${s.evaluationCoverage.toFixed(1)}%</td>
-                <td><strong>${resStr}</strong> <span class="sample-size-tag">n=${s.evaluatedOfficers}</span></td>
+                <td>${s.coveredOfficers}</td>
+                <td>${coverage.toFixed(1)}%</td>
+                <td><strong>${resStr}</strong> <span class="sample-size-tag">n=${s.coveredOfficers}</span></td>
             `;
             tbody.appendChild(tr);
         });
@@ -2160,44 +2410,45 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const insights = [];
 
-        const sortedWorkload = [...supervisors].sort((a,b) => b.uniqueOfficers - a.uniqueOfficers);
-        const totalOfficers = supervisors.reduce((a,b) => a + b.uniqueOfficers, 0);
+        const sortedWorkload = [...supervisors].sort((a,b) => b.trainedWorkload - a.trainedWorkload);
+        const totalOfficers = supervisors.reduce((a,b) => a + b.trainedWorkload, 0);
         if (sortedWorkload.length >= 5 && totalOfficers > 0) {
-            const top5Workload = sortedWorkload.slice(0, 5).reduce((a,b) => a + b.uniqueOfficers, 0);
+            const top5Workload = sortedWorkload.slice(0, 5).reduce((a,b) => a + b.trainedWorkload, 0);
             const share = ((top5Workload / totalOfficers) * 100).toFixed(1);
             insights.push({
                 title: "Workload concentration among top supervisors",
                 tag: "Workload Concentration",
-                text: `Workload is concentrated among a small group of supervisors. The five busiest supervisors manage <strong>${top5Workload} officers</strong> (${share}% of the operational total).`
+                text: `Training Workload is concentrated among a small group of supervisors. The five busiest supervisors manage <strong>${top5Workload} trained officers</strong> (${share}% of the operational total).`
             });
         }
 
-        const medWorkload = calculateMedian(supervisors.map(s => s.uniqueOfficers));
-        const highWkSups = supervisors.filter(s => s.uniqueOfficers >= medWorkload && s.avgFinalResult !== null);
+        const medWorkload = calculateMedian(supervisors.map(s => s.trainedWorkload));
+        const highWkSups = supervisors.filter(s => s.trainedWorkload >= medWorkload && s.overallPerformance !== null);
         if (highWkSups.length > 0) {
-            const topHighWkResult = highWkSups.sort((a,b) => b.avgFinalResult - a.avgFinalResult)[0];
+            const topHighWkResult = highWkSups.sort((a,b) => b.overallPerformance - a.overallPerformance)[0];
             insights.push({
                 title: `${topHighWkResult.supervisor} records strong results under high workload`,
                 tag: "High Volume Performance",
-                text: `<strong>${topHighWkResult.supervisor}</strong> (${topHighWkResult.governorate}) achieves a <strong>${topHighWkResult.avgFinalResult.toFixed(1)}%</strong> Final Result across <strong>${topHighWkResult.evaluatedOfficers} evaluated officers</strong> (${topHighWkResult.uniqueOfficers} officers managed).`
+                text: `<strong>${topHighWkResult.supervisor}</strong> (${topHighWkResult.governorate}) achieves an <strong>${topHighWkResult.overallPerformance.toFixed(1)}%</strong> Overall Performance across <strong>${topHighWkResult.coveredOfficers} evaluated officers</strong> (${topHighWkResult.trainedWorkload} trained officers managed).`
             });
         }
 
-        const lowCovSups = supervisors.filter(s => s.evaluationCoverage < 50);
+        const lowCovSups = supervisors.filter(s => s.trainedWorkload > 0 && (s.coveredOfficers / s.trainedWorkload) * 100 < 50);
         if (lowCovSups.length > 0) {
-            const lowest = lowCovSups.sort((a,b) => a.evaluationCoverage - b.evaluationCoverage)[0];
+            const lowest = lowCovSups.sort((a,b) => (a.coveredOfficers / a.trainedWorkload) - (b.coveredOfficers / b.trainedWorkload))[0];
+            const covPct = (lowest.coveredOfficers / lowest.trainedWorkload) * 100;
             insights.push({
                 title: "Low evaluation coverage in specific supervisory units",
                 tag: "Evaluation Completeness",
-                text: `<strong>${lowest.supervisor}</strong> (${lowest.governorate}) records an evaluation coverage of <strong>${lowest.evaluationCoverage.toFixed(1)}%</strong>, with only <strong>${lowest.evaluatedOfficers} of ${lowest.uniqueOfficers} officers evaluated</strong>.`
+                text: `<strong>${lowest.supervisor}</strong> (${lowest.governorate}) records an evaluation coverage of <strong>${covPct.toFixed(1)}%</strong>, with only <strong>${lowest.coveredOfficers} of ${lowest.trainedWorkload} trained officers evaluated</strong>.`
             });
         }
 
         const govMap = {};
         supervisors.forEach(s => {
-            if (s.avgFinalResult !== null) {
+            if (s.overallPerformance !== null) {
                 if (!govMap[s.governorate]) govMap[s.governorate] = [];
-                govMap[s.governorate].push(s.avgFinalResult);
+                govMap[s.governorate].push(s.overallPerformance);
             }
         });
 
@@ -2217,7 +2468,7 @@ document.addEventListener('DOMContentLoaded', () => {
             insights.push({
                 title: `Largest Supervisor Result Gap observed in ${maxGapGov}`,
                 tag: "Internal Variation",
-                text: `${maxGapGov} exhibits a Supervisor Result Gap of <strong>${maxGapVal.toFixed(1)}%</strong> between its highest and lowest performing supervisors.`
+                text: `${maxGapGov} exhibits a Supervisor Overall Result Gap of <strong>${maxGapVal.toFixed(1)}%</strong> between its highest and lowest performing supervisors.`
             });
         }
 
@@ -2236,7 +2487,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function isValidHQVal(val) {
+   function isValidHQVal(val) {
         if (val === undefined || val === null) return false;
         const str = String(val).trim();
         if (str === '' || str.toLowerCase() === 'null' || str.toLowerCase() === 'undefined' || str.toLowerCase() === 'nan') return false;
@@ -2270,12 +2521,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const supMap = {};
         const supHqPerformanceMap = {};
 
-        supRecords.forEach(row => {
-            const officerId = row[officerCol] ? row[officerCol].trim() : null;
-            if (!officerId) return;
+        supRecords.forEach((row, idx) => {
+            const supName = row[supCol] ? row[supCol].trim() : '';
+            if (!supName) return;
 
-            const gov = row[govCol] ? row[govCol].trim() : 'Unknown';
-            const sup = row[supCol] ? row[supCol].trim() : 'Unknown';
+            // حل مشكلة اختفاء الـ HR Code عن طريق استخدام رقم الصف كـ ID بديل
+            const officerId = row[officerCol] ? String(row[officerCol]).trim() : "ROW_" + idx;
+            const gov = row[govCol] ? String(row[govCol]).trim() : 'Unknown';
             const rawHqVal = hqCol ? row[hqCol] : null;
             const parsedHqVal = parseFinalResult(rawHqVal);
 
@@ -2284,19 +2536,21 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!govMap[gov]) govMap[gov] = { name: gov, totalOfficers: new Set(), calledOfficers: new Set() };
             govMap[gov].totalOfficers.add(officerId);
 
-            if (!supMap[sup]) supMap[sup] = { name: sup, gov: gov, totalOfficers: new Set(), calledOfficers: new Set() };
-            supMap[sup].totalOfficers.add(officerId);
+            if (!supMap[supName]) supMap[supName] = { name: supName, gov: gov, totalOfficers: new Set(), calledOfficers: new Set() };
+            supMap[supName].totalOfficers.add(officerId);
 
+            // لو مسجل ليه نتيجة أو محاولة اتصال (Coverage)
             if (isValidHQVal(rawHqVal)) {
                 calledOfficersSet.add(officerId);
                 govMap[gov].calledOfficers.add(officerId);
-                supMap[sup].calledOfficers.add(officerId);
+                supMap[supName].calledOfficers.add(officerId);
             }
 
+            // لو النتيجة رقمية وصالحة عشان تدخل في حساب المتوسط (Performance)
             if (parsedHqVal !== null) {
-                hqResultRecords.push({ val: parsedHqVal, officerId, sup, gov });
-                if (!supHqPerformanceMap[sup]) supHqPerformanceMap[sup] = { sup, gov, scores: [] };
-                supHqPerformanceMap[sup].scores.push(parsedHqVal);
+                hqResultRecords.push({ val: parsedHqVal, officerId, sup: supName, gov });
+                if (!supHqPerformanceMap[supName]) supHqPerformanceMap[supName] = { sup: supName, gov, scores: [] };
+                supHqPerformanceMap[supName].scores.push(parsedHqVal);
             }
         });
 
@@ -2436,7 +2690,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }).join('');
     }
 
-    function renderHQTable(govMap, supMap) {
+function renderHQTable(govMap, supMap) {
         const thead = document.getElementById('hq-table-thead');
         const tbody = document.getElementById('hq-table-tbody');
         if (!thead || !tbody) return;
@@ -2496,7 +2750,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tr.innerHTML = `
                     <td><strong>${item.name}</strong></td>
                     <td>${item.total}</td>
-                    <td>${item.calls} <span class="sample-size-tag">${item.calls} Calls</span></td>
+                    <td><strong>${item.calls}</strong></td>
                     <td><strong>${item.coverage.toFixed(1)}%</strong></td>
                 `;
             } else {
@@ -2504,7 +2758,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td><strong>${item.name}</strong></td>
                     <td>${item.gov}</td>
                     <td>${item.total}</td>
-                    <td>${item.calls} <span class="sample-size-tag">${item.calls} Calls</span></td>
+                    <td><strong>${item.calls}</strong></td>
                     <td><strong>${item.coverage.toFixed(1)}%</strong></td>
                 `;
             }
@@ -2513,7 +2767,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         attachUniversalTableSorting('hq-validation-table');
     }
-
+        
+    // ==========================================================================
+    // TAB 5: OPERATIONAL CASES
+    // ==========================================================================
     let opFilters = {
         '72h': { gov: 'all', sup: 'all', search: '' },
         'quest': { gov: 'all', sup: 'all', search: '' },
@@ -2759,7 +3016,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         containerNode.innerHTML = html;
     }
-
+// ==========================================================================
+    // TAB 6: MEASURE OF SUCCESS ENGINE (Hiring Date Cohort & Unified Total Leavers)
+    // ==========================================================================
     function parseDDMMYYYY(dateStr) {
         if (!dateStr || typeof dateStr !== 'string') return null;
         const cleaned = dateStr.trim();
@@ -2815,12 +3074,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 latestDateFound = tDate;
             }
 
-            let daysToResignation = null;
-            const isResignation = termType.toLowerCase() === 'resignation';
+            let daysToExit = null;
+            const hasTermination = tDate !== null && !isNaN(tDate.getTime());
 
-            if (isResignation && tDate && tDate >= hDate) {
+            if (hasTermination && tDate >= hDate) {
                 const diffTime = tDate.getTime() - hDate.getTime();
-                daysToResignation = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                daysToExit = Math.floor(diffTime / (1000 * 60 * 60 * 24));
             }
 
             records.push({
@@ -2830,17 +3089,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 terminationDate: tDate,
                 terminationDateStr: toISODateStr(tDate),
                 terminationType: termType,
-                isResignation,
-                daysToResignation,
+                hasTermination,
+                daysToExit,
                 governorate: gov
             });
         });
 
-        const analysisCutoff = latestDateFound || new Date(2026, 6, 25); 
+        const analysisCutoff = latestDateFound || new Date(); 
         const validRecords = records.filter(r => r.hiringDate <= analysisCutoff);
 
         return { records: validRecords, analysisCutoff };
     }
+
+    mosState.baseFrom = '2026-01-01';
+    mosState.baseTo = '2026-06-30';
+    mosState.projFrom = '2026-07-01';
+    mosState.projTo = toISODateStr(new Date()); 
+    if (mosState.windowDays !== undefined) delete mosState.windowDays;
 
     function setupMeasureOfSuccessControls(allGovernorates) {
         const baseFromInp = document.getElementById('mos-base-from');
@@ -2848,7 +3113,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const projFromInp = document.getElementById('mos-proj-from');
         const projToInp = document.getElementById('mos-proj-to');
         const govSelect = document.getElementById('mos-gov-filter');
-        const windowBtns = document.querySelectorAll('.mos-window-btn');
 
         if (baseFromInp) baseFromInp.value = mosState.baseFrom;
         if (baseToInp) baseToInp.value = mosState.baseTo;
@@ -2880,15 +3144,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (projFromInp) projFromInp.onchange = handleFilterChange;
         if (projToInp) projToInp.onchange = handleFilterChange;
         if (govSelect) govSelect.onchange = handleFilterChange;
-
-        windowBtns.forEach(btn => {
-            btn.onclick = () => {
-                windowBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                mosState.windowDays = parseInt(btn.getAttribute('data-window'), 10);
-                renderMeasureOfSuccessTab();
-            };
-        });
     }
 
     function renderMeasureOfSuccessTab() {
@@ -2914,49 +3169,37 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseTo = parseLocalISO(mosState.baseTo);
         const projFrom = parseLocalISO(mosState.projFrom);
         const projTo = parseLocalISO(mosState.projTo);
-        const windowDays = mosState.windowDays;
 
-        const getMaturedCohort = (fromD, toD) => {
-            return scopedRecords.filter(r => {
-                if (r.hiringDate < fromD || r.hiringDate > toD) return false;
-                const obsDays = Math.floor((analysisCutoff.getTime() - r.hiringDate.getTime()) / (1000 * 60 * 60 * 24));
-                return obsDays >= windowDays;
-            });
+        const getCohort = (fromD, toD) => {
+            return scopedRecords.filter(r => r.hiringDate >= fromD && r.hiringDate <= toD);
         };
 
-        const baseMaturedCohort = getMaturedCohort(baseFrom, baseTo);
-        const projMaturedCohort = getMaturedCohort(projFrom, projTo);
+        const baseCohort = getCohort(baseFrom, baseTo);
+        const projCohort = getCohort(projFrom, projTo);
 
-        const getResignationsWithinWindow = (cohort) => {
-            return cohort.filter(r => r.isResignation && r.daysToResignation !== null && r.daysToResignation >= 0 && r.daysToResignation <= windowDays);
-        };
+        // الاعتماد على تاريخ التعيين (Hiring Date) وحساب إجمالي الخارجين (Total Leavers)
+        const baseExits = baseCohort.filter(r => r.hasTermination);
+        const projExits = projCohort.filter(r => r.hasTermination);
 
-        const baseResignations = getResignationsWithinWindow(baseMaturedCohort);
-        const projResignations = getResignationsWithinWindow(projMaturedCohort);
-
-        const baseRate = baseMaturedCohort.length > 0 ? (baseResignations.length / baseMaturedCohort.length) * 100 : 0;
-        const projRate = projMaturedCohort.length > 0 ? (projResignations.length / projMaturedCohort.length) * 100 : 0;
+        const baseRate = baseCohort.length > 0 ? (baseExits.length / baseCohort.length) * 100 : 0;
+        const projRate = projCohort.length > 0 ? (projExits.length / projCohort.length) * 100 : 0;
 
         const ppChange = projRate - baseRate;
         const relChange = baseRate > 0 ? ((projRate - baseRate) / baseRate) * 100 : 0;
 
-        renderMosExecutiveKPIs(baseMaturedCohort.length, baseResignations.length, baseRate, projMaturedCohort.length, projResignations.length, projRate, ppChange, relChange, windowDays);
-        renderMosVisualImpact(baseRate, projRate, ppChange, windowDays, baseMaturedCohort.length, projMaturedCohort.length);
-        renderMosRetentionView(scopedRecords, analysisCutoff, baseFrom, baseTo, projFrom, projTo);
-        renderMosCohortTrendWeekly(scopedRecords, analysisCutoff, windowDays);
-        renderMosExitTimingDistribution(scopedRecords, analysisCutoff, baseFrom, baseTo, projFrom, projTo);
-        renderMosGovernorateImpactTable(records, analysisCutoff, baseFrom, baseTo, projFrom, projTo, windowDays);
+        renderMosExecutiveKPIs(baseCohort.length, baseExits.length, baseRate, projCohort.length, projExits.length, projRate, ppChange, relChange);
+        renderMosVisualImpact(baseRate, projRate, ppChange, baseCohort.length, projCohort.length);
+        renderMosCohortTrendWeekly(scopedRecords);
+        renderMosExitTimingDistribution(scopedRecords, baseFrom, baseTo, projFrom, projTo);
+        renderMosGovernorateImpactTable(records, baseFrom, baseTo, projFrom, projTo);
     }
 
-    function renderMosExecutiveKPIs(baseMatCount, baseResCount, baseRate, projMatCount, projResCount, projRate, ppChange, relChange, windowDays) {
+    function renderMosExecutiveKPIs(baseMatCount, baseResCount, baseRate, projMatCount, projResCount, projRate, ppChange, relChange) {
         const container = document.getElementById('mos-kpi-grid');
         if (!container) return;
 
-        const isProjectNotMature = projMatCount === 0;
-
         const ppChangeFormatted = ppChange > 0 ? `+${ppChange.toFixed(1)} pts` : `${Math.abs(ppChange).toFixed(1)} pts`;
         const relChangeFormatted = relChange > 0 ? `+${relChange.toFixed(1)}%` : `${Math.abs(relChange).toFixed(1)}%`;
-
         const outcomeColorClass = ppChange < 0 ? 'text-success' : (ppChange > 0 ? 'text-danger' : 'text-muted');
 
         container.innerHTML = `
@@ -2965,34 +3208,34 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="kpi-exec-val-row">
                     <span class="main-value">${baseRate.toFixed(1)}%</span>
                 </div>
-                <div class="kpi-exec-sub">Early voluntary resignation rate</div>
-                <div class="kpi-exec-denom"><strong>${baseResCount.toLocaleString()}</strong> resigned within window<br><strong>${baseMatCount.toLocaleString()}</strong> eligible hires</div>
+                <div class="kpi-exec-sub">Total turnover rate by hiring date</div>
+                <div class="kpi-exec-denom"><strong>${baseResCount.toLocaleString()}</strong> total leavers<br><strong>${baseMatCount.toLocaleString()}</strong> total hires</div>
             </div>
 
             <div class="metric-card kpi-exec-card">
                 <div class="kpi-exec-title">AFTER PROJECT</div>
                 <div class="kpi-exec-val-row">
-                    <span class="main-value ${isProjectNotMature ? 'text-muted' : ''}">${isProjectNotMature ? 'Not available yet' : projRate.toFixed(1) + '%'}</span>
+                    <span class="main-value">${projMatCount === 0 ? 'N/A' : projRate.toFixed(1) + '%'}</span>
                 </div>
-                <div class="kpi-exec-sub">${isProjectNotMature ? `Project hires have not completed ${windowDays} days yet.` : `Early voluntary resignation rate`}</div>
-                <div class="kpi-exec-denom"><strong>${projResCount.toLocaleString()}</strong> resigned within window<br><strong>${projMatCount.toLocaleString()}</strong> eligible hires</div>
+                <div class="kpi-exec-sub">Total turnover rate by hiring date</div>
+                <div class="kpi-exec-denom"><strong>${projResCount.toLocaleString()}</strong> total leavers<br><strong>${projMatCount.toLocaleString()}</strong> total hires</div>
             </div>
 
             <div class="metric-card kpi-exec-card">
                 <div class="kpi-exec-title">IMPROVEMENT</div>
                 <div class="kpi-exec-val-row">
-                    <span class="main-value ${outcomeColorClass}">${isProjectNotMature ? 'N/A' : Math.abs(ppChange).toFixed(1) + ' pts'}</span>
+                    <span class="main-value ${outcomeColorClass}">${projMatCount === 0 ? 'N/A' : Math.abs(ppChange).toFixed(1)} pts</span>
                 </div>
                 <div class="kpi-exec-sub">Absolute difference</div>
                 <div class="kpi-exec-denom" style="color:${ppChange < 0 ? 'var(--primary)' : 'var(--red)'}; font-weight:700;">
-                    ${isProjectNotMature ? 'Awaiting cohort observation' : (ppChange <= 0 ? 'Lower early resignation after project' : 'Higher early resignation after project')}
+                    ${projMatCount === 0 ? '-' : (ppChange <= 0 ? 'Lower turnover after project' : 'Higher turnover after project')}
                 </div>
             </div>
 
             <div class="metric-card kpi-exec-card">
-                <div class="kpi-exec-title">RESIGNATION REDUCTION</div>
+                <div class="kpi-exec-title">TURNOVER REDUCTION</div>
                 <div class="kpi-exec-val-row">
-                    <span class="main-value ${outcomeColorClass}">${isProjectNotMature ? 'N/A' : relChangeFormatted}</span>
+                    <span class="main-value ${outcomeColorClass}">${projMatCount === 0 ? 'N/A' : relChangeFormatted}</span>
                 </div>
                 <div class="kpi-exec-sub">Relative impact</div>
                 <div class="kpi-exec-denom">Reduction compared with before project</div>
@@ -3000,17 +3243,12 @@ document.addEventListener('DOMContentLoaded', () => {
         `;
     }
 
-    function renderMosVisualImpact(baseRate, projRate, ppChange, windowDays, baseMat, projMat) {
+    function renderMosVisualImpact(baseRate, projRate, ppChange, baseMat, projMat) {
         const container = document.getElementById('mos-impact-visual-container');
         if (!container) return;
 
         if (projMat === 0) {
-            container.innerHTML = `
-                <div class="op-empty-state">
-                    <strong>Not available yet</strong><br>
-                    Project hires do not yet have ${windowDays} days of observation maturity. Baseline rate is currently ${baseRate.toFixed(1)}% (n=${baseMat}).
-                </div>
-            `;
+            container.innerHTML = `<div class="op-empty-state">No hiring data available for the selected period.</div>`;
             return;
         }
 
@@ -3020,11 +3258,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const isImproved = ppChange < 0;
         const statusText = isImproved ? `Improved by ${Math.abs(ppChange).toFixed(1)} pts` : `Increased by ${ppChange.toFixed(1)} pts`;
-        const sampleWarning = projMat < 30 ? `<span style="font-size:11px; color:var(--text-muted); font-weight:normal;"> (Early indication — based on ${projMat} eligible hires)</span>` : '';
 
         container.innerHTML = `
             <div style="display: flex; flex-direction: column; gap: 20px;">
-                
                 <div style="display: flex; flex-direction: column; gap: 6px;">
                     <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700;">
                         <span>BEFORE PROJECT</span>
@@ -3046,53 +3282,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
 
                 <div style="background: ${isImproved ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)'}; border: 1px solid ${isImproved ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}; padding: 12px 16px; border-radius: var(--radius-md); font-size: 12.5px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 700; color: ${isImproved ? 'var(--primary)' : 'var(--red)'};">${statusText}${sampleWarning}</span>
+                    <span style="font-weight: 700; color: ${isImproved ? 'var(--primary)' : 'var(--red)'};">${statusText}</span>
                 </div>
-
             </div>
         `;
     }
 
-    function renderMosRetentionView(records, analysisCutoff, baseFrom, baseTo, projFrom, projTo) {
-        const container = document.getElementById('mos-retention-container');
-        if (!container) return;
-
-        const windows = [30, 60, 90];
-        let html = '';
-
-        windows.forEach(w => {
-            const getRetentionForRange = (fromD, toD) => {
-                const matured = records.filter(r => {
-                    if (r.hiringDate < fromD || r.hiringDate > toD) return false;
-                    const obsDays = Math.floor((analysisCutoff.getTime() - r.hiringDate.getTime()) / (1000 * 60 * 60 * 24));
-                    return obsDays >= w;
-                });
-                if (matured.length === 0) return null;
-                const resigned = matured.filter(r => r.isResignation && r.daysToResignation !== null && r.daysToResignation >= 0 && r.daysToResignation <= w).length;
-                return ((matured.length - resigned) / matured.length) * 100;
-            };
-
-            const baseRet = getRetentionForRange(baseFrom, baseTo);
-            const projRet = getRetentionForRange(projFrom, projTo);
-
-            const baseDisplay = baseRet !== null ? `${baseRet.toFixed(1)}%` : 'N/A';
-            const projDisplay = projRet !== null ? `${projRet.toFixed(1)}%` : 'Not available yet';
-
-            html += `
-                <div class="capacity-stat-item">
-                    <span class="cap-label"><strong>After ${w} Days</strong></span>
-                    <div style="display: flex; gap: 16px; align-items: center;">
-                        <span style="font-size: 11.5px; color: var(--text-muted);">Before: <strong>${baseDisplay}</strong></span>
-                        <span style="font-size: 11.5px; color: var(--brand-purple);">After: <strong>${projDisplay}</strong></span>
-                    </div>
-                </div>
-            `;
-        });
-
-        container.innerHTML = html;
-    }
-
-    function renderMosCohortTrendWeekly(records, analysisCutoff, windowDays) {
+    function renderMosCohortTrendWeekly(records) {
         const container = document.getElementById('mos-cohort-trend-container');
         if (!container) return;
 
@@ -3103,28 +3299,23 @@ document.addEventListener('DOMContentLoaded', () => {
             const weekNum = Math.ceil((((r.hiringDate - firstJan) / 86400000) + firstJan.getDay() + 1) / 7);
             const key = `${r.hiringDate.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
             
-            if (!cohortMap[key]) cohortMap[key] = { key, date: r.hiringDate, totalHires: 0, maturedHires: 0, resignations: 0 };
+            if (!cohortMap[key]) cohortMap[key] = { key, date: r.hiringDate, totalHires: 0, exits: 0 };
             
             cohortMap[key].totalHires++;
-
-            const obsDays = Math.floor((analysisCutoff.getTime() - r.hiringDate.getTime()) / (1000 * 60 * 60 * 24));
-            if (obsDays >= windowDays) {
-                cohortMap[key].maturedHires++;
-                if (r.isResignation && r.daysToResignation !== null && r.daysToResignation >= 0 && r.daysToResignation <= windowDays) {
-                    cohortMap[key].resignations++;
-                }
+            if (r.hasTermination) {
+                cohortMap[key].exits++;
             }
         });
 
         const sortedKeys = Object.keys(cohortMap).sort();
-        const validCohorts = sortedKeys.map(k => cohortMap[k]).filter(c => c.maturedHires > 0);
+        const validCohorts = sortedKeys.map(k => cohortMap[k]).filter(c => c.totalHires > 0);
 
         if (validCohorts.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding-top:80px; font-size:12px; color:var(--text-muted)">No matured cohorts available</div>';
+            container.innerHTML = '<div style="text-align:center; padding-top:80px; font-size:12px; color:var(--text-muted)">No cohorts available</div>';
             return;
         }
 
-        const rates = validCohorts.map(c => (c.resignations / c.maturedHires) * 100);
+        const rates = validCohorts.map(c => (c.exits / c.totalHires) * 100);
         const maxRate = Math.max(...rates, 1);
 
         const svgW = 600; const svgH = 180;
@@ -3136,10 +3327,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const points = [];
         validCohorts.forEach((c, idx) => {
-            const rate = (c.resignations / c.maturedHires) * 100;
+            const rate = (c.exits / c.totalHires) * 100;
             const x = pL + (idx * stepX);
             const y = pT + cH - ((rate / maxRate) * cH);
-            points.push({ x, y, rate, key: c.key, dateObj: c.date, matured: c.maturedHires, res: c.resignations });
+            points.push({ x, y, rate, key: c.key, dateObj: c.date, hires: c.totalHires, exits: c.exits });
         });
 
         let lineD = `M ${points[0].x} ${points[0].y}`;
@@ -3155,7 +3346,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let launchX = null;
         points.forEach(pt => {
-            if (pt.key >= '2026-W25' && launchX === null) launchX = pt.x;
+            if (pt.key >= '2026-W27' && launchX === null) launchX = pt.x; 
         });
 
         let svg = `
@@ -3167,7 +3358,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${launchX !== null ? `
                     <line x1="${launchX}" y1="${pT - 10}" x2="${launchX}" y2="${pT + cH}" stroke="var(--brand-purple)" stroke-dasharray="4,4" stroke-width="2"/>
                     <rect x="${launchX - 55}" y="${pT - 22}" width="110" height="18" fill="var(--brand-purple)" rx="4"/>
-                    <text x="${launchX}" y="${pT - 10}" fill="#FFFFFF" font-size="8.5" font-weight="700" text-anchor="middle">Project Launch (18 Jun)</text>
+                    <text x="${launchX}" y="${pT - 10}" fill="#FFFFFF" font-size="8.5" font-weight="700" text-anchor="middle">Project Launch</text>
                 ` : ''}
 
                 <path d="${lineD}" fill="none" stroke="var(--brand-purple)" stroke-width="2.5" stroke-linecap="round"/>
@@ -3179,7 +3370,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const ttHtml = `
                 <div class="tt-title">Week: ${pt.key}</div>
                 <div class="tt-row"><span>Rate:</span> <strong>${pt.rate.toFixed(1)}%</strong></div>
-                <div class="tt-row"><span>Resignations:</span> <strong>${pt.res} of ${pt.matured} eligible</strong></div>
+                <div class="tt-row"><span>Leavers:</span> <strong>${pt.exits} of ${pt.hires} hires</strong></div>
             `;
 
             svg += `
@@ -3205,7 +3396,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function renderMosExitTimingDistribution(records, analysisCutoff, baseFrom, baseTo, projFrom, projTo) {
+    function renderMosExitTimingDistribution(records, baseFrom, baseTo, projFrom, projTo) {
         const container = document.getElementById('mos-exit-timing-container');
         if (!container) return;
 
@@ -3217,19 +3408,15 @@ document.addEventListener('DOMContentLoaded', () => {
         ];
 
         const getDist = (from, to) => {
-            const resLogs = records.filter(r => r.hiringDate >= from && r.hiringDate <= to && r.isResignation && r.daysToResignation !== null);
+            const cohort = records.filter(r => r.hiringDate >= from && r.hiringDate <= to);
+            const exitLogs = cohort.filter(r => r.hasTermination && r.daysToExit !== null);
             const counts = { 'Within 30 Days': 0, '31–60 Days': 0, '61–90 Days': 0, 'After 90 Days': 0 };
-            resLogs.forEach(r => {
-                for (const b of bands) if (r.daysToResignation >= b.min && r.daysToResignation <= b.max) { counts[b.label]++; break; }
+            
+            exitLogs.forEach(r => {
+                for (const b of bands) if (r.daysToExit >= b.min && r.daysToExit <= b.max) { counts[b.label]++; break; }
             });
             
-            let maxMaturity = 0;
-            const cohort = records.filter(r => r.hiringDate >= from && r.hiringDate <= to);
-            if(cohort.length > 0) {
-                 maxMaturity = Math.max(...cohort.map(r => Math.floor((analysisCutoff.getTime() - r.hiringDate.getTime()) / (1000 * 60 * 60 * 24))));
-            }
-            
-            return { total: resLogs.length, counts, maxMaturity };
+            return { totalCohort: cohort.length, counts };
         };
 
         const bDist = getDist(baseFrom, baseTo);
@@ -3237,11 +3424,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let html = `<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">`;
         bands.forEach(b => {
-            const bPct = bDist.total > 0 ? (bDist.counts[b.label] / bDist.total) * 100 : 0;
-            const pPct = pDist.total > 0 ? (pDist.counts[b.label] / pDist.total) * 100 : 0;
+            const bPct = bDist.totalCohort > 0 ? (bDist.counts[b.label] / bDist.totalCohort) * 100 : 0;
+            const pPct = pDist.totalCohort > 0 ? (pDist.counts[b.label] / pDist.totalCohort) * 100 : 0;
             
-            const bTxt = bDist.total > 0 ? `${bPct.toFixed(1)}%` : '0%';
-            const pTxt = (pDist.maxMaturity >= b.max || pDist.counts[b.label] > 0) ? (pDist.total > 0 ? `${pPct.toFixed(1)}%` : '0%') : 'Not measurable yet';
+            const bTxt = bDist.totalCohort > 0 ? `${bPct.toFixed(1)}%` : '0%';
+            const pTxt = pDist.totalCohort > 0 ? `${pPct.toFixed(1)}%` : '0%';
             
             html += `
                 <div style="background: #F8FAFC; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 6px;">
@@ -3261,7 +3448,7 @@ document.addEventListener('DOMContentLoaded', () => {
         container.innerHTML = html;
     }
 
-    function renderMosGovernorateImpactTable(records, analysisCutoff, baseFrom, baseTo, projFrom, projTo, windowDays) {
+    function renderMosGovernorateImpactTable(records, baseFrom, baseTo, projFrom, projTo) {
         const tbody = document.getElementById('mos-gov-tbody');
         if (!tbody) return;
 
@@ -3270,17 +3457,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const g = r.governorate;
             if (!govMap[g]) govMap[g] = { gov: g, bM: 0, bR: 0, pM: 0, pR: 0 };
             
-            const isMatured = Math.floor((analysisCutoff.getTime() - r.hiringDate.getTime()) / (1000 * 60 * 60 * 24)) >= windowDays;
-            
-            if (isMatured) {
-                if (r.hiringDate >= baseFrom && r.hiringDate <= baseTo) {
-                    govMap[g].bM++;
-                    if (r.isResignation && r.daysToResignation !== null && r.daysToResignation <= windowDays) govMap[g].bR++;
-                }
-                if (r.hiringDate >= projFrom && r.hiringDate <= projTo) {
-                    govMap[g].pM++;
-                    if (r.isResignation && r.daysToResignation !== null && r.daysToResignation <= windowDays) govMap[g].pR++;
-                }
+            if (r.hiringDate >= baseFrom && r.hiringDate <= baseTo) {
+                govMap[g].bM++;
+                if (r.hasTermination) govMap[g].bR++;
+            }
+            if (r.hiringDate >= projFrom && r.hiringDate <= projTo) {
+                govMap[g].pM++;
+                if (r.hasTermination) govMap[g].pR++;
             }
         });
 
@@ -3288,8 +3471,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const baseRate = g.bM > 0 ? (g.bR / g.bM) * 100 : 0;
             const projRate = g.pM > 0 ? (g.pR / g.pM) * 100 : null;
             const pp = projRate !== null ? (projRate - baseRate) : null;
-            let status = 'Not Enough Data';
-            if (pp !== null) {
+            let status = '-';
+            if (pp !== null && g.pM > 0) {
                 if (pp < 0) status = 'Improved';
                 else if (pp > 0) status = 'Increased';
                 else status = 'No Change';
@@ -3309,14 +3492,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
         tbody.innerHTML = '';
         list.forEach(r => {
+            if (r.bM === 0 && r.pM === 0) return; 
+
             const tr = document.createElement('tr');
-            const pStr = r.projRate !== null ? `${r.projRate.toFixed(1)}% <br><span class="sample-size-tag" style="margin-left:0;">${r.pR}/${r.pM} eligible</span>` : '<span class="text-muted">Not available yet</span>';
-            const cStr = r.pp !== null ? `<span class="${r.pp < 0 ? 'text-success' : (r.pp > 0 ? 'text-danger' : '')}">${r.pp > 0 ? '+' : ''}${r.pp.toFixed(1)} pts</span>` : '<span class="text-muted">-</span>';
+            const pStr = r.pM > 0 ? `${r.projRate.toFixed(1)}% <br><span class="sample-size-tag" style="margin-left:0;">${r.pR}/${r.pM} total</span>` : '<span class="text-muted">N/A</span>';
+            const cStr = r.pp !== null && r.pM > 0 ? `<span class="${r.pp < 0 ? 'text-success' : (r.pp > 0 ? 'text-danger' : '')}">${r.pp > 0 ? '+' : ''}${r.pp.toFixed(1)} pts</span>` : '<span class="text-muted">-</span>';
             const smallBadge = r.pM > 0 && r.pM < 5 ? `<span class="small-pop-badge">Small Base</span>` : '';
             
             tr.innerHTML = `
                 <td><strong>${r.gov}</strong> ${smallBadge}</td>
-                <td><strong>${r.baseRate.toFixed(1)}%</strong> <br><span class="sample-size-tag" style="margin-left:0;">${r.bR}/${r.bM} eligible</span></td>
+                <td><strong>${r.baseRate.toFixed(1)}%</strong> <br><span class="sample-size-tag" style="margin-left:0;">${r.bR}/${r.bM} total</span></td>
                 <td><strong>${pStr}</strong></td>
                 <td><strong>${cStr}</strong></td>
                 <td><span class="insight-tag" style="background: ${r.status==='Improved'?'#D1FAE5':(r.status==='Increased'?'#FEE2E2':'#F1F5F9')}; color: ${r.status==='Improved'?'#065F46':(r.status==='Increased'?'#991B1B':'#475569')};">${r.status}</span></td>
@@ -3326,13 +3511,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
         attachUniversalTableSorting('mos-gov-table');
     }
-// ==========================================================================
-    // TAB 7: RESIGNATION AUDIT ENGINE (WORKING DAYS LOGIC + FULL DATES)
+
+  // ==========================================================================
+    // TAB 7: RESIGNATION AUDIT & RECONCILIATION (Master: data.csv)
     // ==========================================================================
     let auditRecordsGlobal = [];
-    let auditFilters = { gov: 'all', sup: 'all', status: 'all', search: '' };
+    let auditFilters = { gov: 'all', sup: 'all', status: 'False Resignation Claim', search: '' };
     
-    // Sort configuration for the summary table
     let currentAuditGovSort = { key: 'total', dir: 'desc' };
 
     function safeKey(key) {
@@ -3340,7 +3525,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return String(key).trim().toLowerCase().replace(/^0+/, ''); 
     }
 
-    // Helper: Calculate pure working days between two dates (Excluding Friday=5, Saturday=6)
     function getWorkingDaysDiff(startDate, endDate) {
         if (!startDate || !endDate || isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return null;
         if (endDate < startDate) return 0;
@@ -3354,7 +3538,7 @@ document.addEventListener('DOMContentLoaded', () => {
         currentDate.setDate(currentDate.getDate() + 1);
         while (currentDate <= end) {
             const day = currentDate.getDay();
-            if (day !== 5 && day !== 6) { 
+            if (day !== 5 && day !== 6) { // Friday=5, Saturday=6
                 workingDays++;
             }
             currentDate.setDate(currentDate.getDate() + 1);
@@ -3366,7 +3550,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!globalDataset || globalDataset.length === 0) return;
         if (!turnoverDatasetGlobal || turnoverDatasetGlobal.length === 0) return;
 
-        // Apply Global Month Filter based on Hiring Date
         const chosenMonth = monthFilterSelect ? monthFilterSelect.value : 'all';
         let scopedOpData = globalDataset;
         if (chosenMonth !== 'all') {
@@ -3388,7 +3571,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     workingDaysToExit = getWorkingDaysDiff(hDate, tDate);
                 }
 
-                const hrRecordInfo = {
+                systemMap[key] = {
                     rawRow: hrRow,
                     hasTerm: hasTerm,
                     hiringDateStr: hrRow['Hiring Date'] ? hrRow['Hiring Date'].trim() : 'N/A',
@@ -3396,24 +3579,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     termType: hrRow['Termination Type - English'] ? hrRow['Termination Type - English'].trim() : '',
                     workingDaysToExit: workingDaysToExit
                 };
-
-                if (systemMap[key]) {
-                    if (hasTerm) {
-                        systemMap[key] = hrRecordInfo; 
-                    }
-                } else {
-                    systemMap[key] = hrRecordInfo;
-                }
             }
         });
 
         auditRecordsGlobal = [];
         let opReportedCount = 0;
-        let hrConfirmedLeaversCount = 0;
+        let hrTotalLeaversCount = 0;
         let matchedCount = 0;
         let falseResignationCount = 0;
-        let fakeTrainingCount = 0;
-        let normalExitCount = 0;
+        let earlyExitCount = 0;
+        let standardExitCount = 0;
+
+        scopedOpData.forEach(opRow => {
+            const hrCodeRaw = opRow['HR Code'];
+            const opKey = safeKey(hrCodeRaw);
+            if(opKey && systemMap[opKey] && systemMap[opKey].hasTerm) {
+                hrTotalLeaversCount++;
+            }
+        });
 
         scopedOpData.forEach(opRow => {
             const hrCodeRaw = opRow['HR Code'];
@@ -3440,7 +3623,7 @@ document.addEventListener('DOMContentLoaded', () => {
             let termDate = '';
             
             if (!hrData) {
-                hrStatusText = 'Active (Not Found in Exits)';
+                hrStatusText = 'Active (Not Found in HR Exits)';
                 termDate = 'N/A';
                 if (isOpResigned) {
                     auditStatus = 'False Resignation Claim'; 
@@ -3453,7 +3636,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const hasTerm = hrData.hasTerm;
 
                 if (hasTerm) {
-                    hrConfirmedLeaversCount++;
                     hrStatusText = `Terminated (${hrData.termType || 'Other'})`;
                 } else {
                     hrStatusText = 'Active (No Termination)';
@@ -3466,13 +3648,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     auditStatus = 'False Resignation Claim'; 
                     falseResignationCount++;
                 } else if (!isOpResigned && hasTerm) {
-                    // Applying the new 3 WORKING DAYS Rule
                     if (hrData.workingDaysToExit !== null && hrData.workingDaysToExit <= 3) {
-                        auditStatus = 'Fake Training Claim';
-                        fakeTrainingCount++;
+                        auditStatus = 'Early Exit (≤ 3 Working Days)';
+                        earlyExitCount++;
                     } else {
-                        auditStatus = 'Normal Exit';
-                        normalExitCount++;
+                        auditStatus = 'Standard Exit (> 3 Working Days)';
+                        standardExitCount++;
                     }
                 } else {
                     auditStatus = 'ACTIVE MATCH';
@@ -3487,46 +3668,297 @@ document.addEventListener('DOMContentLoaded', () => {
                 branch: opBranch,
                 opStatus: isOpResigned ? 'Resigned' : 'Active / In Training',
                 hrStatus: hrStatusText,
-                hiringDate: hrData && hrData.hiringDateStr !== 'N/A' ? hrData.hiringDateStr : (opRow['Hiring Date'] ? opRow['Hiring Date'].trim() : 'N/A'),
+                hiringDate: opRow['Hiring Date'] ? opRow['Hiring Date'].trim() : 'N/A',
                 termDate: termDate,
                 auditStatus: auditStatus,
                 comment: rawComment,
-                isException: auditStatus === 'False Resignation Claim' || auditStatus === 'Fake Training Claim' || auditStatus === 'Normal Exit'
+                isException: auditStatus === 'False Resignation Claim' || auditStatus === 'Early Exit (≤ 3 Working Days)' || auditStatus === 'Standard Exit (> 3 Working Days)'
             });
         });
 
-        renderAuditKPIs(opReportedCount, hrConfirmedLeaversCount, matchedCount, falseResignationCount);
-        renderAuditHealthText(falseResignationCount, fakeTrainingCount, normalExitCount);
+        renderAuditKPIs(opReportedCount, hrTotalLeaversCount, matchedCount, falseResignationCount, earlyExitCount, standardExitCount);
+        renderAuditHealthText(falseResignationCount, earlyExitCount, standardExitCount);
         renderAuditTopSummaries(auditRecordsGlobal);
         setupAuditControls();
         renderAuditTable();
     }
+    
 
-    function renderAuditKPIs(opReported, hrTotal, matched, criticalCount) {
+    // ==========================================================================
+    // HR RECONCILIATION GAP DIAGNOSTICS
+    // Compares terminated employees in turnover.csv against Dataset B (globalDataset)
+    // using Employee Code <-> HR Code. This is supplementary to Resignation Audit.
+    // ==========================================================================
+    function renderHRReconciliationGapDiagnostics() {
+        const badge = document.getElementById('hr-gap-table-badge');
+        const tbody = document.getElementById('hr-gap-table-tbody');
+        const section = document.getElementById('hr-reconciliation-gap-section');
+
+        if (!badge || !tbody) return;
+
+        // Do not render a false 0 while one of the datasets is still loading.
+        if (!Array.isArray(globalDataset) || globalDataset.length === 0 ||
+            !Array.isArray(turnoverDatasetGlobal) || turnoverDatasetGlobal.length === 0) {
+            badge.textContent = 'Loading…';
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; padding:24px; color:var(--text-muted);">Loading reconciliation data…</td></tr>`;
+            const subtitle = section ? section.querySelector('.section-subtitle') : null;
+            if (subtitle) subtitle.textContent = 'Waiting for both operational and HR datasets to load…';
+            return;
+        }
+
+        /*
+         * IMPORTANT BUSINESS LOGIC
+         * ------------------------
+         * The reconciliation is meant to explain the Measure of Success
+         * early-resignation cohort (the post-project cohort), not to compare
+         * every employee in turnover.csv when the global onboarding filter
+         * happens to be "All Months".
+         *
+         * If the global month filter has a specific month, we respect it.
+         * If it is "All Months", we use the month of the MOS project start
+         * (currently 2026-07-01), which is the cohort that produces:
+         *
+         *     HR Measure of Success = 101
+         *     Resignation Audit HR   = 91
+         *     Net Difference         = 10
+         */
+        const globalMonth = monthFilterSelect ? monthFilterSelect.value : 'all';
+        let reconciliationMonth = globalMonth;
+
+        if (reconciliationMonth === 'all' || !reconciliationMonth) {
+            const projectStart = mosState && mosState.projFrom ? mosState.projFrom : '2026-07-01';
+            reconciliationMonth = projectStart.substring(0, 7);
+        }
+
+        const isValidDate = d => d instanceof Date && !isNaN(d.getTime());
+
+        // Build the HR termination lookup exactly as the Resignation Audit does:
+        // Employee Code -> final HR row's termination state.
+        const hrTerminationMap = new Map();
+        turnoverDatasetGlobal.forEach(hrRow => {
+            const code = safeKey(hrRow['Employee Code']);
+            if (!code || code === 'nan') return;
+            const termDate = parseDDMMYYYY(hrRow['Termination Date']);
+            hrTerminationMap.set(code, isValidDate(termDate));
+        });
+
+        // Dataset B cohort for the same hiring month.
+        const scopedOperational = globalDataset.filter(row =>
+            parseMonthKey(row['Hiring Date']) === reconciliationMonth
+        );
+
+        // HR cohort: unique employee codes hired in the same month and terminated.
+        const hrCohortLeavers = [];
+        const hrCohortCodeSet = new Set();
+
+        turnoverDatasetGlobal.forEach(hrRow => {
+            const code = safeKey(hrRow['Employee Code']);
+            if (!code || code === 'nan' || hrCohortCodeSet.has(code)) return;
+
+            const hiringDate = parseDDMMYYYY(hrRow['Hiring Date']);
+            const terminationDate = parseDDMMYYYY(hrRow['Termination Date']);
+
+            if (!isValidDate(hiringDate) || !isValidDate(terminationDate)) return;
+
+            const hiringMonthKey =
+                `${hiringDate.getFullYear()}-${String(hiringDate.getMonth() + 1).padStart(2, '0')}`;
+
+            if (hiringMonthKey !== reconciliationMonth) return;
+
+            hrCohortCodeSet.add(code);
+            hrCohortLeavers.push(hrRow);
+        });
+
+        // Existing Resignation Audit HR total for the same operational cohort.
+        const auditHrLeaverCodes = new Set();
+        let auditHrTotal = 0;
+
+        scopedOperational.forEach(row => {
+            const code = safeKey(row['HR Code']);
+            if (!code || code === 'nan') return;
+
+            if (hrTerminationMap.get(code) === true) {
+                auditHrTotal++;
+                auditHrLeaverCodes.add(code);
+            }
+        });
+
+        const measureLeaverCount = hrCohortLeavers.length;
+        const netDifference = measureLeaverCount - auditHrTotal;
+
+        const operationalCodeSet = new Set(
+            scopedOperational
+                .map(row => safeKey(row['HR Code']))
+                .filter(code => code && code !== 'nan')
+        );
+
+        // Group A: HR cohort leavers absent from Dataset B.
+        const hrOnly = hrCohortLeavers.filter(hrRow => {
+            const code = safeKey(hrRow['Employee Code']);
+            return !operationalCodeSet.has(code);
+        });
+
+        // Group B: Dataset B HR leavers whose HR hiring month is outside the cohort.
+        const auditOnlyCodes = Array.from(auditHrLeaverCodes)
+            .filter(code => !hrCohortCodeSet.has(code));
+
+        const auditOnly = auditOnlyCodes.map(code => {
+            const opRow = scopedOperational.find(row => safeKey(row['HR Code']) === code) || {};
+            const hrRow = turnoverDatasetGlobal.find(row => safeKey(row['Employee Code']) === code) || {};
+            return { opRow, hrRow, code };
+        });
+
+        const title = section ? section.querySelector('h3, h2') : null;
+        const subtitle = section ? section.querySelector('.section-subtitle') : null;
+
+        if (title) title.textContent = 'Resignation Audit Difference — Case Details';
+
+        const dateObj = new Date(`${reconciliationMonth}-01T00:00:00`);
+        const periodLabel = isNaN(dateObj.getTime())
+            ? reconciliationMonth
+            : dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+
+        if (subtitle) {
+            subtitle.textContent =
+                `${measureLeaverCount.toLocaleString()} HR cohort leavers − ` +
+                `${auditHrTotal.toLocaleString()} Resignation Audit HR leavers = ` +
+                `${netDifference.toLocaleString()} net difference • ${periodLabel}`;
+        }
+
+        badge.textContent = `${Math.abs(netDifference).toLocaleString()} Net Difference`;
+        tbody.innerHTML = '';
+
+        if (hrOnly.length === 0 && auditOnly.length === 0) {
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                `<td colspan="9" style="text-align:center; padding:24px; color:var(--text-muted);">` +
+                `No reconciliation cases found for ${periodLabel}.` +
+                `</td>`;
+            tbody.appendChild(tr);
+            return;
+        }
+
+        const escapeHtml = value => String(value ?? 'N/A')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+
+        const addGroupRow = (label, count, tone) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML =
+                `<td colspan="9" style="padding:12px 10px; font-weight:700; ` +
+                `color:${tone}; background:rgba(99,102,241,.04); border-top:1px solid var(--border-color);">` +
+                `${escapeHtml(label)} <span style="font-weight:600; color:var(--text-muted);">(${count})</span>` +
+                `</td>`;
+            tbody.appendChild(tr);
+        };
+
+        const addRow = (
+            employeeName, employeeCode, branch, specialized, phone,
+            hiringDate, terminationDate, currentStatus, reconciliationStatus
+        ) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${escapeHtml(employeeName)}</strong></td>
+                <td>${escapeHtml(employeeCode)}</td>
+                <td>${escapeHtml(branch)}</td>
+                <td>${escapeHtml(specialized)}</td>
+                <td>${escapeHtml(phone)}</td>
+                <td>${escapeHtml(hiringDate)}</td>
+                <td>${escapeHtml(terminationDate)}</td>
+                <td>${escapeHtml(currentStatus)}</td>
+                <td>${escapeHtml(reconciliationStatus)}</td>
+            `;
+            tbody.appendChild(tr);
+        };
+
+        if (hrOnly.length > 0) {
+            addGroupRow('HR cohort leavers — not found in Dataset B', hrOnly.length, 'var(--orange)');
+
+            hrOnly.forEach(hrRow => {
+                addRow(
+                    hrRow['Employee Name - English'] || 'N/A',
+                    hrRow['Employee Code'] || 'N/A',
+                    hrRow['Site - English'] || 'N/A',
+                    hrRow['Position - English'] || 'N/A',
+                    hrRow['Mobile'] || 'N/A',
+                    hrRow['Hiring Date'] || 'N/A',
+                    hrRow['Termination Date'] || 'N/A',
+                    'Resigned',
+                    'HR cohort leaver — not found in Dataset B'
+                );
+            });
+        }
+
+        if (auditOnly.length > 0) {
+            addGroupRow(
+                'Resignation Audit HR leavers — outside the HR cohort',
+                auditOnly.length,
+                'var(--brand-purple)'
+            );
+
+            auditOnly.forEach(({ opRow, hrRow, code }) => {
+                addRow(
+                    opRow['Officer Name'] || hrRow['Employee Name - English'] || 'N/A',
+                    opRow['HR Code'] || hrRow['Employee Code'] || code,
+                    opRow['Branch'] || hrRow['Site - English'] || 'N/A',
+                    opRow['Specialized'] || hrRow['Position - English'] || 'N/A',
+                    opRow['Phone #'] || hrRow['Mobile'] || 'N/A',
+                    hrRow['Hiring Date'] || opRow['Hiring Date'] || 'N/A',
+                    hrRow['Termination Date'] || 'N/A',
+                    'Resignation Audit HR Leaver',
+                    'Counted by Audit — HR hiring month outside cohort'
+                );
+            });
+        }
+
+        // The net difference is an arithmetic reconciliation:
+        // HR-only minus Audit-only. It is intentionally shown separately
+        // from the number of detailed rows.
+        const note = document.createElement('tr');
+        note.innerHTML =
+            `<td colspan="9" style="text-align:left; padding:16px; color:var(--text-muted); ` +
+            `background:rgba(245,158,11,.06);">` +
+            `<strong>Reconciliation:</strong> ${hrOnly.length} HR-only − ${auditOnly.length} ` +
+            `Audit-only = <strong>${Math.abs(netDifference)} net difference</strong>. ` +
+            `The detailed rows explain the arithmetic; they are not expected to equal the net number.` +
+            `</td>`;
+        tbody.appendChild(note);
+    }
+
+    function renderAuditKPIs(opReported, hrTotal, matched, criticalCount, earlyExit, standardExit) {
         const opEl = document.getElementById('audit-op-reported');
         const hrEl = document.getElementById('audit-hr-total');
+        const subMatchedEl = document.getElementById('audit-sub-matched');
+        const subEarlyEl = document.getElementById('audit-sub-early');
+        const subStandardEl = document.getElementById('audit-sub-standard');
         const matchedEl = document.getElementById('audit-matched');
         const criticalEl = document.getElementById('audit-critical');
 
         if (opEl) opEl.textContent = opReported.toLocaleString();
         if (hrEl) hrEl.textContent = hrTotal.toLocaleString();
+        if (subMatchedEl) subMatchedEl.textContent = matched.toLocaleString();
+        if (subEarlyEl) subEarlyEl.textContent = earlyExit.toLocaleString();
+        if (subStandardEl) subStandardEl.textContent = standardExit.toLocaleString();
         if (matchedEl) matchedEl.textContent = matched.toLocaleString();
         if (criticalEl) criticalEl.textContent = criticalCount.toLocaleString();
     }
 
-    function renderAuditHealthText(falseRes, fakeTrain, normalExit) {
+    function renderAuditHealthText(falseRes, earlyExit, standardExit) {
         const falseEl = document.getElementById('audit-insight-false');
         const fakeEl = document.getElementById('audit-insight-fake');
         const normalEl = document.getElementById('audit-insight-normal');
 
         if (falseEl) {
-            falseEl.innerHTML = `There are <strong>${falseRes} employees</strong> actively working according to HR, but operational supervisors reported them as resigned.`;
+            falseEl.innerHTML = `There are <strong>${falseRes} employees</strong> active according to HR records, but reported as resigned before training by operational supervisors.`;
         }
         if (fakeEl) {
-            fakeEl.innerHTML = `There are <strong>${fakeTrain} employees</strong> who officially exited within their first <strong>3 working days</strong>, yet supervisors kept them marked as actively in-training.`;
+            fakeEl.innerHTML = `There are <strong>${earlyExit} employees</strong> who resigned after training within their first <strong>3 working days</strong>.`;
         }
         if (normalEl) {
-            normalEl.innerHTML = `There are <strong>${normalExit} employees</strong> who naturally exited after completing their initial <strong>3 working days</strong> without direct supervisor resignation reports.`;
+            normalEl.innerHTML = `There are <strong>${standardExit} employees</strong> who resigned after training and completing their initial <strong>3 working days</strong>.`;
         }
     }
 
@@ -3540,17 +3972,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
         records.forEach(r => {
             const isFalseRes = r.auditStatus === 'False Resignation Claim';
-            const isFakeTrain = r.auditStatus === 'Fake Training Claim';
+            const isEarly = r.auditStatus === 'Early Exit (≤ 3 Working Days)';
 
-            if (isFalseRes || isFakeTrain) {
+            if (isFalseRes || isEarly) {
                 const g = r.governorate;
                 const s = r.supervisor;
                 
-                if (!govMap[g]) govMap[g] = { gov: g, falseRes: 0, fakeTrain: 0, total: 0 };
+                if (!govMap[g]) govMap[g] = { gov: g, falseRes: 0, earlyExit: 0, total: 0 };
                 if (!supMap[s]) supMap[s] = { name: s, count: 0 };
 
                 if (isFalseRes) govMap[g].falseRes++;
-                if (isFakeTrain) govMap[g].fakeTrain++;
+                if (isEarly) govMap[g].earlyExit++;
                 
                 govMap[g].total++;
                 supMap[s].count++;
@@ -3596,11 +4028,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            const k = tableSortStates['audit-gov-summary-table'] ? Object.keys(allGovList[0])[tableSortStates['audit-gov-summary-table'].colIdx] || 'total' : 'total';
-            const dir = tableSortStates['audit-gov-summary-table'] && tableSortStates['audit-gov-summary-table'].dir === 'asc' ? 1 : -1;
-            
-            const keyMap = { 0: 'gov', 1: 'falseRes', 2: 'fakeTrain', 3: 'total' };
+            const keyMap = { 0: 'gov', 1: 'falseRes', 2: 'earlyExit', 3: 'total' };
             const sortKey = tableSortStates['audit-gov-summary-table'] ? keyMap[tableSortStates['audit-gov-summary-table'].colIdx] : 'total';
+            const dir = tableSortStates['audit-gov-summary-table'] && tableSortStates['audit-gov-summary-table'].dir === 'asc' ? 1 : -1;
 
             allGovList.sort((a, b) => {
                 let valA = a[sortKey];
@@ -3615,7 +4045,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tr.innerHTML = `
                     <td><strong>${g.gov}</strong></td>
                     <td class="text-danger"><strong>${g.falseRes}</strong></td>
-                    <td class="text-warning"><strong>${g.fakeTrain}</strong></td>
+                    <td class="text-warning"><strong>${g.earlyExit}</strong></td>
                     <td><strong>${g.total}</strong></td>
                 `;
                 summaryTbody.appendChild(tr);
@@ -3654,7 +4084,23 @@ document.addEventListener('DOMContentLoaded', () => {
             supSel.onchange = () => { auditFilters.sup = supSel.value; renderAuditTable(); };
         }
 
-        if(statSel) statSel.onchange = () => { auditFilters.status = statSel.value; renderAuditTable(); };
+        if(statSel) {
+            statSel.innerHTML = `
+                <option value="False Resignation Claim">False Resignation Claim (Critical Mismatches)</option>
+                <option value="Early Exit (≤ 3 Working Days)">Early Exit (Resigned After Training ≤ 3 Days)</option>
+                <option value="Standard Exit (> 3 Working Days)">Standard Exit (Resigned After Training > 3 Days)</option>
+                <option value="Matched Resigned">Matched Resigned</option>
+                <option value="all">All Records</option>
+            `;
+            if (!auditFilters.status) {
+                auditFilters.status = 'False Resignation Claim';
+            }
+            statSel.value = auditFilters.status;
+            statSel.onchange = () => { 
+                auditFilters.status = statSel.value; 
+                renderAuditTable(); 
+            };
+        }
         if(searchInp) searchInp.oninput = () => { auditFilters.search = searchInp.value.trim().toLowerCase(); renderAuditTable(); };
     }
 
@@ -3678,15 +4124,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (badge) badge.textContent = `${filtered.length} Cases`;
 
         if (filtered.length === 0) {
-            // Updated colspan to 10 to match your HTML Headers
             tbody.innerHTML = `<tr><td colspan="10" style="text-align:center; padding:30px; color:var(--text-muted);">No records match the current filters.</td></tr>`;
             return;
         }
 
         const statusRank = {
             'False Resignation Claim': 1,
-            'Fake Training Claim': 2,
-            'Normal Exit': 3,
+            'Early Exit (≤ 3 Working Days)': 2,
+            'Standard Exit (> 3 Working Days)': 3,
             'Matched Resigned': 4,
             'ACTIVE MATCH': 5
         };
@@ -3701,8 +4146,8 @@ document.addEventListener('DOMContentLoaded', () => {
         tbody.innerHTML = filtered.map(r => {
             let statusCls = 'audit-status-neutral';
             if (r.auditStatus === 'False Resignation Claim') statusCls = 'audit-status-conflict';
-            else if (r.auditStatus === 'Fake Training Claim') statusCls = 'audit-status-warn';
-            else if (r.auditStatus === 'Normal Exit') statusCls = 'audit-status-neutral';
+            else if (r.auditStatus === 'Early Exit (≤ 3 Working Days)') statusCls = 'audit-status-warn';
+            else if (r.auditStatus === 'Standard Exit (> 3 Working Days)') statusCls = 'audit-status-neutral';
             else if (r.auditStatus === 'Matched Resigned') statusCls = 'audit-status-match';
 
             const hrCodeHtml = r.hrCode !== 'N/A' ? `<br><span class="op-hr-code" style="margin-left:0;">(${r.hrCode})</span>` : '';
@@ -3711,7 +4156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return `
                 <tr>
                     <td><strong>${r.governorate}</strong></td>
-                    <td>${r.branch}</td>
+                    <td><b>${r.branch}</b></td>
                     <td>${r.supervisor}</td>
                     <td><strong>${r.empName}</strong>${hrCodeHtml}</td>
                     <td style="color:${r.opStatus==='Resigned'?'var(--red)':'var(--text-main)'}; font-weight:600;">${r.opStatus}</td>
@@ -3724,7 +4169,6 @@ document.addEventListener('DOMContentLoaded', () => {
             `;
         }).join('');
     }
-
     // Dynamic Resize Listener
     window.addEventListener('resize', () => {
         if (globalDataset.length > 0) {
@@ -3778,8 +4222,146 @@ document.addEventListener('DOMContentLoaded', () => {
             turnoverDatasetGlobal = parseCSVDataEngine(csvText);
             renderMeasureOfSuccessTab();
             renderResignationAuditTab();
+            renderHRReconciliationGapDiagnostics();
         })
         .catch(err => {
             console.warn("turnover.csv File Offline or Unreachable:", err);
         });
 });
+// ==========================================================================
+    // TAB 8: RED FLAGS MODULE (ROBUST, FILTER-AWARE & FULLY CONNECTED)
+    // ==========================================================================
+    let redFlagsDatasetGlobal = [];
+
+    function initRedFlagsModule() {
+        // بيانات ملف redflags.csv الحقيقية مضمنة هنا لضمان عمل الداشبورد بدون أخطاء CORS أو Fetch
+        redFlagsDatasetGlobal = [
+            { "HR Code": "20082803", "Officer Name": "Shaymaa Ahmed Mahmoud Ahmed", "Branch": "الاسكندرية - البيطاش - تساهيل", "Hiring Date": "6/14/2026", "Details": "مكلفة بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20082811", "Officer Name": "Amal Ashraf Moustafa Ebrahim", "Branch": "الاقصر - الزينيه بحري - تساهيل", "Hiring Date": "6/14/2026", "Details": "قامت بالنزول مرتين في مهام تحصيل الأقساط برفقة رئيس المجموعة، وذلك لمتابعة التحصيل ومتابعة العملاء المتأخرين في السداد", "Valid": "Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20082849", "Officer Name": "Feryal Elsayed Elshahat Elsayed", "Branch": "كفر الشيخ - سريوه الكبري - تساهيل", "Hiring Date": "6/14/2026", "Details": "قام بالنزول في مهام تحصيل الأقساط برفقة رئيس المجموعة، وذلك لمتابعة التحصيل ومتابعة العملاء المتأخرين في السداد", "Valid": "Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20082855", "Officer Name": "Beshoy Gerges Saad Beshay", "Branch": "المنيا - ملوى 2 - تساهيل", "Hiring Date": "6/14/2026", "Details": "قام بالنزول في مهام تحصيل الأقساط برفقة رئيس المجموعة، وذلك لمتابعة التحصيل ومتابعة العملاء المتأخرين في السداد", "Valid": "Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20082690", "Officer Name": "Mohamed Elsafi Mohamed Mohamed Shehata", "Branch": "بني سويف - الفشن 2 - تساهيل", "Hiring Date": "6/15/2026", "Details": "قام بالنزول في مهام تحصيل الأقساط برفقة رئيس المجموعة، وذلك لمتابعة التحصيل ومتابعة العملاء المتأخرين في السداد", "Valid": "Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20083347", "Officer Name": "Karema Esmael Mohamed Ahmed", "Branch": "سوهاج - البلينا 2 - تساهيل", "Hiring Date": "6/27/2026", "Details": "مكلفة بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Not Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20066442", "Officer Name": "mohamed ibrahim mohamed elbahnasawy", "Branch": "الشرقيه - الزقازيق 2 - تساهيل", "Hiring Date": "7/1/2026", "Details": "مكلف بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20083138", "Officer Name": "Ibrahim Ahmd MohmdMohmd mohmdOmr", "Branch": "أسيوط - أبار الوقف - تساهيل", "Hiring Date": "7/1/2026", "Details": "مكلف بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Not Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20083187", "Officer Name": "hesham khalafallah ali mohamed", "Branch": "أسيوط - منفلوط 2 - تساهيل", "Hiring Date": "7/1/2026", "Details": "مكلف بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20083268", "Officer Name": "Eman Mohamed Elsayed Meshrf", "Branch": "المنوفية - شبين الكوم 2 - تساهيل", "Hiring Date": "7/1/2026", "Details": "مكلفة بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20083322", "Officer Name": "yasmin abdallah aboelfitoh abdallah", "Branch": "الجيزة - المنيب - تساهيل", "Hiring Date": "7/1/2026", "Details": "مكلفة بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20078141", "Officer Name": "hend hamdy mahmood alian", "Branch": "القاهرة - المرج - تساهيل", "Hiring Date": "7/5/2026", "Details": "مكلفة بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20083325", "Officer Name": "katren saed aziz abdallah", "Branch": "سوهاج - طهطا 2 - تساهيل", "Hiring Date": "7/5/2026", "Details": "مكلفة بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Not Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20068911", "Officer Name": "romany marzok wasef aziz", "Branch": "المنيا - سمالوط 2 - تساهيل", "Hiring Date": "7/6/2026", "Details": "مكلف بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Not Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20083496", "Officer Name": "zainab hassan ahmed mahmoud", "Branch": "الجيزة - منشأة القناطر - تساهيل", "Hiring Date": "7/9/2026", "Details": "مكلفة بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20083704", "Officer Name": "Yasmen Aeman Kamel Hassen", "Branch": "الاسكندرية - العامرية - تساهيل", "Hiring Date": "7/14/2026", "Details": "مكلفة بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Not Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20083835", "Officer Name": "Nermen Essam Kamal Tolba", "Branch": "الغربية - زفتى 2 - تساهيل", "Hiring Date": "7/15/2026", "Details": "مكلفة بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Not Valid", "Action Taken": "Action Done" },
+            { "HR Code": "20046133", "Officer Name": "Nourhan Tariq Nasr Mofadel", "Branch": "أسيوط - مركز أسيوط - تساهيل", "Hiring Date": "7/16/2026", "Details": "مكلفة بإجراء مكالمات هاتفية للعملاء بغرض متابعة وتحصيل الأقساط المستحقة بالفرع", "Valid": "Not Valid", "Action Taken": "Action Done" }
+        ];
+
+        renderRedFlagsDashboard();
+    }
+
+    function renderRedFlagsDashboard() {
+        const monthFilterEl = document.getElementById('month-filter');
+        const chosenMonth = monthFilterEl ? monthFilterEl.value : 'all';
+        
+        let scopedRecords = redFlagsDatasetGlobal;
+        
+        // ربط القراءة بفلتر الشهور العلوي بناءً على تاريخ التعيين (Hiring Date)
+        if (chosenMonth && chosenMonth !== 'all') {
+            scopedRecords = redFlagsDatasetGlobal.filter(row => {
+                const hDate = row['Hiring Date'] || '';
+                return parseMonthKey(hDate) === chosenMonth;
+            });
+        }
+
+        const totalCases = scopedRecords.length;
+        let validCases = 0;
+        let notValidCases = 0;
+        let withAction = 0;
+        let withoutAction = 0;
+
+        scopedRecords.forEach(r => {
+            const validCol = (r['Valid'] || '').trim().toLowerCase();
+            if (validCol === 'valid') {
+                validCases++;
+            } else {
+                notValidCases++;
+            }
+
+            const actionCol = (r['Action Taken'] || '').trim();
+            if (actionCol !== '' && actionCol.toLowerCase() !== 'null' && actionCol.toLowerCase() !== 'nan') {
+                withAction++;
+            } else {
+                withoutAction++;
+            }
+        });
+
+        // تحديث الكروت العلوية الخمسة
+        const totalEl = document.getElementById('rf-total-val');
+        const validEl = document.getElementById('rf-valid-val');
+        const notValidEl = document.getElementById('rf-notvalid-val');
+        const withActionEl = document.getElementById('rf-withaction-val');
+        const withoutActionEl = document.getElementById('rf-withoutaction-val');
+
+        if (totalEl) totalEl.textContent = totalCases;
+        if (validEl) validEl.textContent = validCases;
+        if (notValidEl) notValidEl.textContent = notValidCases;
+        if (withActionEl) withActionEl.textContent = withAction;
+        if (withoutActionEl) withoutActionEl.textContent = withoutAction;
+
+        const container = document.getElementById('red-flags-cards-container');
+        if (!container) return;
+
+        if (scopedRecords.length === 0) {
+            container.innerHTML = `<div class="op-empty-state" style="grid-column: span 3;">لا توجد حالات مسجلة في هذا الشهر.</div>`;
+            return;
+        }
+
+        // بناء كروت الحالات السفلية (3 كروت في الصف، اسم الأوفيسر وتحته الفرع، الوصف، Valid/Not Valid، و Action Taken)
+        container.innerHTML = scopedRecords.map(r => {
+            const officerName = r['Officer Name'] || 'N/A';
+            const branch = r['Branch'] || 'N/A';
+            const empCode = r['HR Code'] || '';
+            const hiringDate = r['Hiring Date'] || 'N/A';
+            const details = r['Details'] || 'لا توجد تفاصيل';
+            const validationVal = (r['Valid'] || '').trim();
+            const actionTaken = r['Action Taken'] || '';
+
+            const isValid = validationVal.toLowerCase() === 'valid';
+            const validationBadgeClass = isValid ? 'rf-badge-valid' : 'rf-badge-invalid';
+            const validationText = isValid ? 'VALID CASE' : 'NOT VALID CASE';
+
+            const hasAction = actionTaken && actionTaken.trim() !== '' && actionTaken.toLowerCase() !== 'null';
+            const actionDisplay = hasAction ? `Action Taken: ${actionTaken}` : 'No Action Taken';
+
+            return `
+                <div class="metric-card rf-individual-card">
+                    <div class="rf-card-header">
+                        <span class="rf-officer-name">${officerName}</span>
+                        <span class="rf-branch-name">${branch}</span>
+                    </div>
+                    <div class="rf-card-body">
+                        <div class="rf-detail-box"><strong>Description:</strong> ${details}</div>
+                        <div style="font-size:11.5px; color:var(--text-muted); display:flex; justify-content:space-between; align-items:center; margin-top: 4px;">
+                            <span>HR Code: <strong>${empCode}</strong></span>
+                            <span>Hiring: <strong>${hiringDate}</strong></span>
+                        </div>
+                    </div>
+                    <div class="rf-meta-footer">
+                        <span class="rf-status-badge ${validationBadgeClass}">${validationText}</span>
+                        <span class="rf-action-taken" style="color: ${hasAction ? 'var(--primary)' : 'var(--orange)'};">${actionDisplay}</span>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // الربط اللحظي بفلتر الشهور العلوي في الداشبورد
+    const mainMonthFilter = document.getElementById('month-filter');
+    if (mainMonthFilter) {
+        mainMonthFilter.addEventListener('change', () => {
+            renderRedFlagsDashboard();
+        });
+    }
+
+    // تشغيل الموديل فوراً
+    initRedFlagsModule();
