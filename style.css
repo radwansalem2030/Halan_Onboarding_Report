@@ -590,63 +590,447 @@ body {
 /* ==========================================================================
    RESPONSIVE ADJUSTMENTS
    ========================================================================== */
+
 @media (max-width: 1100px) {
     .gov-perf-grid { grid-template-columns: repeat(2, 1fr); }
     .kpi-executive-cards-grid { grid-template-columns: repeat(2, 1fr) !important; }
+
+    .metrics-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px;
+    }
+
+    .metrics-grid .metric-card.main-kpi {
+        grid-column: 1 / -1;
+    }
+
+    .metrics-grid .metric-card:not(.main-kpi) {
+        grid-column: span 1;
+    }
+
+    .metric-card {
+        min-width: 0;
+    }
+
+    .card-body-radial {
+        min-width: 0;
+        gap: 14px;
+    }
+
+    .radial-left-content {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .radial-left-content .value-block {
+        min-width: 0;
+    }
+
+    .card-description-text {
+        overflow-wrap: anywhere;
+    }
 }
 
+
+/* ==========================================================================
+   TABLET / MOBILE SIDEBAR
+   ========================================================================== */
 @media (max-width: 992px) {
-    .app-layout { flex-direction: column; overflow-y: auto; }
-    
+
+    .app-layout {
+        display: flex;
+        flex-direction: row;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .app-main {
+        flex: 1 1 auto;
+        width: 100%;
+        min-width: 0;
+        overflow: hidden;
+    }
+
+    /*
+       On tablet/mobile the sidebar is an off-canvas drawer.
+       It starts CLOSED. The existing JavaScript toggle adds
+       .sidebar-collapsed, which means OPEN at these breakpoints.
+    */
     .app-sidebar {
-        width: 100% !important; height: auto;
-        flex-direction: row; align-items: center; justify-content: space-between;
-        border-right: none; border-bottom: 1px solid var(--sidebar-border);
-        padding: 0 16px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+
+        width: 260px !important;
+        height: 100dvh;
+
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+
+        padding: 0;
+        border-right: 1px solid var(--sidebar-border);
+        border-bottom: none;
+
+        z-index: 1000;
+
+        transform: translateX(-105%);
+        transition:
+            transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+            box-shadow 0.3s ease;
+
+        box-shadow: none;
+        overflow: hidden;
     }
-    
-    .sidebar-brand { padding: 16px 0; border-bottom: none; height: auto; }
-    
+
+    /* Existing JS class = OPEN on tablet/mobile */
+    .app-layout.sidebar-collapsed .app-sidebar {
+        width: 260px !important;
+        transform: translateX(0);
+        box-shadow: 12px 0 30px rgba(15, 23, 42, 0.18);
+    }
+
+    /* Restore expanded-sidebar appearance while open */
+    .app-layout.sidebar-collapsed .sidebar-brand {
+        justify-content: flex-start;
+        padding: 24px;
+    }
+
+    .app-layout.sidebar-collapsed .sidebar-brand h2,
+    .app-layout.sidebar-collapsed .tab-label,
+    .app-layout.sidebar-collapsed .sidebar-user-profile .user-info,
+    .app-layout.sidebar-collapsed .logout-text {
+        opacity: 1;
+        display: initial;
+        pointer-events: auto;
+    }
+
+    .app-layout.sidebar-collapsed .sidebar-nav {
+        padding: 24px 16px;
+    }
+
+    .app-layout.sidebar-collapsed .nav-tab-btn {
+        justify-content: flex-start;
+        padding: 12px 14px;
+    }
+
+    .app-layout.sidebar-collapsed .sidebar-user-profile {
+        justify-content: flex-start;
+    }
+
+    .app-layout.sidebar-collapsed .logout-btn {
+        padding: 10px;
+        justify-content: center;
+    }
+
+    .sidebar-brand {
+        width: 100%;
+        height: 80px;
+        flex-shrink: 0;
+        padding: 24px;
+    }
+
     .sidebar-nav {
-        flex-direction: row; padding: 16px 8px; flex: 1; margin: 0 16px;
-        overflow-x: auto;
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+
+        flex-direction: column;
+        padding: 24px 16px;
+        margin: 0;
+        gap: 6px;
+
+        overflow-y: auto;
+        overflow-x: hidden;
     }
-    
-    .sidebar-nav .nav-tab-btn { width: auto; flex-shrink: 0; justify-content: center; }
-    
-    .sidebar-user-area { display: none; /* Hidden on mobile as it's top bar anyway */ }
-    
-    .dashboard-header.top-bar { padding: 16px; height: auto; flex-direction: column; align-items: stretch; gap: 16px; }
-    .header-left { justify-content: space-between; width: 100%; }
-    .sidebar-toggle-btn { display: none; } /* No collapse on mobile */
-    .header-actions { flex-direction: column-reverse; align-items: flex-start; gap: 12px; }
-    .top-controls-group { width: 100%; flex-wrap: wrap; justify-content: space-between; }
-    .header-divider { display: none; }
-    
-    .dashboard-content-scroll { padding: 20px 16px; overflow: visible; }
-    .map-and-callouts-grid { grid-template-columns: 1fr; }
-    .seg-grid-2x2 { grid-template-columns: 1fr; }
-    .flow-strip-container { flex-direction: column; align-items: stretch; }
-    .flow-arrow-separator { text-align: center; transform: rotate(90deg); margin: -4px 0; }
+
+    .sidebar-nav .nav-tab-btn {
+        width: 100%;
+        flex-shrink: 0;
+        justify-content: flex-start;
+        padding: 12px 14px;
+    }
+
+    .sidebar-user-area {
+        display: flex;
+        width: 100%;
+        flex-shrink: 0;
+    }
+
+    .sidebar-toggle-btn {
+        display: flex;
+        flex-shrink: 0;
+        position: fixed;
+        top: 16px;
+        left: 16px;
+        z-index: 1001;
+    }
+
+    /* When the drawer is open, keep the existing hamburger accessible
+       instead of letting the sidebar cover it. */
+    .app-layout.sidebar-collapsed .sidebar-toggle-btn {
+        left: 272px;
+    }
+
+    .dashboard-header.top-bar {
+        height: auto;
+        min-height: 80px;
+        padding: 16px;
+        gap: 14px;
+    }
+
+    .header-left {
+        min-width: 0;
+        gap: 12px;
+    }
+
+    .header-main {
+        min-width: 0;
+    }
+
+    .header-main h1 {
+        font-size: 20px;
+    }
+
+    .header-main .subtitle {
+        line-height: 1.35;
+    }
+
+    .header-actions {
+        min-width: 0;
+        gap: 12px;
+    }
+
+    .top-controls-group {
+        min-width: 0;
+        gap: 10px;
+    }
+
+    .header-divider {
+        display: none;
+    }
+
+    .dashboard-content-scroll {
+        width: 100%;
+        min-width: 0;
+        padding: 20px 16px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-content,
+    .metrics-grid,
+    .middle-charts-layout,
+    .leaderboards-grid {
+        min-width: 0;
+    }
+
+    .map-and-callouts-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .seg-grid-2x2 {
+        grid-template-columns: 1fr;
+    }
+
+    .flow-strip-container {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .flow-arrow-separator {
+        text-align: center;
+        transform: rotate(90deg);
+        margin: -4px 0;
+    }
 }
 
+
+/* ==========================================================================
+   MOBILE
+   ========================================================================== */
 @media (max-width: 768px) {
-    .sidebar-nav .nav-tab-btn { padding: 10px 12px; font-size: 11px; }
-    .metrics-grid { display: flex; flex-direction: column; gap: 16px; }
-    .metrics-grid .metric-card { width: 100% !important; grid-column: span 10 !important; }
-    .card-body-split { flex-direction: column; align-items: flex-start; gap: 16px; }
-    .pure-distribution-wrapper { max-width: 100%; width: 100%; }
-    .middle-charts-layout { grid-template-columns: 1fr; }
-    .leaderboards-grid { grid-template-columns: 1fr; }
-    .premium-select { width: 100%; background-position: right 16px center; }
-    .sup-executive-summary-strip { grid-template-columns: repeat(2, 1fr); }
-    .kpi-executive-cards-grid { grid-template-columns: 1fr !important; }
-    .hq-summary-main { flex-direction: column; align-items: flex-start; gap: 4px; }
-    .gov-perf-grid { grid-template-columns: 1fr; }
-    .insights-grid-container { grid-template-columns: 1fr; }
-    .op-controls-row { flex-direction: column; align-items: stretch; }
-    .op-filter-group { min-width: 100%; }
+
+    .dashboard-header.top-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-left {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .header-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .top-controls-group {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .premium-select {
+        width: 100%;
+        background-position: right 16px center;
+    }
+
+    .status-pill {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .top-bar-user-area {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .metrics-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .metrics-grid .metric-card,
+    .metrics-grid .metric-card.main-kpi,
+    .metrics-grid .metric-card:not(.main-kpi) {
+        width: 100%;
+        grid-column: 1 / -1;
+        min-width: 0;
+    }
+
+    .metric-card {
+        padding: 20px;
+    }
+
+    .card-body-split {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .pure-distribution-wrapper {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    .card-body-radial {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .radial-left-content {
+        min-width: 0;
+        flex: 1 1 auto;
+    }
+
+    .radial-left-content .value-block {
+        min-width: 0;
+    }
+
+    .progress-circle-container {
+        width: 82px;
+        height: 82px;
+        flex: 0 0 82px;
+    }
+
+    .radial-center-text {
+        font-size: 13px;
+        white-space: nowrap;
+    }
+
+    .middle-charts-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .leaderboards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .sup-executive-summary-strip {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .kpi-executive-cards-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .hq-summary-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    .gov-perf-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .insights-grid-container {
+        grid-template-columns: 1fr;
+    }
+
+    .op-controls-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .op-filter-group {
+        min-width: 100%;
+    }
 }
+
+
+/* ==========================================================================
+   VERY SMALL PHONES
+   ========================================================================== */
+@media (max-width: 420px) {
+    .app-layout.sidebar-collapsed .sidebar-toggle-btn {
+        left: 212px;
+    }
+
+
+    .dashboard-content-scroll {
+        padding: 16px 12px;
+    }
+
+    .metric-card {
+        padding: 18px;
+    }
+
+    .card-body-radial {
+        gap: 10px;
+    }
+
+    .progress-circle-container {
+        width: 78px;
+        height: 78px;
+        flex-basis: 78px;
+    }
+
+    .radial-center-text {
+        font-size: 12px;
+    }
+
+    .main-value {
+        font-size: 36px;
+    }
+
+    .sup-executive-summary-strip {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* ==========================================================================
    TAB 8: RED FLAGS STYLES
    ========================================================================== */
