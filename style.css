@@ -771,15 +771,16 @@ body {
         z-index: 1001;
     }
 
-    /* When the drawer is open, keep the existing hamburger accessible
-       instead of letting the sidebar cover it. */
     .app-layout.sidebar-collapsed .sidebar-toggle-btn {
-        left: 220px;
+        left: 268px;
+        z-index: 1002;
     }
+
+
 
     .dashboard-header.top-bar {
         position: relative;
-        z-index: 6;
+        z-index: auto;
         height: auto;
         min-height: 80px;
         padding: 16px;
@@ -999,9 +1000,6 @@ body {
    VERY SMALL PHONES
    ========================================================================== */
 @media (max-width: 420px) {
-    .app-layout.sidebar-collapsed .sidebar-toggle-btn {
-        left: 220px;
-    }
 
 
     .dashboard-content-scroll {
