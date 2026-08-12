@@ -137,7 +137,7 @@ body {
 
 .sidebar-nav .nav-tab-btn {
     display: flex; align-items: center; justify-content: flex-start; gap: 12px;
-    padding: 12px 14px; font-size: 12px; font-weight: 600; width: 100%; border-radius: 8px;
+    padding: 12px 14px; font-size: 11px; font-weight: 600; width: 100%; border-radius: 8px;
     border: none; background: transparent; color: var(--sidebar-text); cursor: pointer; transition: all 0.2s ease;
 }
 
@@ -772,7 +772,7 @@ body {
     /* When the drawer is open, keep the existing hamburger accessible
        instead of letting the sidebar cover it. */
     .app-layout.sidebar-collapsed .sidebar-toggle-btn {
-        left: 272px;
+        left: 220px;
     }
 
     .dashboard-header.top-bar {
@@ -996,7 +996,7 @@ body {
    ========================================================================== */
 @media (max-width: 420px) {
     .app-layout.sidebar-collapsed .sidebar-toggle-btn {
-        left: 212px;
+        left: 220px;
     }
 
 
