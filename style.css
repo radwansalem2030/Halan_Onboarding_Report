@@ -776,6 +776,8 @@ body {
     }
 
     .dashboard-header.top-bar {
+        position: relative;
+        z-index: 5;
         height: auto;
         min-height: 80px;
         padding: 16px;
