@@ -59,6 +59,11 @@ document.addEventListener('DOMContentLoaded', () => {
             hash: simpleHash('F@123456'),
             displayName: 'Fathallah',
             role: 'Team User'
+        },
+         'ibrahim': {
+            hash: simpleHash('@123456'),
+            displayName: 'Ibrahim Refaat',
+            role: 'Team User'
         }
     };
 
