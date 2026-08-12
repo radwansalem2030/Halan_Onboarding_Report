@@ -651,6 +651,8 @@ body {
         width: 100%;
         min-width: 0;
         overflow: hidden;
+        position: relative;
+        z-index: 5;
     }
 
     /*
@@ -777,7 +779,7 @@ body {
 
     .dashboard-header.top-bar {
         position: relative;
-        z-index: 5;
+        z-index: 6;
         height: auto;
         min-height: 80px;
         padding: 16px;
