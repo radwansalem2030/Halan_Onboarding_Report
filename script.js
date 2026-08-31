@@ -3167,6 +3167,7 @@ function renderHQTable(govMap, supMap) {
     }
 
     const MOS_LEAVER_TYPES = new Set(['resignation', 'service termination', 'end of contract']);
+    let mosDatasetCoverageStartDate = null; // Earliest hiring date available in the supplied turnover history.
 
     function normalizeEmployeeCode(value) {
         if (value === null || value === undefined) return '';
@@ -3231,6 +3232,7 @@ function renderHQTable(govMap, supMap) {
 
         const analysisCutoff = latestDateFound || new Date();
         const records = Array.from(byEmployee.values()).filter(r => r.hiringDate <= analysisCutoff);
+        mosDatasetCoverageStartDate = records.reduce((min, r) => (!min || r.hiringDate < min ? r.hiringDate : min), null);
         records.forEach(r => {
             r.hasTermination = isMosLeaverRecord(r);
             r.daysToExit = r.hasTermination && r.terminationDate >= r.hiringDate
@@ -3437,26 +3439,27 @@ function renderHQTable(govMap, supMap) {
     }
 
     function getMosPeriodMetrics(records, fromD, toD) {
-        const opening = records.filter(r => r.hiringDate <= fromD && (!r.hasTermination || r.terminationDate >= fromD)).length;
+        // Company-wide turnover requires a true opening workforce baseline.
+        // Because the supplied source is a 2026 hire history, a period that starts
+        // at the dataset boundary has no observable pre-period opening HC.
+        const openingKnown = !mosDatasetCoverageStartDate || fromD > mosDatasetCoverageStartDate;
+        const opening = openingKnown
+            ? records.filter(r => r.hiringDate < fromD && (!r.hasTermination || r.terminationDate >= fromD)).length
+            : 0;
         const closing = records.filter(r => r.hiringDate <= toD && (!r.hasTermination || r.terminationDate > toD)).length;
         const hires = records.filter(r => r.hiringDate >= fromD && r.hiringDate <= toD);
         const cohortHires = hires.length;
         const cohortLeavers = hires.filter(r => r.hasTermination && r.terminationDate >= fromD && r.terminationDate <= toD);
         const leavers = records.filter(r => r.hasTermination && r.terminationDate >= fromD && r.terminationDate <= toD).length;
-        const average = (opening + closing) / 2;
-        const turnoverRate = average > 0 ? (leavers / average) * 100 : null;
+        const average = openingKnown ? (opening + closing) / 2 : null;
+        const turnoverRate = average !== null && average > 0 ? (leavers / average) * 100 : null;
         const cohortTurnoverRate = cohortHires > 0 ? (cohortLeavers.length / cohortHires) * 100 : null;
-
         return {
-            opening,
-            closing,
+            opening, openingKnown, closing,
             hires: cohortHires,
             cohortLeavers: cohortLeavers.length,
             leaverIds: new Set(cohortLeavers.map(r => r.empCode)),
-            leavers,
-            average,
-            turnoverRate,
-            cohortTurnoverRate
+            leavers, average, turnoverRate, cohortTurnoverRate
         };
     }
 
@@ -3643,11 +3646,20 @@ function renderHQTable(govMap, supMap) {
         const improved = pp !== null && pp < 0;
         const worsened = pp !== null && pp > 0;
         const relative = (pp !== null && previousRate !== null && previousRate !== 0) ? Math.abs((pp / previousRate) * 100) : null;
-        const statusText = pp === null ? 'No comparison data' : improved ? `Improved by ${Math.abs(pp).toFixed(1)} pts` : worsened ? `Increased by ${Math.abs(pp).toFixed(1)} pts` : 'No change';
+        const statusText = pp === null
+            ? 'No valid comparison rate'
+            : improved ? `Improved by ${Math.abs(pp).toFixed(1)} pts`
+            : worsened ? `Increased by ${Math.abs(pp).toFixed(1)} pts`
+            : 'No change';
         const statusClass = improved ? 'text-success' : (worsened ? 'text-danger' : 'text-muted');
         const relativeText = relative === null ? 'N/A' : improved ? `${relative.toFixed(1)}% relative reduction` : worsened ? `${relative.toFixed(1)}% relative increase` : '0.0% relative change';
         const netCurrent = currentMetrics.hires - currentMetrics.leavers;
         const netPrevious = previousMetrics.hires - previousMetrics.leavers;
+        const previousOpeningText = previousMetrics.openingKnown ? previousMetrics.opening.toLocaleString() : 'N/A';
+        const previousAverageText = previousMetrics.average === null ? 'N/A' : previousMetrics.average.toLocaleString(undefined,{maximumFractionDigits:1});
+        const previousHistoryNote = previousMetrics.openingKnown
+            ? ''
+            : '<div class="mos-company-note">The supplied turnover history starts on 01 Jan 2026, so the opening headcount at that coverage boundary is treated as 0 within the supplied history. The rate therefore reflects the workforce captured from the start of the supplied history.</div>';
 
         container.innerHTML = `
             <div class="mos-company-grid">
@@ -3669,13 +3681,14 @@ function renderHQTable(govMap, supMap) {
                     <div class="mos-company-card-rate">${previousRate === null ? 'N/A' : previousRate.toFixed(1) + '%'}</div>
                     <div class="mos-company-card-period">${formatPeriodLabel(cmp.previousFrom, cmp.previousTo)}</div>
                     <div class="mos-company-stats">
-                        <span>Opening HC <strong>${previousMetrics.opening.toLocaleString()}</strong></span>
+                        <span>Opening HC <strong>${previousOpeningText}</strong></span>
                         <span>Closing HC <strong>${previousMetrics.closing.toLocaleString()}</strong></span>
-                        <span>Average HC <strong>${previousMetrics.average.toLocaleString(undefined,{maximumFractionDigits:1})}</strong></span>
+                        <span>Average HC <strong>${previousAverageText}</strong></span>
                         <span>Hires <strong>${previousMetrics.hires.toLocaleString()}</strong></span>
                         <span>All qualifying leavers <strong>${previousMetrics.leavers.toLocaleString()}</strong></span>
                         <span>Net workforce change <strong>${netPrevious >= 0 ? '+' : ''}${netPrevious.toLocaleString()}</strong></span>
                     </div>
+                    ${previousHistoryNote}
                 </div>
                 <div class="mos-company-summary-card">
                     <div class="mos-company-card-label">WORKFORCE TURNOVER CHANGE</div>
@@ -3713,7 +3726,7 @@ function renderHQTable(govMap, supMap) {
             const [y,m] = key.split('-').map(Number);
             const monthStart = new Date(y, m-1, 1);
             const monthEnd = new Date(y, m, 0);
-            const opening = records.filter(r => r.hiringDate <= monthStart && (!r.hasTermination || r.terminationDate >= monthStart)).length;
+            const opening = records.filter(r => r.hiringDate < monthStart && (!r.hasTermination || r.terminationDate >= monthStart)).length;
             const closing = records.filter(r => r.hiringDate <= monthEnd && (!r.hasTermination || r.terminationDate > monthEnd)).length;
             const leavers = records.filter(r => r.hasTermination && r.terminationDate >= monthStart && r.terminationDate <= monthEnd).length;
             const average = (opening + closing) / 2;
@@ -3747,40 +3760,134 @@ function renderHQTable(govMap, supMap) {
     function renderMosExitTimingDistribution(records, previousFrom, previousTo, currentFrom, currentTo) {
         const container = document.getElementById('mos-exit-timing-container');
         if (!container) return;
-        const bands = [
-            { label: 'Within 30 Days', min: 0, max: 30 },
-            { label: '31–60 Days', min: 31, max: 60 },
-            { label: '61–90 Days', min: 61, max: 90 },
-            { label: 'After 90 Days', min: 91, max: 9999 }
+
+        const windows = [
+            { label: 'Within 15 Days', days: 15 },
+            { label: 'Within 30 Days', days: 30 },
+            { label: 'Within 60 Days', days: 60 },
+            { label: 'Within 90 Days', days: 90 }
         ];
-        const getDist = (from, to) => {
-            const exitLogs = records.filter(r => r.hasTermination && r.terminationDate >= from && r.terminationDate <= to && r.daysToExit !== null);
-            const counts = Object.fromEntries(bands.map(b => [b.label,0]));
-            exitLogs.forEach(r=>{ const b=bands.find(x=>r.daysToExit>=x.min&&r.daysToExit<=x.max); if(b) counts[b.label]++; });
-            return { total: exitLogs.length, counts };
+
+        // Primary concept: same-employee NEW-HIRE cohorts.
+        // A hire is included in a window only after the full observation window
+        // has elapsed by the end of that period. This prevents partially observed
+        // cohorts from creating misleading rates (e.g. 100% at 90 days).
+        const getCohort = (from, to) => records.filter(r => r.hiringDate >= from && r.hiringDate <= to);
+        const getWindowStats = (cohort, periodEnd, maxDays) => {
+            const maturityCutoff = addDaysLocal(periodEnd, -maxDays);
+            const eligible = cohort.filter(r => r.hiringDate <= maturityCutoff);
+            const exitsWithin = eligible.filter(r =>
+                r.hasTermination &&
+                r.terminationDate >= r.hiringDate &&
+                r.terminationDate <= periodEnd &&
+                r.daysToExit !== null &&
+                r.daysToExit >= 0 &&
+                r.daysToExit <= maxDays
+            );
+            const pct = eligible.length ? (exitsWithin.length / eligible.length) * 100 : null;
+            return { eligible: eligible.length, count: exitsWithin.length, pct };
         };
-        const prev=getDist(previousFrom,previousTo), cur=getDist(currentFrom,currentTo);
-        let html='<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px;">';
-        bands.forEach(b=>{ const prevPct=prev.total?(prev.counts[b.label]/prev.total)*100:0; const curPct=cur.total?(cur.counts[b.label]/cur.total)*100:0; html+=`<div style="background:#F8FAFC;border:1px solid var(--border-color);border-radius:var(--radius-md);padding:12px;display:flex;flex-direction:column;gap:6px;"><span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">${b.label}</span><div style="display:flex;justify-content:space-between;"><span style="font-size:10.5px;color:var(--text-muted);">Previous:</span><strong style="font-size:12px;">${prevPct.toFixed(1)}% (${prev.counts[b.label]})</strong></div><div style="display:flex;justify-content:space-between;"><span style="font-size:10.5px;color:var(--brand-purple);">Selected:</span><strong style="font-size:11px;color:var(--brand-purple);">${curPct.toFixed(1)}% (${cur.counts[b.label]})</strong></div></div>`; });
-        html+=`</div><div style="margin-top:10px;font-size:11px;color:var(--text-muted);">Based on leavers recorded by termination date. Previous leavers: ${prev.total.toLocaleString()} • Selected leavers: ${cur.total.toLocaleString()}.</div>`;
-        container.innerHTML=html;
+
+        const previousCohort = getCohort(previousFrom, previousTo);
+        const selectedCohort = getCohort(currentFrom, currentTo);
+        let html = '<div class="mos-exit-timing-grid">';
+
+        windows.forEach(w => {
+            const prev = getWindowStats(previousCohort, previousTo, w.days);
+            const cur = getWindowStats(selectedCohort, currentTo, w.days);
+            const pp = (prev.pct !== null && cur.pct !== null) ? cur.pct - prev.pct : null;
+            const ppClass = pp === null ? 'text-muted' : (pp < 0 ? 'text-success' : (pp > 0 ? 'text-danger' : 'text-muted'));
+            const ppText = pp === null ? 'No comparable data' : (pp === 0 ? 'No change' : `${pp > 0 ? '+' : ''}${pp.toFixed(1)} pts`);
+
+            html += `
+                <div class="mos-exit-timing-card">
+                    <div class="mos-exit-timing-title">${w.label}</div>
+                    <div class="mos-exit-timing-row">
+                        <span class="mos-exit-timing-label">Previous</span>
+                        <div class="mos-exit-timing-value">
+                            <strong>${prev.pct === null ? 'N/A' : prev.count.toLocaleString()}</strong>
+                            <span>${prev.pct === null ? 'N/A' : prev.pct.toFixed(1) + '%'}</span>
+                        </div>
+                    </div>
+                    <div class="mos-exit-timing-row" style="font-size:10px;color:var(--text-muted);">
+                        <span>Eligible hires</span><span>${prev.pct === null ? 'Not mature' : prev.eligible.toLocaleString()}</span>
+                    </div>
+                    <div class="mos-exit-timing-row">
+                        <span class="mos-exit-timing-label current">Selected</span>
+                        <div class="mos-exit-timing-value current">
+                            <strong>${cur.pct === null ? 'N/A' : cur.count.toLocaleString()}</strong>
+                            <span>${cur.pct === null ? 'N/A' : cur.pct.toFixed(1) + '%'}</span>
+                        </div>
+                    </div>
+                    <div class="mos-exit-timing-row" style="font-size:10px;color:var(--text-muted);">
+                        <span>Eligible hires</span><span>${cur.pct === null ? 'Not mature' : cur.eligible.toLocaleString()}</span>
+                    </div>
+                    <div class="mos-exit-timing-change ${ppClass}">${ppText}</div>
+                </div>`;
+        });
+
+        html += `</div><div class="mos-exit-timing-footnote">
+            Same-employee new-hire cohorts. Each 15/30/60/90-day window uses only hires whose full observation window is complete by the end of that period. A window with no mature cohort is shown as N/A.
+        </div>`;
+        container.innerHTML = html;
     }
 
     function renderMosGovernorateImpactTable(records, previousFrom, previousTo, currentFrom, currentTo) {
         const tbody = document.getElementById('mos-gov-tbody');
         if (!tbody) return;
+
+        // Governorate impact follows the primary NEW-HIRE COHORT concept.
+        // The same Employee Code is tracked from hiring to any qualifying exit.
         const govMap = {};
-        records.forEach(r=>{ const g=r.governorate; if(!govMap[g]) govMap[g]={gov:g, prevHC:0, curHC:0, prevL:0, curL:0};
-            if(r.hiringDate<=previousFrom && (!r.hasTermination || r.terminationDate>=previousFrom)) govMap[g].prevHC++;
-            if(r.hiringDate<=currentFrom && (!r.hasTermination || r.terminationDate>=currentFrom)) govMap[g].curHC++;
-            if(r.hasTermination && r.terminationDate>=previousFrom && r.terminationDate<=previousTo) govMap[g].prevL++;
-            if(r.hasTermination && r.terminationDate>=currentFrom && r.terminationDate<=currentTo) govMap[g].curL++;
+        records.forEach(r => {
+            const g = r.governorate || 'Unknown';
+            if (!govMap[g]) govMap[g] = { gov:g, prevHires:0, curHires:0, prevL:0, curL:0 };
+
+            if (r.hiringDate >= previousFrom && r.hiringDate <= previousTo) {
+                govMap[g].prevHires++;
+                if (r.hasTermination && r.terminationDate >= previousFrom && r.terminationDate <= previousTo) govMap[g].prevL++;
+            }
+            if (r.hiringDate >= currentFrom && r.hiringDate <= currentTo) {
+                govMap[g].curHires++;
+                if (r.hasTermination && r.terminationDate >= currentFrom && r.terminationDate <= currentTo) govMap[g].curL++;
+            }
         });
-        const list=Object.values(govMap).map(g=>{ const prevRate=g.prevHC>0?(g.prevL/g.prevHC)*100:null; const curRate=g.curHC>0?(g.curL/g.curHC)*100:null; const pp=prevRate!==null&&curRate!==null?curRate-prevRate:null; const status=pp===null?'-':pp<0?'Improved':pp>0?'Increased':'No Change'; return {...g,prevRate,curRate,pp,status}; });
-        const k=currentMosGovSort.key||'projRate', dir=currentMosGovSort.dir==='asc'?1:-1;
-        list.sort((a,b)=>{ const map={baseRate:'prevRate',projRate:'curRate'}; const key=map[k]||k; const av=a[key],bv=b[key]; if(typeof av==='string') return av.localeCompare(bv)*dir; return ((av??-999)-(bv??-999))*dir; });
-        tbody.innerHTML='';
-        list.forEach(r=>{ if(r.prevHC===0&&r.curHC===0)return; const tr=document.createElement('tr'); const prevStr=r.prevRate===null?'<span class="text-muted">N/A</span>':`<strong>${r.prevRate.toFixed(1)}%</strong><br><span class="sample-size-tag" style="margin-left:0;">${r.prevL}/${r.prevHC} HC basis</span>`; const curStr=r.curRate===null?'<span class="text-muted">N/A</span>':`<strong>${r.curRate.toFixed(1)}%</strong><br><span class="sample-size-tag" style="margin-left:0;">${r.curL}/${r.curHC} HC basis</span>`; const ppStr=r.pp===null?'-':`<span class="${r.pp<0?'text-success':r.pp>0?'text-danger':''}">${r.pp>0?'+':''}${r.pp.toFixed(1)} pts</span>`; tr.innerHTML=`<td><strong>${r.gov}</strong></td><td>${prevStr}</td><td>${curStr}</td><td><strong>${ppStr}</strong></td><td><span class="insight-tag" style="background:${r.status==='Improved'?'#D1FAE5':(r.status==='Increased'?'#FEE2E2':'#F1F5F9')}; color:${r.status==='Improved'?'#065F46':(r.status==='Increased'?'#991B1B':'#475569')};">${r.status}</span></td>`; tbody.appendChild(tr); });
+
+        const list = Object.values(govMap)
+            .filter(g => g.prevHires > 0 || g.curHires > 0)
+            .map(g => {
+                const prevRate = g.prevHires ? (g.prevL / g.prevHires) * 100 : null;
+                const curRate = g.curHires ? (g.curL / g.curHires) * 100 : null;
+                const pp = (prevRate !== null && curRate !== null) ? curRate - prevRate : null;
+                const status = pp === null ? '-' : (pp < 0 ? 'Improved' : (pp > 0 ? 'Increased' : 'No Change'));
+                return { ...g, prevRate, curRate, pp, status };
+            });
+
+        const k = currentMosGovSort.key || 'projRate';
+        const dir = currentMosGovSort.dir === 'asc' ? 1 : -1;
+        list.sort((a,b) => {
+            const map = { baseRate:'prevRate', projRate:'curRate' };
+            const key = map[k] || k;
+            const av=a[key], bv=b[key];
+            if (typeof av === 'string') return av.localeCompare(bv) * dir;
+            return ((av ?? -999) - (bv ?? -999)) * dir;
+        });
+
+        tbody.innerHTML = '';
+        list.forEach(r => {
+            const tr = document.createElement('tr');
+            const prevStr = r.prevRate === null
+                ? '<span class="text-muted">N/A</span>'
+                : `<strong>${r.prevRate.toFixed(1)}%</strong><br><span class="sample-size-tag" style="margin-left:0;">${r.prevL}/${r.prevHires} hires</span>`;
+            const curStr = r.curRate === null
+                ? '<span class="text-muted">N/A</span>'
+                : `<strong>${r.curRate.toFixed(1)}%</strong><br><span class="sample-size-tag" style="margin-left:0;">${r.curL}/${r.curHires} hires</span>`;
+            const ppStr = r.pp === null ? '-' : `<span class="${r.pp<0?'text-success':r.pp>0?'text-danger':''}">${r.pp>0?'+':''}${r.pp.toFixed(1)} pts</span>`;
+            const statusBg = r.status==='Improved' ? '#D1FAE5' : (r.status==='Increased' ? '#FEE2E2' : '#F1F5F9');
+            const statusColor = r.status==='Improved' ? '#065F46' : (r.status==='Increased' ? '#991B1B' : '#475569');
+            tr.innerHTML = `<td><strong>${r.gov}</strong></td><td>${prevStr}</td><td>${curStr}</td><td><strong>${ppStr}</strong></td><td><span class="insight-tag" style="background:${statusBg};color:${statusColor};">${r.status}</span></td>`;
+            tbody.appendChild(tr);
+        });
         attachUniversalTableSorting('mos-gov-table');
     }
 
