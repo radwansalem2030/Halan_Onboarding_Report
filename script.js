@@ -228,12 +228,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Measure of Success Filter State
     const PROJECT_LAUNCH_DATE_STR = '2026-06-18';
     let mosState = {
-        baseFrom: '2026-01-01',
-        baseTo: '2026-06-17',
-        projFrom: '2026-06-18',
-        projTo: '2026-07-25',
-        windowDays: 30,
-        gov: 'all'
+        currentFrom: '2026-07-01',
+        currentTo: toISODateStr(new Date()),
+        previousFrom: '2026-05-01',
+        previousTo: '2026-06-30',
+        comparisonManual: false,
+        // Compatibility aliases used by the existing reconciliation logic.
+        baseFrom: '2026-05-01',
+        baseTo: '2026-06-30',
+        projFrom: '2026-07-01',
+        projTo: toISODateStr(new Date()),
+        gov: 'all',
+        businessLines: ['all'],
+        titles: ['all']
     };
 
     // Global Sorting Registry for Data Tables
@@ -2607,50 +2614,141 @@ document.addEventListener('DOMContentLoaded', () => {
         const container = document.getElementById('hq-kpi-grid');
         if (!container) return;
 
-        const evaluatedOfficersCount = new Set(hqResultRecords.map(r => r.officerId)).size;
-        const avgHqPerf = hqResultRecords.length > 0 ? (hqResultRecords.reduce((sum, r) => sum + r.val, 0) / hqResultRecords.length) : 0;
-        
-        const validatedSupervisorsCount = Object.keys(supHqPerfMap).length;
-        const avgValOfficersPerSup = validatedSupervisorsCount > 0 ? (evaluatedOfficersCount / validatedSupervisorsCount) : 0;
+        // HQ outcome breakdown is based on UNIQUE Officer HR Code.
+        // Coverage = every officer with a recorded HQ outcome (Answer, Not Available,
+        // Resigned, or Wrong Number). Blank HQ result = Not Covered.
+        const outcomeByOfficer = new Map();
+        supRecords.forEach((row, idx) => {
+            const officerIdRaw = row['Officer HR Code'] || row['HR Code'] || row['Officer Code'] || row['Officer Name'] || row['Employee ID'];
+            const officerId = officerIdRaw ? String(officerIdRaw).trim() : `ROW_${idx}`;
+            if (outcomeByOfficer.has(officerId)) return;
 
-        const hqTrend = computeCohortTrendSeries(supRecords, 'HQ Call Result');
-        const hqSparkSVG = buildSparklineSVG(hqTrend, '#3B82F6');
+            const raw = row['HQ Call Result'];
+            const value = raw === undefined || raw === null ? '' : String(raw).trim();
+            const lower = value.toLowerCase();
+
+            let outcome = 'Not Covered';
+            if (value !== '' && lower !== 'null' && lower !== 'undefined' && lower !== 'nan') {
+                if (lower === 'not available') {
+                    outcome = 'Not Available';
+                } else if (lower === 'wrong number') {
+                    outcome = 'Wrong Number';
+                } else if (lower.includes('resigned')) {
+                    // All resignation statuses are one business category.
+                    outcome = 'Resigned';
+                } else if (parseFinalResult(value) !== null) {
+                    // Any numeric HQ result is a completed/answered call.
+                    outcome = 'Answer';
+                } else {
+                    // Any other non-blank status is still a recorded outcome.
+                    outcome = 'Other Outcome';
+                }
+            }
+
+            outcomeByOfficer.set(officerId, outcome);
+        });
+
+        const outcomeCounts = {
+            'Answer': 0,
+            'Not Available': 0,
+            'Resigned': 0,
+            'Wrong Number': 0,
+            'Other Outcome': 0,
+            'Not Covered': 0
+        };
+
+        outcomeByOfficer.forEach(outcome => {
+            if (Object.prototype.hasOwnProperty.call(outcomeCounts, outcome)) {
+                outcomeCounts[outcome]++;
+            } else {
+                outcomeCounts['Other Outcome']++;
+            }
+        });
+
+        const uniqueTotal = outcomeByOfficer.size;
+        const recordedCoverageCount = uniqueTotal - outcomeCounts['Not Covered'];
+        const recordedCoveragePct = uniqueTotal > 0 ? (recordedCoverageCount / uniqueTotal) * 100 : 0;
+
+        const pct = count => uniqueTotal > 0 ? (count / uniqueTotal) * 100 : 0;
+
+        // Performance remains based on NUMERIC HQ answers only, exactly as before.
+        const evaluatedOfficersCount = new Set(hqResultRecords.map(r => r.officerId)).size;
+        const avgHqPerf = hqResultRecords.length > 0
+            ? (hqResultRecords.reduce((sum, r) => sum + r.val, 0) / hqResultRecords.length)
+            : 0;
+
+        const validatedSupervisorsCount = Object.keys(supHqPerfMap).length;
+        const avgValOfficersPerSup = validatedSupervisorsCount > 0
+            ? (evaluatedOfficersCount / validatedSupervisorsCount)
+            : 0;
+
+        const outcomeRows = [
+            { label: 'Answer', count: outcomeCounts['Answer'], color: '#10B981' },
+            { label: 'Not Available', count: outcomeCounts['Not Available'], color: '#F59E0B' },
+            { label: 'Resigned', count: outcomeCounts['Resigned'], color: '#EF4444' },
+            { label: 'Wrong Number', count: outcomeCounts['Wrong Number'], color: '#64748B' },
+            ...(outcomeCounts['Other Outcome'] > 0
+                ? [{ label: 'Other Outcome', count: outcomeCounts['Other Outcome'], color: '#8B5CF6' }]
+                : []),
+            { label: 'Not Covered', count: outcomeCounts['Not Covered'], color: '#CBD5E1' }
+        ];
+
+        const outcomeBreakdownHtml = outcomeRows.map(item => `
+            <div style="display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:10.5px; line-height:1.3;">
+                <span style="display:flex; align-items:center; gap:6px; color:var(--text-main);">
+                    <span style="width:7px; height:7px; border-radius:50%; background:${item.color}; flex:0 0 auto;"></span>
+                    ${item.label}
+                </span>
+                <strong>${item.count.toLocaleString()} (${pct(item.count).toFixed(1)}%)</strong>
+            </div>
+        `).join('');
 
         container.innerHTML = `
             <div class="metric-card kpi-exec-card">
                 <div class="kpi-exec-title">HQ CALL COVERAGE</div>
                 <div class="kpi-exec-val-row">
-                    <span class="main-value text-purple">${coveragePct.toFixed(1)}%</span>
+                    <span class="main-value text-purple">${recordedCoveragePct.toFixed(1)}%</span>
                 </div>
-                <div class="kpi-exec-sub">Ratio of officers with HQ validation calls</div>
-                <div class="kpi-exec-denom"><strong>${calledOfficers.toLocaleString()}</strong> of <strong>${totalOfficers.toLocaleString()}</strong> Officers</div>
-                ${hqSparkSVG}
+                <div class="kpi-exec-sub">Recorded HQ call outcomes / unique officers</div>
+                <div class="kpi-exec-denom">
+                    <strong>${recordedCoverageCount.toLocaleString()}</strong> of <strong>${uniqueTotal.toLocaleString()}</strong> Officers
+                </div>
+
+                <div style="margin-top:10px; display:flex; flex-direction:column; gap:5px;">
+                    ${outcomeBreakdownHtml}
+                </div>
+
+                <div style="margin-top:9px; font-size:10px; color:var(--text-muted);">
+                    Answer + Not Available + Resigned + Wrong Number = Covered
+                </div>
             </div>
-            <div class="metric-card kpi-exec-card">
-                <div class="kpi-exec-title">HQ VALIDATION PERFORMANCE</div>
+
+            <div class="metric-card kpi-exec-card hq-performance-combined-card">
+                <div class="hq-performance-top">
+                    <div class="kpi-exec-title">HQ VALIDATION PERFORMANCE</div>
                 <div class="kpi-exec-val-row">
                     <span class="main-value" style="color:#3B82F6;">${avgHqPerf > 0 ? avgHqPerf.toFixed(1) + '%' : 'N/A'}</span>
                 </div>
                 <div class="kpi-exec-sub">Average HQ validation performance score</div>
                 <div class="kpi-exec-denom">Based on <strong>${evaluatedOfficersCount.toLocaleString()}</strong> evaluated officers</div>
-                ${hqSparkSVG}
-            </div>
-            <div class="metric-card kpi-exec-card">
-                <div class="kpi-exec-title">SUPERVISORS VALIDATED</div>
-                <div class="kpi-exec-val-row">
-                    <span class="main-value text-success">${validatedSupervisorsCount.toLocaleString()}</span>
                 </div>
-                <div class="kpi-exec-sub">Supervisors with ≥1 validated officer call</div>
-                <div class="kpi-exec-denom">Active supervisory team unit context</div>
-            </div>
-            <div class="metric-card kpi-exec-card">
-                <div class="kpi-exec-title">AVG VALIDATED / SUPERVISOR</div>
-                <div class="kpi-exec-val-row">
-                    <span class="main-value text-orange-main">${avgValOfficersPerSup.toFixed(1)}</span>
+                <div class="hq-performance-bottom">
+                    <div class="hq-performance-bottom-block">
+                        <div class="kpi-exec-title">SUPERVISORS VALIDATED</div>
+                        <div class="kpi-exec-val-row"><span class="main-value text-success">${validatedSupervisorsCount.toLocaleString()}</span></div>
+                        <div class="kpi-exec-sub">Supervisors with ≥1 validated officer call</div>
+                        <div class="kpi-exec-denom">Active supervisory team unit context</div>
+                    </div>
+                    <div class="hq-performance-divider"></div>
+                    <div class="hq-performance-bottom-block">
+                        <div class="kpi-exec-title">AVG VALIDATED / SUPERVISOR</div>
+                        <div class="kpi-exec-val-row"><span class="main-value text-orange-main">${avgValOfficersPerSup.toFixed(1)}</span></div>
+                        <div class="kpi-exec-sub">Validated officers handled per supervisor</div>
+                        <div class="kpi-exec-denom">Based on <strong>${evaluatedOfficersCount.toLocaleString()}</strong> unique officer calls</div>
+                    </div>
                 </div>
-                <div class="kpi-exec-sub">Validated officers handled per supervisor</div>
-                <div class="kpi-exec-denom">Based on <strong>${evaluatedOfficersCount.toLocaleString()}</strong> unique officer calls</div>
             </div>
+
         `;
     }
 
@@ -3032,7 +3130,8 @@ function renderHQTable(govMap, supMap) {
         containerNode.innerHTML = html;
     }
 // ==========================================================================
-    // TAB 6: MEASURE OF SUCCESS ENGINE (Hiring Date Cohort & Unified Total Leavers)
+    // ==========================================================================
+    // TAB 6: MEASURE OF SUCCESS ENGINE (Flexible Period Turnover Analysis)
     // ==========================================================================
     function parseDDMMYYYY(dateStr) {
         if (!dateStr || typeof dateStr !== 'string') return null;
@@ -3067,463 +3166,621 @@ function renderHQTable(govMap, supMap) {
         return siteStr.split(/\s*-\s*/)[0].trim();
     }
 
+    const MOS_LEAVER_TYPES = new Set(['resignation', 'service termination', 'end of contract']);
+
+    function normalizeEmployeeCode(value) {
+        if (value === null || value === undefined) return '';
+        return String(value).trim();
+    }
+
+    function deriveBusinessLine(position) {
+        const p = String(position || '').trim().toLowerCase();
+        if (p.includes('cf')) return 'CF';
+        if (p.includes('investment')) return 'Invest';
+        if (p.includes('gamaya')) return 'Gamaya';
+        return 'MF';
+    }
+
+    function isMosLeaverRecord(record) {
+        return !!record.terminationDate && MOS_LEAVER_TYPES.has(record.terminationType.toLowerCase());
+    }
+
     function processTurnoverRecords(rawCsvRecords) {
-        const records = [];
+        const byEmployee = new Map();
         let latestDateFound = null;
 
         rawCsvRecords.forEach(row => {
-            const empCode = row['Employee Code'] ? row['Employee Code'].trim() : '';
+            const empCode = normalizeEmployeeCode(row['Employee Code']);
             const hDate = parseDDMMYYYY(row['Hiring Date']);
             const tDate = parseDDMMYYYY(row['Termination Date']);
             const termType = row['Termination Type - English'] ? row['Termination Type - English'].trim() : '';
+            const position = row['Position - English'] ? row['Position - English'].trim() : 'Unknown';
             const site = row['Site - English'] || row['Site - Arabic'] || '';
             const gov = extractGovernorate(site);
 
-            if (!hDate) return; 
+            if (!empCode || !hDate) return;
 
-            if (hDate && (!latestDateFound || hDate > latestDateFound)) {
-                latestDateFound = hDate;
-            }
+            if (hDate && (!latestDateFound || hDate > latestDateFound)) latestDateFound = hDate;
+            if (tDate && (!latestDateFound || tDate > latestDateFound)) latestDateFound = tDate;
 
-            if (tDate && (!latestDateFound || tDate > latestDateFound)) {
-                latestDateFound = tDate;
-            }
-
-            let daysToExit = null;
-            const hasTermination = tDate !== null && !isNaN(tDate.getTime());
-
-            if (hasTermination && tDate >= hDate) {
-                const diffTime = tDate.getTime() - hDate.getTime();
-                daysToExit = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            }
-
-            records.push({
+            const candidate = {
                 empCode,
                 hiringDate: hDate,
                 hiringDateStr: toISODateStr(hDate),
                 terminationDate: tDate,
                 terminationDateStr: toISODateStr(tDate),
                 terminationType: termType,
-                hasTermination,
-                daysToExit,
+                position,
+                businessLine: deriveBusinessLine(position),
                 governorate: gov
-            });
+            };
+
+            const existing = byEmployee.get(empCode);
+            if (!existing) {
+                byEmployee.set(empCode, candidate);
+                return;
+            }
+
+            // Keep the most informative/latest termination state if duplicate Employee Codes ever appear.
+            const existingT = existing.terminationDate ? existing.terminationDate.getTime() : -1;
+            const candidateT = candidate.terminationDate ? candidate.terminationDate.getTime() : -1;
+            if (candidateT > existingT || (!existing.terminationDate && candidate.terminationType && candidate.hiringDate >= existing.hiringDate)) {
+                byEmployee.set(empCode, candidate);
+            }
         });
 
-        const analysisCutoff = latestDateFound || new Date(); 
-        const validRecords = records.filter(r => r.hiringDate <= analysisCutoff);
+        const analysisCutoff = latestDateFound || new Date();
+        const records = Array.from(byEmployee.values()).filter(r => r.hiringDate <= analysisCutoff);
+        records.forEach(r => {
+            r.hasTermination = isMosLeaverRecord(r);
+            r.daysToExit = r.hasTermination && r.terminationDate >= r.hiringDate
+                ? Math.floor((r.terminationDate.getTime() - r.hiringDate.getTime()) / 86400000)
+                : null;
+        });
 
-        return { records: validRecords, analysisCutoff };
+        return { records, analysisCutoff };
     }
 
-    mosState.baseFrom = '2026-01-01';
-    mosState.baseTo = '2026-06-30';
-    mosState.projFrom = '2026-07-01';
-    mosState.projTo = toISODateStr(new Date()); 
-    if (mosState.windowDays !== undefined) delete mosState.windowDays;
+    function parseLocalISO(isoStr) {
+        if (!isoStr) return null;
+        const parts = isoStr.split('-').map(Number);
+        if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
 
-    function setupMeasureOfSuccessControls(allGovernorates) {
-        const baseFromInp = document.getElementById('mos-base-from');
-        const baseToInp = document.getElementById('mos-base-to');
-        const projFromInp = document.getElementById('mos-proj-from');
-        const projToInp = document.getElementById('mos-proj-to');
+    function addDaysLocal(dateObj, days) {
+        const d = new Date(dateObj.getTime());
+        d.setDate(d.getDate() + days);
+        return d;
+    }
+
+    function formatPeriodLabel(fromD, toD) {
+        if (!fromD || !toD) return 'N/A';
+        const opts = { day: '2-digit', month: 'short', year: 'numeric' };
+        return `${fromD.toLocaleDateString('en-GB', opts)} → ${toD.toLocaleDateString('en-GB', opts)}`;
+    }
+
+    function getComparablePeriod(currentFrom, currentTo) {
+        const daysInclusive = Math.floor((currentTo - currentFrom) / 86400000) + 1;
+        const previousTo = addDaysLocal(currentFrom, -1);
+        const previousFrom = addDaysLocal(previousTo, -(daysInclusive - 1));
+        return { previousFrom, previousTo, daysInclusive };
+    }
+
+    function getMosFilterSelections() {
+        const businessChecks = Array.from(document.querySelectorAll('#mos-business-filter input[data-mos-business]'));
+        const selectedBusiness = businessChecks.filter(i => i.checked && i.value !== 'all').map(i => i.value);
+        return {
+            businessLines: selectedBusiness.length ? selectedBusiness : ['all']
+        };
+    }
+
+    function applyMosBusinessFilterState(container, selectedValues) {
+        const boxes = Array.from(container.querySelectorAll('input[data-mos-business]'));
+        const allBox = boxes.find(i => i.value === 'all');
+        const valueBoxes = boxes.filter(i => i.value !== 'all');
+        const allSelected = !Array.isArray(selectedValues) || selectedValues.length === 0 || selectedValues.includes('all');
+
+        if (allBox) allBox.checked = allSelected;
+        valueBoxes.forEach(box => {
+            box.checked = !allSelected && selectedValues.includes(box.value);
+        });
+    }
+
+    function renderMosBusinessChecklist(values, selectedValues) {
+        const container = document.getElementById('mos-business-filter');
+        if (!container) return;
+
+        // Build the checklist once. Do NOT rebuild it on every click; doing so
+        // causes the native checkbox interaction to feel unreliable and can
+        // visually jump on smaller screens.
+        if (!container.querySelector('input[data-mos-business]')) {
+            container.innerHTML = `
+                <div class="mos-checklist-box mos-business-checklist-box">
+                    <label class="mos-check-item mos-check-all">
+                        <input type="checkbox" data-mos-business value="all">
+                        <span>All</span>
+                    </label>
+                    ${values.map(v => `
+                        <label class="mos-check-item">
+                            <input type="checkbox" data-mos-business value="${v}">
+                            <span>${v}</span>
+                        </label>`).join('')}
+                </div>`;
+
+            container.addEventListener('change', (event) => {
+                const changed = event.target.closest('input[data-mos-business]');
+                if (!changed) return;
+
+                const allBox = container.querySelector('input[data-mos-business="all"]');
+                const valueBoxes = Array.from(container.querySelectorAll('input[data-mos-business]')).filter(i => i.value !== 'all');
+
+                if (changed.value === 'all') {
+                    if (allBox.checked) {
+                        valueBoxes.forEach(i => { i.checked = false; });
+                    } else {
+                        // Never allow a state with nothing selected. "All" is the
+                        // neutral/default state when no business line is selected.
+                        allBox.checked = true;
+                    }
+                } else if (changed.checked) {
+                    if (allBox) allBox.checked = false;
+                } else if (!valueBoxes.some(i => i.checked)) {
+                    if (allBox) allBox.checked = true;
+                }
+
+                const selections = getMosFilterSelections();
+                mosState.businessLines = selections.businessLines;
+                renderMeasureOfSuccessTab(true);
+            });
+        }
+
+        applyMosBusinessFilterState(container, selectedValues || ['all']);
+    }
+
+    function setupMeasureOfSuccessControls(records) {
+        const currentFromInp = document.getElementById('mos-current-from');
+        const currentToInp = document.getElementById('mos-current-to');
+        const previousFromInp = document.getElementById('mos-previous-from');
+        const previousToInp = document.getElementById('mos-previous-to');
         const govSelect = document.getElementById('mos-gov-filter');
+        const todayIso = toISODateStr(new Date());
 
-        if (baseFromInp) baseFromInp.value = mosState.baseFrom;
-        if (baseToInp) baseToInp.value = mosState.baseTo;
-        if (projFromInp) projFromInp.value = mosState.projFrom;
-        if (projToInp) projToInp.value = mosState.projTo;
+        if (!mosState.currentFrom) mosState.currentFrom = '2026-07-01';
+        if (!mosState.currentTo) mosState.currentTo = todayIso;
 
+        const currentFrom = parseLocalISO(mosState.currentFrom);
+        const currentTo = parseLocalISO(mosState.currentTo);
+        if (!mosState.previousFrom || !mosState.previousTo) {
+            const cmp = currentFrom && currentTo && currentFrom <= currentTo
+                ? getComparablePeriod(currentFrom, currentTo)
+                : { previousFrom: parseLocalISO('2026-05-01'), previousTo: parseLocalISO('2026-06-30') };
+            mosState.previousFrom = toISODateStr(cmp.previousFrom);
+            mosState.previousTo = toISODateStr(cmp.previousTo);
+        }
+
+        if (currentFromInp) currentFromInp.value = mosState.currentFrom;
+        if (currentToInp) currentToInp.value = mosState.currentTo;
+        if (previousFromInp) previousFromInp.value = mosState.previousFrom;
+        if (previousToInp) previousToInp.value = mosState.previousTo;
+
+        const govs = Array.from(new Set(records.map(r => r.governorate).filter(Boolean))).sort();
         if (govSelect && govSelect.options.length <= 1) {
-            govSelect.innerHTML = '<option value="all">All Governorates ▼</option>';
-            allGovernorates.sort().forEach(g => {
+            govs.forEach(g => {
                 const opt = document.createElement('option');
                 opt.value = g;
                 opt.textContent = g;
                 govSelect.appendChild(opt);
             });
-            govSelect.value = mosState.gov;
         }
+        if (govSelect) govSelect.value = mosState.gov || 'all';
 
-        const handleFilterChange = () => {
-            if (baseFromInp) mosState.baseFrom = baseFromInp.value;
-            if (baseToInp) mosState.baseTo = baseToInp.value;
-            if (projFromInp) mosState.projFrom = projFromInp.value;
-            if (projToInp) mosState.projTo = projToInp.value;
+        const lines = ['MF', 'CF', 'Invest', 'Gamaya'];
+        renderMosBusinessChecklist(lines, mosState.businessLines || ['all']);
+
+        const syncAliases = () => {
+            mosState.baseFrom = mosState.previousFrom;
+            mosState.baseTo = mosState.previousTo;
+            mosState.projFrom = mosState.currentFrom;
+            mosState.projTo = mosState.currentTo;
+        };
+
+        const handleFilterChange = (source) => {
+            if (currentFromInp) mosState.currentFrom = currentFromInp.value;
+            if (currentToInp) mosState.currentTo = currentToInp.value;
+            if (previousFromInp) mosState.previousFrom = previousFromInp.value;
+            if (previousToInp) mosState.previousTo = previousToInp.value;
             if (govSelect) mosState.gov = govSelect.value;
+
+            const selections = getMosFilterSelections();
+            mosState.businessLines = selections.businessLines;
+
+            // Keep the convenient same-length comparison as the default. Once the
+            // user edits either comparison date, subsequent current-period changes
+            // no longer overwrite the user's manual comparison choice.
+            if ((source === 'current-from' || source === 'current-to') && !mosState.comparisonManual) {
+                const from = parseLocalISO(mosState.currentFrom);
+                const to = parseLocalISO(mosState.currentTo);
+                if (from && to && from <= to) {
+                    const cmp = getComparablePeriod(from, to);
+                    mosState.previousFrom = toISODateStr(cmp.previousFrom);
+                    mosState.previousTo = toISODateStr(cmp.previousTo);
+                    if (previousFromInp) previousFromInp.value = mosState.previousFrom;
+                    if (previousToInp) previousToInp.value = mosState.previousTo;
+                }
+            }
+
+            if (source === 'previous-from' || source === 'previous-to') {
+                mosState.comparisonManual = true;
+            }
+
+            syncAliases();
             renderMeasureOfSuccessTab();
         };
 
-        if (baseFromInp) baseFromInp.onchange = handleFilterChange;
-        if (baseToInp) baseToInp.onchange = handleFilterChange;
-        if (projFromInp) projFromInp.onchange = handleFilterChange;
-        if (projToInp) projToInp.onchange = handleFilterChange;
-        if (govSelect) govSelect.onchange = handleFilterChange;
+        if (currentFromInp) currentFromInp.onchange = () => handleFilterChange('current-from');
+        if (currentToInp) currentToInp.onchange = () => handleFilterChange('current-to');
+        if (previousFromInp) previousFromInp.onchange = () => handleFilterChange('previous-from');
+        if (previousToInp) previousToInp.onchange = () => handleFilterChange('previous-to');
+        if (govSelect) govSelect.onchange = () => handleFilterChange('governorate');
+
+        syncAliases();
     }
 
-    function renderMeasureOfSuccessTab() {
+    function mosRecordMatchesFilters(record) {
+        const bl = Array.isArray(mosState.businessLines) && mosState.businessLines.length
+            ? mosState.businessLines
+            : ['all'];
+        const businessOk = bl.includes('all') || bl.includes(String(record.businessLine || '').trim());
+        const govOk = !mosState.gov || mosState.gov === 'all' || mosState.gov === record.governorate;
+        return businessOk && govOk;
+    }
+
+    function getMosPeriodMetrics(records, fromD, toD) {
+        const opening = records.filter(r => r.hiringDate <= fromD && (!r.hasTermination || r.terminationDate >= fromD)).length;
+        const closing = records.filter(r => r.hiringDate <= toD && (!r.hasTermination || r.terminationDate > toD)).length;
+        const hires = records.filter(r => r.hiringDate >= fromD && r.hiringDate <= toD);
+        const cohortHires = hires.length;
+        const cohortLeavers = hires.filter(r => r.hasTermination && r.terminationDate >= fromD && r.terminationDate <= toD);
+        const leavers = records.filter(r => r.hasTermination && r.terminationDate >= fromD && r.terminationDate <= toD).length;
+        const average = (opening + closing) / 2;
+        const turnoverRate = average > 0 ? (leavers / average) * 100 : null;
+        const cohortTurnoverRate = cohortHires > 0 ? (cohortLeavers.length / cohortHires) * 100 : null;
+
+        return {
+            opening,
+            closing,
+            hires: cohortHires,
+            cohortLeavers: cohortLeavers.length,
+            leaverIds: new Set(cohortLeavers.map(r => r.empCode)),
+            leavers,
+            average,
+            turnoverRate,
+            cohortTurnoverRate
+        };
+    }
+
+    function renderMeasureOfSuccessTab(skipControlRender = false) {
         if (!turnoverDatasetGlobal || turnoverDatasetGlobal.length === 0) return;
 
-        const { records, analysisCutoff } = processTurnoverRecords(turnoverDatasetGlobal);
+        const { records } = processTurnoverRecords(turnoverDatasetGlobal);
+        if (!skipControlRender) setupMeasureOfSuccessControls(records);
 
-        const allGovs = Array.from(new Set(records.map(r => r.governorate).filter(Boolean)));
-        setupMeasureOfSuccessControls(allGovs);
-
-        let scopedRecords = records;
-        if (mosState.gov !== 'all') {
-            scopedRecords = records.filter(r => r.governorate === mosState.gov);
-        }
-
-        const parseLocalISO = (isoStr) => {
-            if (!isoStr) return null;
-            const [y, m, d] = isoStr.split('-');
-            return new Date(y, m - 1, d);
-        };
-
-        const baseFrom = parseLocalISO(mosState.baseFrom);
-        const baseTo = parseLocalISO(mosState.baseTo);
-        const projFrom = parseLocalISO(mosState.projFrom);
-        const projTo = parseLocalISO(mosState.projTo);
-
-        const getCohort = (fromD, toD) => {
-            return scopedRecords.filter(r => r.hiringDate >= fromD && r.hiringDate <= toD);
-        };
-
-        const baseCohort = getCohort(baseFrom, baseTo);
-        const projCohort = getCohort(projFrom, projTo);
-
-        // الاعتماد على تاريخ التعيين (Hiring Date) وحساب إجمالي الخارجين (Total Leavers)
-        const baseExits = baseCohort.filter(r => r.hasTermination);
-        const projExits = projCohort.filter(r => r.hasTermination);
-
-        const baseRate = baseCohort.length > 0 ? (baseExits.length / baseCohort.length) * 100 : 0;
-        const projRate = projCohort.length > 0 ? (projExits.length / projCohort.length) * 100 : 0;
-
-        const ppChange = projRate - baseRate;
-        const relChange = baseRate > 0 ? ((projRate - baseRate) / baseRate) * 100 : 0;
-
-        renderMosExecutiveKPIs(baseCohort.length, baseExits.length, baseRate, projCohort.length, projExits.length, projRate, ppChange, relChange);
-        renderMosVisualImpact(baseRate, projRate, ppChange, baseCohort.length, projCohort.length);
-        renderMosCohortTrendWeekly(scopedRecords);
-        renderMosExitTimingDistribution(scopedRecords, baseFrom, baseTo, projFrom, projTo);
-        renderMosGovernorateImpactTable(records, baseFrom, baseTo, projFrom, projTo);
-    }
-
-    function renderMosExecutiveKPIs(baseMatCount, baseResCount, baseRate, projMatCount, projResCount, projRate, ppChange, relChange) {
-        const container = document.getElementById('mos-kpi-grid');
-        if (!container) return;
-
-        const ppChangeFormatted = ppChange > 0 ? `+${ppChange.toFixed(1)} pts` : `${Math.abs(ppChange).toFixed(1)} pts`;
-        const relChangeFormatted = relChange > 0 ? `+${relChange.toFixed(1)}%` : `${Math.abs(relChange).toFixed(1)}%`;
-        const outcomeColorClass = ppChange < 0 ? 'text-success' : (ppChange > 0 ? 'text-danger' : 'text-muted');
-
-        container.innerHTML = `
-            <div class="metric-card kpi-exec-card">
-                <div class="kpi-exec-title">BEFORE PROJECT</div>
-                <div class="kpi-exec-val-row">
-                    <span class="main-value">${baseRate.toFixed(1)}%</span>
-                </div>
-                <div class="kpi-exec-sub">Total turnover rate by hiring date</div>
-                <div class="kpi-exec-denom"><strong>${baseResCount.toLocaleString()}</strong> total leavers<br><strong>${baseMatCount.toLocaleString()}</strong> total hires</div>
-            </div>
-
-            <div class="metric-card kpi-exec-card">
-                <div class="kpi-exec-title">AFTER PROJECT</div>
-                <div class="kpi-exec-val-row">
-                    <span class="main-value">${projMatCount === 0 ? 'N/A' : projRate.toFixed(1) + '%'}</span>
-                </div>
-                <div class="kpi-exec-sub">Total turnover rate by hiring date</div>
-                <div class="kpi-exec-denom"><strong>${projResCount.toLocaleString()}</strong> total leavers<br><strong>${projMatCount.toLocaleString()}</strong> total hires</div>
-            </div>
-
-            <div class="metric-card kpi-exec-card">
-                <div class="kpi-exec-title">IMPROVEMENT</div>
-                <div class="kpi-exec-val-row">
-                    <span class="main-value ${outcomeColorClass}">${projMatCount === 0 ? 'N/A' : Math.abs(ppChange).toFixed(1)} pts</span>
-                </div>
-                <div class="kpi-exec-sub">Absolute difference</div>
-                <div class="kpi-exec-denom" style="color:${ppChange < 0 ? 'var(--primary)' : 'var(--red)'}; font-weight:700;">
-                    ${projMatCount === 0 ? '-' : (ppChange <= 0 ? 'Lower turnover after project' : 'Higher turnover after project')}
-                </div>
-            </div>
-
-            <div class="metric-card kpi-exec-card">
-                <div class="kpi-exec-title">TURNOVER REDUCTION</div>
-                <div class="kpi-exec-val-row">
-                    <span class="main-value ${outcomeColorClass}">${projMatCount === 0 ? 'N/A' : relChangeFormatted}</span>
-                </div>
-                <div class="kpi-exec-sub">Relative impact</div>
-                <div class="kpi-exec-denom">Reduction compared with before project</div>
-            </div>
-        `;
-    }
-
-    function renderMosVisualImpact(baseRate, projRate, ppChange, baseMat, projMat) {
-        const container = document.getElementById('mos-impact-visual-container');
-        if (!container) return;
-
-        if (projMat === 0) {
-            container.innerHTML = `<div class="op-empty-state">No hiring data available for the selected period.</div>`;
+        const currentFrom = parseLocalISO(mosState.currentFrom);
+        const currentTo = parseLocalISO(mosState.currentTo);
+        if (!currentFrom || !currentTo || currentFrom > currentTo) {
+            const kpi = document.getElementById('mos-kpi-grid');
+            if (kpi) kpi.innerHTML = '<div class="op-empty-state">Please select a valid date range.</div>';
             return;
         }
 
-        const maxRate = Math.max(baseRate, projRate, 1);
-        const baseWidth = (baseRate / maxRate) * 100;
-        const projWidth = (projRate / maxRate) * 100;
+        const previousFrom = parseLocalISO(mosState.previousFrom);
+        const previousTo = parseLocalISO(mosState.previousTo);
+        if (!previousFrom || !previousTo || previousFrom > previousTo) {
+            const kpi = document.getElementById('mos-kpi-grid');
+            if (kpi) kpi.innerHTML = '<div class="op-empty-state">Please select a valid comparison date range.</div>';
+            return;
+        }
 
-        const isImproved = ppChange < 0;
-        const statusText = isImproved ? `Improved by ${Math.abs(ppChange).toFixed(1)} pts` : `Increased by ${ppChange.toFixed(1)} pts`;
+        mosState.baseFrom = mosState.previousFrom;
+        mosState.baseTo = mosState.previousTo;
+        mosState.projFrom = mosState.currentFrom;
+        mosState.projTo = mosState.currentTo;
+
+        const cmp = { previousFrom, previousTo, daysInclusive: Math.floor((previousTo - previousFrom) / 86400000) + 1 };
+        const scopedRecords = records.filter(mosRecordMatchesFilters);
+        const previousMetrics = getMosPeriodMetrics(scopedRecords, previousFrom, previousTo);
+        const currentMetrics = getMosPeriodMetrics(scopedRecords, currentFrom, currentTo);
+
+        renderMosExecutiveKPIs(previousMetrics, currentMetrics, cmp);
+        renderMosVisualImpact(previousMetrics, currentMetrics, cmp);
+        renderMosCohortTrendWeekly(scopedRecords);
+        renderMosExitTimingDistribution(scopedRecords, previousFrom, previousTo, currentFrom, currentTo);
+        renderMosGovernorateImpactTable(scopedRecords, previousFrom, previousTo, currentFrom, currentTo);
+        renderMosCompanyWideTurnover(previousMetrics, currentMetrics, cmp);
+    }
+
+    function renderMosExecutiveKPIs(previousMetrics, currentMetrics, cmp) {
+        const container = document.getElementById('mos-kpi-grid');
+        if (!container) return;
+
+        const currentRate = currentMetrics.cohortTurnoverRate;
+        const previousRate = previousMetrics.cohortTurnoverRate;
+        const ppChange = (currentRate !== null && previousRate !== null) ? currentRate - previousRate : null;
+        const improved = ppChange !== null && ppChange < 0;
+        const worsened = ppChange !== null && ppChange > 0;
+        const outcomeClass = ppChange === null ? 'text-muted' : (improved ? 'text-success' : (worsened ? 'text-danger' : 'text-muted'));
+        const rateText = currentRate === null ? 'N/A' : `${currentRate.toFixed(1)}%`;
+        const prevRateText = previousRate === null ? 'N/A' : `${previousRate.toFixed(1)}%`;
+        const relativeMagnitude = (currentRate !== null && previousRate !== null && previousRate !== 0)
+            ? Math.abs((ppChange / previousRate) * 100)
+            : null;
+        const relativeText = relativeMagnitude === null
+            ? 'N/A'
+            : improved
+                ? `${relativeMagnitude.toFixed(1)}% relative reduction`
+                : worsened
+                    ? `${relativeMagnitude.toFixed(1)}% relative increase`
+                    : '0.0% relative change';
+        const impactText = ppChange === null
+            ? 'No comparison data'
+            : improved
+                ? `Observed improvement: ${Math.abs(ppChange).toFixed(1)} pts`
+                : worsened
+                    ? `Observed increase: ${Math.abs(ppChange).toFixed(1)} pts`
+                    : 'No change';
 
         container.innerHTML = `
-            <div style="display: flex; flex-direction: column; gap: 20px;">
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700;">
-                        <span>BEFORE PROJECT</span>
-                        <span>${baseRate.toFixed(1)}% <span class="sample-size-tag">n=${baseMat}</span></span>
-                    </div>
-                    <div class="dist-bar-track" style="height: 14px; background: #E2E8F0;">
-                        <div class="dist-bar-fill" style="width: ${baseWidth}%; background: #64748B;"></div>
-                    </div>
-                </div>
-
-                <div style="display: flex; flex-direction: column; gap: 6px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 13px; font-weight: 700;">
-                        <span>AFTER PROJECT</span>
-                        <span class="${isImproved ? 'text-success' : 'text-danger'}">${projRate.toFixed(1)}% <span class="sample-size-tag">n=${projMat}</span></span>
-                    </div>
-                    <div class="dist-bar-track" style="height: 14px; background: #E2E8F0;">
-                        <div class="dist-bar-fill" style="width: ${projWidth}%; background: ${isImproved ? 'var(--primary)' : 'var(--red)'};"></div>
-                    </div>
-                </div>
-
-                <div style="background: ${isImproved ? 'rgba(16, 185, 129, 0.08)' : 'rgba(239, 68, 68, 0.08)'}; border: 1px solid ${isImproved ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}; padding: 12px 16px; border-radius: var(--radius-md); font-size: 12.5px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 700; color: ${isImproved ? 'var(--primary)' : 'var(--red)'};">${statusText}</span>
+            <div class="metric-card kpi-exec-card">
+                <div class="kpi-exec-title">COHORT TURNOVER RATE</div>
+                <div class="kpi-exec-val-row"><span class="main-value ${outcomeClass}">${rateText}</span></div>
+                <div class="kpi-exec-sub">Selected: ${formatPeriodLabel(parseLocalISO(mosState.currentFrom), parseLocalISO(mosState.currentTo))}</div>
+                <div class="kpi-exec-denom">
+                    <strong>${currentMetrics.cohortLeavers.toLocaleString()}</strong> exited from <strong>${currentMetrics.hires.toLocaleString()}</strong> new hires<br>
+                    <strong>${prevRateText}</strong> comparison cohort rate<br>
+                    <strong class="${outcomeClass}">${impactText}</strong><br>
+                    <strong class="${outcomeClass}">${relativeText}</strong>
                 </div>
             </div>
-        `;
+            <div class="metric-card kpi-exec-card">
+                <div class="kpi-exec-title">NEW HIRES</div>
+                <div class="kpi-exec-val-row"><span class="main-value">${currentMetrics.hires.toLocaleString()}</span></div>
+                <div class="kpi-exec-sub">Unique Employee IDs hired in selected period</div>
+                <div class="kpi-exec-denom">
+                    <strong>${previousMetrics.hires.toLocaleString()}</strong> comparison period<br>
+                    <strong>${currentMetrics.hires - previousMetrics.hires >= 0 ? '+' : ''}${(currentMetrics.hires - previousMetrics.hires).toLocaleString()}</strong> vs comparison
+                </div>
+            </div>
+            <div class="metric-card kpi-exec-card">
+                <div class="kpi-exec-title">SAME-COHORT LEAVERS</div>
+                <div class="kpi-exec-val-row"><span class="main-value ${currentMetrics.cohortLeavers > previousMetrics.cohortLeavers ? 'text-danger' : 'text-success'}">${currentMetrics.cohortLeavers.toLocaleString()}</span></div>
+                <div class="kpi-exec-sub">Hired in selected period and exited in same period</div>
+                <div class="kpi-exec-denom">
+                    <strong>${previousMetrics.cohortLeavers.toLocaleString()}</strong> comparison cohort leavers<br>
+                    ${currentMetrics.cohortLeavers.toLocaleString()} / ${currentMetrics.hires.toLocaleString()} = <strong>${rateText}</strong>
+                </div>
+            </div>
+            <div class="metric-card kpi-exec-card ${improved ? 'mos-impact-positive' : (worsened ? 'mos-impact-negative' : '')}">
+                <div class="kpi-exec-title">OBSERVED IMPACT</div>
+                <div class="kpi-exec-val-row"><span class="main-value ${outcomeClass}">${ppChange === null ? 'N/A' : `${Math.abs(ppChange).toFixed(1)} pts`}</span></div>
+                <div class="kpi-exec-sub">Selected cohort vs comparison cohort</div>
+                <div class="kpi-exec-denom">
+                    <strong class="${outcomeClass}">${improved ? 'Positive observed impact' : (worsened ? 'Negative observed impact' : 'No measurable change')}</strong><br>
+                    ${relativeText}<br>
+                    <span class="stat-subtext">Impact is observed within the selected hire/exit cohorts; it is not a causal proof.</span>
+                </div>
+            </div>`;
+    }
+
+    function renderMosVisualImpact(previousMetrics, currentMetrics, cmp) {
+        const container = document.getElementById('mos-impact-visual-container');
+        if (!container) return;
+
+        const previousRate = previousMetrics.cohortTurnoverRate;
+        const currentRate = currentMetrics.cohortTurnoverRate;
+        if (previousRate === null && currentRate === null) {
+            container.innerHTML = '<div class="op-empty-state">No new-hire cohort data available for the selected periods.</div>';
+            return;
+        }
+
+        const maxRate = Math.max(previousRate || 0, currentRate || 0, 1);
+        const previousWidth = ((previousRate || 0) / maxRate) * 100;
+        const currentWidth = ((currentRate || 0) / maxRate) * 100;
+        const pp = (currentRate !== null && previousRate !== null) ? currentRate - previousRate : null;
+        const improved = pp !== null && pp < 0;
+        const worsened = pp !== null && pp > 0;
+        const magnitude = pp === null ? null : Math.abs(pp);
+        const relative = (pp !== null && previousRate !== null && previousRate !== 0) ? Math.abs((pp / previousRate) * 100) : null;
+        const statusText = pp === null
+            ? 'Insufficient comparison data'
+            : improved
+                ? `Positive observed impact: ${magnitude.toFixed(1)} pts lower`
+                : worsened
+                    ? `Negative observed impact: ${magnitude.toFixed(1)} pts higher`
+                    : 'No change in cohort exit rate';
+        const relativeText = relative === null
+            ? ''
+            : improved
+                ? `${relative.toFixed(1)}% relative reduction`
+                : worsened
+                    ? `${relative.toFixed(1)}% relative increase`
+                    : '0.0% relative change';
+        const statusColor = improved ? 'var(--primary)' : (worsened ? 'var(--red)' : 'var(--text-main)');
+        const statusBg = improved ? 'rgba(16,185,129,.08)' : (worsened ? 'rgba(239,68,68,.08)' : 'rgba(100,116,139,.08)');
+        const statusBorder = improved ? 'rgba(16,185,129,.2)' : (worsened ? 'rgba(239,68,68,.2)' : 'rgba(100,116,139,.2)');
+
+        container.innerHTML = `
+            <div style="display:flex; flex-direction:column; gap:20px;">
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700;">
+                        <span>COMPARISON COHORT</span>
+                        <span>${previousRate === null ? 'N/A' : previousRate.toFixed(1) + '%'} <span class="sample-size-tag">${previousMetrics.cohortLeavers} exited / ${previousMetrics.hires} hires</span></span>
+                    </div>
+                    <div class="dist-bar-track" style="height:14px; background:#E2E8F0;"><div class="dist-bar-fill" style="width:${previousWidth}%; background:#64748B;"></div></div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:6px;">
+                    <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700;">
+                        <span>SELECTED COHORT</span>
+                        <span class="${improved ? 'text-success' : (worsened ? 'text-danger' : '')}">${currentRate === null ? 'N/A' : currentRate.toFixed(1) + '%'} <span class="sample-size-tag">${currentMetrics.cohortLeavers} exited / ${currentMetrics.hires} hires</span></span>
+                    </div>
+                    <div class="dist-bar-track" style="height:14px; background:#E2E8F0;"><div class="dist-bar-fill" style="width:${currentWidth}%; background:${improved ? 'var(--primary)' : (worsened ? 'var(--red)' : 'var(--brand-purple)')};"></div></div>
+                </div>
+                <div style="background:${statusBg}; border:1px solid ${statusBorder}; padding:12px 16px; border-radius:var(--radius-md); font-size:12.5px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                    <span style="font-weight:700; color:${statusColor};">${statusText}</span>
+                    <span style="font-weight:700; color:${statusColor};">${relativeText}</span>
+                    <span class="stat-subtext">${formatPeriodLabel(cmp.previousFrom, cmp.previousTo)} vs ${formatPeriodLabel(parseLocalISO(mosState.currentFrom), parseLocalISO(mosState.currentTo))}</span>
+                </div>
+            </div>`;
+    }
+
+    function renderMosCompanyWideTurnover(previousMetrics, currentMetrics, cmp) {
+        const container = document.getElementById('mos-company-wide-container');
+        if (!container) return;
+
+        const currentRate = currentMetrics.turnoverRate;
+        const previousRate = previousMetrics.turnoverRate;
+        const pp = (currentRate !== null && previousRate !== null) ? currentRate - previousRate : null;
+        const improved = pp !== null && pp < 0;
+        const worsened = pp !== null && pp > 0;
+        const relative = (pp !== null && previousRate !== null && previousRate !== 0) ? Math.abs((pp / previousRate) * 100) : null;
+        const statusText = pp === null ? 'No comparison data' : improved ? `Improved by ${Math.abs(pp).toFixed(1)} pts` : worsened ? `Increased by ${Math.abs(pp).toFixed(1)} pts` : 'No change';
+        const statusClass = improved ? 'text-success' : (worsened ? 'text-danger' : 'text-muted');
+        const relativeText = relative === null ? 'N/A' : improved ? `${relative.toFixed(1)}% relative reduction` : worsened ? `${relative.toFixed(1)}% relative increase` : '0.0% relative change';
+        const netCurrent = currentMetrics.hires - currentMetrics.leavers;
+        const netPrevious = previousMetrics.hires - previousMetrics.leavers;
+
+        container.innerHTML = `
+            <div class="mos-company-grid">
+                <div class="mos-company-period-card">
+                    <div class="mos-company-card-label">SELECTED PERIOD</div>
+                    <div class="mos-company-card-rate ${statusClass}">${currentRate === null ? 'N/A' : currentRate.toFixed(1) + '%'}</div>
+                    <div class="mos-company-card-period">${formatPeriodLabel(parseLocalISO(mosState.currentFrom), parseLocalISO(mosState.currentTo))}</div>
+                    <div class="mos-company-stats">
+                        <span>Opening HC <strong>${currentMetrics.opening.toLocaleString()}</strong></span>
+                        <span>Closing HC <strong>${currentMetrics.closing.toLocaleString()}</strong></span>
+                        <span>Average HC <strong>${currentMetrics.average.toLocaleString(undefined,{maximumFractionDigits:1})}</strong></span>
+                        <span>Hires <strong>${currentMetrics.hires.toLocaleString()}</strong></span>
+                        <span>All qualifying leavers <strong>${currentMetrics.leavers.toLocaleString()}</strong></span>
+                        <span>Net workforce change <strong>${netCurrent >= 0 ? '+' : ''}${netCurrent.toLocaleString()}</strong></span>
+                    </div>
+                </div>
+                <div class="mos-company-period-card">
+                    <div class="mos-company-card-label">COMPARISON PERIOD</div>
+                    <div class="mos-company-card-rate">${previousRate === null ? 'N/A' : previousRate.toFixed(1) + '%'}</div>
+                    <div class="mos-company-card-period">${formatPeriodLabel(cmp.previousFrom, cmp.previousTo)}</div>
+                    <div class="mos-company-stats">
+                        <span>Opening HC <strong>${previousMetrics.opening.toLocaleString()}</strong></span>
+                        <span>Closing HC <strong>${previousMetrics.closing.toLocaleString()}</strong></span>
+                        <span>Average HC <strong>${previousMetrics.average.toLocaleString(undefined,{maximumFractionDigits:1})}</strong></span>
+                        <span>Hires <strong>${previousMetrics.hires.toLocaleString()}</strong></span>
+                        <span>All qualifying leavers <strong>${previousMetrics.leavers.toLocaleString()}</strong></span>
+                        <span>Net workforce change <strong>${netPrevious >= 0 ? '+' : ''}${netPrevious.toLocaleString()}</strong></span>
+                    </div>
+                </div>
+                <div class="mos-company-summary-card">
+                    <div class="mos-company-card-label">WORKFORCE TURNOVER CHANGE</div>
+                    <div class="mos-company-card-rate ${statusClass}">${pp === null ? 'N/A' : `${Math.abs(pp).toFixed(1)} pts`}</div>
+                    <div class="mos-company-impact ${statusClass}">${statusText}</div>
+                    <div class="mos-company-impact-sub">${relativeText}</div>
+                    <div class="mos-company-note">Formula: qualifying leavers during period ÷ average headcount during period.</div>
+                    <div class="mos-company-note">Leaver types: Resignation, Service Termination, End Of Contract. Transfers and blank termination states remain active.</div>
+                </div>
+            </div>`;
     }
 
     function renderMosCohortTrendWeekly(records) {
         const container = document.getElementById('mos-cohort-trend-container');
         if (!container) return;
 
-        const cohortMap = {};
-
-        records.forEach(r => {
-            const firstJan = new Date(r.hiringDate.getFullYear(), 0, 1);
-            const weekNum = Math.ceil((((r.hiringDate - firstJan) / 86400000) + firstJan.getDay() + 1) / 7);
-            const key = `${r.hiringDate.getFullYear()}-W${String(weekNum).padStart(2, '0')}`;
-            
-            if (!cohortMap[key]) cohortMap[key] = { key, date: r.hiringDate, totalHires: 0, exits: 0 };
-            
-            cohortMap[key].totalHires++;
-            if (r.hasTermination) {
-                cohortMap[key].exits++;
+        const monthKeys = Array.from(new Set(records.flatMap(r => {
+            const keys = [];
+            const start = new Date(r.hiringDate.getFullYear(), r.hiringDate.getMonth(), 1);
+            const end = new Date();
+            let d = new Date(start.getTime());
+            while (d <= end) {
+                keys.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`);
+                d = new Date(d.getFullYear(), d.getMonth()+1, 1);
             }
-        });
+            return keys;
+        }))).sort();
 
-        const sortedKeys = Object.keys(cohortMap).sort();
-        const validCohorts = sortedKeys.map(k => cohortMap[k]).filter(c => c.totalHires > 0);
-
-        if (validCohorts.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding-top:80px; font-size:12px; color:var(--text-muted)">No cohorts available</div>';
+        if (!monthKeys.length) {
+            container.innerHTML = '<div style="text-align:center; padding-top:80px; font-size:12px; color:var(--text-muted)">No turnover history available</div>';
             return;
         }
 
-        const rates = validCohorts.map(c => (c.exits / c.totalHires) * 100);
-        const maxRate = Math.max(...rates, 1);
-
-        const svgW = 600; const svgH = 180;
-        const pL = 40; const pR = 30; const pT = 25; const pB = 35;
-        const cW = svgW - pL - pR; const cH = svgH - pT - pB;
-
-        const totalPoints = validCohorts.length;
-        const stepX = totalPoints > 1 ? cW / (totalPoints - 1) : cW;
-
-        const points = [];
-        validCohorts.forEach((c, idx) => {
-            const rate = (c.exits / c.totalHires) * 100;
-            const x = pL + (idx * stepX);
-            const y = pT + cH - ((rate / maxRate) * cH);
-            points.push({ x, y, rate, key: c.key, dateObj: c.date, hires: c.totalHires, exits: c.exits });
+        const pointsData = monthKeys.map(key => {
+            const [y,m] = key.split('-').map(Number);
+            const monthStart = new Date(y, m-1, 1);
+            const monthEnd = new Date(y, m, 0);
+            const opening = records.filter(r => r.hiringDate <= monthStart && (!r.hasTermination || r.terminationDate >= monthStart)).length;
+            const closing = records.filter(r => r.hiringDate <= monthEnd && (!r.hasTermination || r.terminationDate > monthEnd)).length;
+            const leavers = records.filter(r => r.hasTermination && r.terminationDate >= monthStart && r.terminationDate <= monthEnd).length;
+            const average = (opening + closing) / 2;
+            const rate = average > 0 ? (leavers / average) * 100 : 0;
+            return { key, rate, leavers, average, monthDate: monthStart };
         });
 
-        let lineD = `M ${points[0].x} ${points[0].y}`;
-        for (let i = 0; i < points.length - 1; i++) {
-            const p0 = points[i];
-            const p1 = points[i + 1];
-            const cpX1 = p0.x + (p1.x - p0.x) / 2;
-            const cpY1 = p0.y;
-            const cpX2 = p0.x + (p1.x - p0.x) / 2;
-            const cpY2 = p1.y;
-            lineD += ` C ${cpX1} ${cpY1}, ${cpX2} ${cpY2}, ${p1.x} ${p1.y}`;
-        }
-
-        let launchX = null;
-        points.forEach(pt => {
-            if (pt.key >= '2026-W27' && launchX === null) launchX = pt.x; 
+        const maxRate = Math.max(...pointsData.map(p => p.rate), 1);
+        const svgW=600, svgH=180, pL=40, pR=30, pT=25, pB=35;
+        const cW=svgW-pL-pR, cH=svgH-pT-pB;
+        const stepX=pointsData.length>1 ? cW/(pointsData.length-1) : cW;
+        const points=pointsData.map((p,idx)=>({ ...p, x:pL+idx*stepX, y:pT+cH-(p.rate/maxRate)*cH }));
+        let lineD=`M ${points[0].x} ${points[0].y}`;
+        for(let i=0;i<points.length-1;i++){ const a=points[i], b=points[i+1], cx=a.x+(b.x-a.x)/2; lineD+=` C ${cx} ${a.y}, ${cx} ${b.y}, ${b.x} ${b.y}`; }
+        let svg=`<svg viewBox="0 0 ${svgW} ${svgH}" width="100%" height="100%" style="overflow:visible;">
+            <line x1="${pL}" y1="${pT}" x2="${pL+cW}" y2="${pT}" stroke="var(--border-color)" stroke-dasharray="3,3"/>
+            <line x1="${pL}" y1="${pT+cH/2}" x2="${pL+cW}" y2="${pT+cH/2}" stroke="var(--border-color)" stroke-dasharray="3,3"/>
+            <line x1="${pL}" y1="${pT+cH}" x2="${pL+cW}" y2="${pT+cH}" stroke="var(--border-color)"/>
+            <path d="${lineD}" fill="none" stroke="var(--brand-purple)" stroke-width="2.5" stroke-linecap="round"/>`;
+        const labelInterval=Math.max(1,Math.ceil(points.length/8));
+        points.forEach((pt,idx)=>{
+            const tt=encodeURIComponent(`<div class="tt-title">Month: ${pt.key}</div><div class="tt-row"><span>Turnover:</span> <strong>${pt.rate.toFixed(1)}%</strong></div><div class="tt-row"><span>Leavers:</span> <strong>${pt.leavers}</strong></div><div class="tt-row"><span>Average HC:</span> <strong>${pt.average.toLocaleString(undefined,{maximumFractionDigits:1})}</strong></div>`);
+            svg+=`<circle cx="${pt.x}" cy="${pt.y}" r="4" fill="var(--card-bg)" stroke="var(--brand-purple)" stroke-width="2.5" class="chart-dot interactive-dot" style="cursor:pointer;" data-tt="${tt}"></circle>`;
+            if(idx%labelInterval===0||idx===points.length-1) svg+=`<text x="${pt.x}" y="${pT+cH+16}" fill="var(--text-muted)" font-size="9" text-anchor="middle">${pt.key}</text>`;
         });
-
-        let svg = `
-            <svg viewBox="0 0 ${svgW} ${svgH}" width="100%" height="100%" style="overflow: visible;">
-                <line x1="${pL}" y1="${pT}" x2="${pL + cW}" y2="${pT}" stroke="var(--border-color)" stroke-dasharray="3,3"/>
-                <line x1="${pL}" y1="${pT + cH/2}" x2="${pL + cW}" y2="${pT + cH/2}" stroke="var(--border-color)" stroke-dasharray="3,3"/>
-                <line x1="${pL}" y1="${pT + cH}" x2="${pL + cW}" y2="${pT + cH}" stroke="var(--border-color)" stroke-width="1.2"/>
-
-                ${launchX !== null ? `
-                    <line x1="${launchX}" y1="${pT - 10}" x2="${launchX}" y2="${pT + cH}" stroke="var(--brand-purple)" stroke-dasharray="4,4" stroke-width="2"/>
-                    <rect x="${launchX - 55}" y="${pT - 22}" width="110" height="18" fill="var(--brand-purple)" rx="4"/>
-                    <text x="${launchX}" y="${pT - 10}" fill="#FFFFFF" font-size="8.5" font-weight="700" text-anchor="middle">Project Launch</text>
-                ` : ''}
-
-                <path d="${lineD}" fill="none" stroke="var(--brand-purple)" stroke-width="2.5" stroke-linecap="round"/>
-        `;
-
-        const labelInterval = Math.max(1, Math.ceil(points.length / 8));
-
-        points.forEach((pt, idx) => {
-            const ttHtml = `
-                <div class="tt-title">Week: ${pt.key}</div>
-                <div class="tt-row"><span>Rate:</span> <strong>${pt.rate.toFixed(1)}%</strong></div>
-                <div class="tt-row"><span>Leavers:</span> <strong>${pt.exits} of ${pt.hires} hires</strong></div>
-            `;
-
-            svg += `
-                <circle cx="${pt.x}" cy="${pt.y}" r="4" 
-                        fill="var(--card-bg)" stroke="var(--brand-purple)" stroke-width="2.5" 
-                        class="chart-dot interactive-dot" style="cursor:pointer;" 
-                        data-tt="${encodeURIComponent(ttHtml)}"></circle>
-            `;
-            
-            if (idx % labelInterval === 0 || idx === points.length - 1) {
-                 svg += `<text x="${pt.x}" y="${pT + cH + 16}" fill="var(--text-muted)" font-size="9" text-anchor="middle">${pt.key}</text>`;
-            }
-        });
-
-        svg += `</svg>`;
-        container.innerHTML = svg;
-
-        container.querySelectorAll('.interactive-dot').forEach(dot => {
-            const content = decodeURIComponent(dot.getAttribute('data-tt'));
-            dot.addEventListener('mouseenter', (e) => { dot.setAttribute('r', '6'); showTooltip(e, content); });
-            dot.addEventListener('mousemove', (e) => { showTooltip(e, content); });
-            dot.addEventListener('mouseleave', () => { dot.setAttribute('r', '4'); hideTooltip(); });
-        });
+        svg+='</svg>';
+        container.innerHTML=svg;
+        container.querySelectorAll('.interactive-dot').forEach(dot=>{ const content=decodeURIComponent(dot.getAttribute('data-tt')); dot.addEventListener('mouseenter',e=>{dot.setAttribute('r','6');showTooltip(e,content);}); dot.addEventListener('mousemove',e=>showTooltip(e,content)); dot.addEventListener('mouseleave',()=>{dot.setAttribute('r','4');hideTooltip();}); });
     }
 
-    function renderMosExitTimingDistribution(records, baseFrom, baseTo, projFrom, projTo) {
+    function renderMosExitTimingDistribution(records, previousFrom, previousTo, currentFrom, currentTo) {
         const container = document.getElementById('mos-exit-timing-container');
         if (!container) return;
-
         const bands = [
             { label: 'Within 30 Days', min: 0, max: 30 },
             { label: '31–60 Days', min: 31, max: 60 },
             { label: '61–90 Days', min: 61, max: 90 },
             { label: 'After 90 Days', min: 91, max: 9999 }
         ];
-
         const getDist = (from, to) => {
-            const cohort = records.filter(r => r.hiringDate >= from && r.hiringDate <= to);
-            const exitLogs = cohort.filter(r => r.hasTermination && r.daysToExit !== null);
-            const counts = { 'Within 30 Days': 0, '31–60 Days': 0, '61–90 Days': 0, 'After 90 Days': 0 };
-            
-            exitLogs.forEach(r => {
-                for (const b of bands) if (r.daysToExit >= b.min && r.daysToExit <= b.max) { counts[b.label]++; break; }
-            });
-            
-            return { totalCohort: cohort.length, counts };
+            const exitLogs = records.filter(r => r.hasTermination && r.terminationDate >= from && r.terminationDate <= to && r.daysToExit !== null);
+            const counts = Object.fromEntries(bands.map(b => [b.label,0]));
+            exitLogs.forEach(r=>{ const b=bands.find(x=>r.daysToExit>=x.min&&r.daysToExit<=x.max); if(b) counts[b.label]++; });
+            return { total: exitLogs.length, counts };
         };
-
-        const bDist = getDist(baseFrom, baseTo);
-        const pDist = getDist(projFrom, projTo);
-
-        let html = `<div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;">`;
-        bands.forEach(b => {
-            const bPct = bDist.totalCohort > 0 ? (bDist.counts[b.label] / bDist.totalCohort) * 100 : 0;
-            const pPct = pDist.totalCohort > 0 ? (pDist.counts[b.label] / pDist.totalCohort) * 100 : 0;
-            
-            const bTxt = bDist.totalCohort > 0 ? `${bPct.toFixed(1)}%` : '0%';
-            const pTxt = pDist.totalCohort > 0 ? `${pPct.toFixed(1)}%` : '0%';
-            
-            html += `
-                <div style="background: #F8FAFC; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px; display: flex; flex-direction: column; gap: 6px;">
-                    <span style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase;">${b.label}</span>
-                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: 4px;">
-                        <span style="font-size: 10.5px; color: var(--text-muted);">Before:</span>
-                        <strong style="font-size: 12px;">${bTxt}</strong>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: baseline;">
-                        <span style="font-size: 10.5px; color: var(--brand-purple);">After:</span>
-                        <strong style="font-size: 11px; color: var(--brand-purple);">${pTxt}</strong>
-                    </div>
-                </div>
-            `;
-        });
-        html += `</div>`;
-        container.innerHTML = html;
+        const prev=getDist(previousFrom,previousTo), cur=getDist(currentFrom,currentTo);
+        let html='<div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px;">';
+        bands.forEach(b=>{ const prevPct=prev.total?(prev.counts[b.label]/prev.total)*100:0; const curPct=cur.total?(cur.counts[b.label]/cur.total)*100:0; html+=`<div style="background:#F8FAFC;border:1px solid var(--border-color);border-radius:var(--radius-md);padding:12px;display:flex;flex-direction:column;gap:6px;"><span style="font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;">${b.label}</span><div style="display:flex;justify-content:space-between;"><span style="font-size:10.5px;color:var(--text-muted);">Previous:</span><strong style="font-size:12px;">${prevPct.toFixed(1)}% (${prev.counts[b.label]})</strong></div><div style="display:flex;justify-content:space-between;"><span style="font-size:10.5px;color:var(--brand-purple);">Selected:</span><strong style="font-size:11px;color:var(--brand-purple);">${curPct.toFixed(1)}% (${cur.counts[b.label]})</strong></div></div>`; });
+        html+=`</div><div style="margin-top:10px;font-size:11px;color:var(--text-muted);">Based on leavers recorded by termination date. Previous leavers: ${prev.total.toLocaleString()} • Selected leavers: ${cur.total.toLocaleString()}.</div>`;
+        container.innerHTML=html;
     }
 
-    function renderMosGovernorateImpactTable(records, baseFrom, baseTo, projFrom, projTo) {
+    function renderMosGovernorateImpactTable(records, previousFrom, previousTo, currentFrom, currentTo) {
         const tbody = document.getElementById('mos-gov-tbody');
         if (!tbody) return;
-
         const govMap = {};
-        records.forEach(r => {
-            const g = r.governorate;
-            if (!govMap[g]) govMap[g] = { gov: g, bM: 0, bR: 0, pM: 0, pR: 0 };
-            
-            if (r.hiringDate >= baseFrom && r.hiringDate <= baseTo) {
-                govMap[g].bM++;
-                if (r.hasTermination) govMap[g].bR++;
-            }
-            if (r.hiringDate >= projFrom && r.hiringDate <= projTo) {
-                govMap[g].pM++;
-                if (r.hasTermination) govMap[g].pR++;
-            }
+        records.forEach(r=>{ const g=r.governorate; if(!govMap[g]) govMap[g]={gov:g, prevHC:0, curHC:0, prevL:0, curL:0};
+            if(r.hiringDate<=previousFrom && (!r.hasTermination || r.terminationDate>=previousFrom)) govMap[g].prevHC++;
+            if(r.hiringDate<=currentFrom && (!r.hasTermination || r.terminationDate>=currentFrom)) govMap[g].curHC++;
+            if(r.hasTermination && r.terminationDate>=previousFrom && r.terminationDate<=previousTo) govMap[g].prevL++;
+            if(r.hasTermination && r.terminationDate>=currentFrom && r.terminationDate<=currentTo) govMap[g].curL++;
         });
-
-        const list = Object.values(govMap).map(g => {
-            const baseRate = g.bM > 0 ? (g.bR / g.bM) * 100 : 0;
-            const projRate = g.pM > 0 ? (g.pR / g.pM) * 100 : null;
-            const pp = projRate !== null ? (projRate - baseRate) : null;
-            let status = '-';
-            if (pp !== null && g.pM > 0) {
-                if (pp < 0) status = 'Improved';
-                else if (pp > 0) status = 'Increased';
-                else status = 'No Change';
-            }
-            return { ...g, baseRate, projRate, pp, status };
-        });
-
-        const k = currentMosGovSort.key || 'projRate';
-        const dir = currentMosGovSort.dir === 'asc' ? 1 : -1;
-        
-        list.sort((a, b) => {
-            let valA = a[k] !== null ? a[k] : -999;
-            let valB = b[k] !== null ? b[k] : -999;
-            if (typeof valA === 'string') return valA.localeCompare(valB) * dir;
-            return (valA - valB) * dir;
-        });
-
-        tbody.innerHTML = '';
-        list.forEach(r => {
-            if (r.bM === 0 && r.pM === 0) return; 
-
-            const tr = document.createElement('tr');
-            const pStr = r.pM > 0 ? `${r.projRate.toFixed(1)}% <br><span class="sample-size-tag" style="margin-left:0;">${r.pR}/${r.pM} total</span>` : '<span class="text-muted">N/A</span>';
-            const cStr = r.pp !== null && r.pM > 0 ? `<span class="${r.pp < 0 ? 'text-success' : (r.pp > 0 ? 'text-danger' : '')}">${r.pp > 0 ? '+' : ''}${r.pp.toFixed(1)} pts</span>` : '<span class="text-muted">-</span>';
-            const smallBadge = r.pM > 0 && r.pM < 5 ? `<span class="small-pop-badge">Small Base</span>` : '';
-            
-            tr.innerHTML = `
-                <td><strong>${r.gov}</strong> ${smallBadge}</td>
-                <td><strong>${r.baseRate.toFixed(1)}%</strong> <br><span class="sample-size-tag" style="margin-left:0;">${r.bR}/${r.bM} total</span></td>
-                <td><strong>${pStr}</strong></td>
-                <td><strong>${cStr}</strong></td>
-                <td><span class="insight-tag" style="background: ${r.status==='Improved'?'#D1FAE5':(r.status==='Increased'?'#FEE2E2':'#F1F5F9')}; color: ${r.status==='Improved'?'#065F46':(r.status==='Increased'?'#991B1B':'#475569')};">${r.status}</span></td>
-            `;
-            tbody.appendChild(tr);
-        });
-
+        const list=Object.values(govMap).map(g=>{ const prevRate=g.prevHC>0?(g.prevL/g.prevHC)*100:null; const curRate=g.curHC>0?(g.curL/g.curHC)*100:null; const pp=prevRate!==null&&curRate!==null?curRate-prevRate:null; const status=pp===null?'-':pp<0?'Improved':pp>0?'Increased':'No Change'; return {...g,prevRate,curRate,pp,status}; });
+        const k=currentMosGovSort.key||'projRate', dir=currentMosGovSort.dir==='asc'?1:-1;
+        list.sort((a,b)=>{ const map={baseRate:'prevRate',projRate:'curRate'}; const key=map[k]||k; const av=a[key],bv=b[key]; if(typeof av==='string') return av.localeCompare(bv)*dir; return ((av??-999)-(bv??-999))*dir; });
+        tbody.innerHTML='';
+        list.forEach(r=>{ if(r.prevHC===0&&r.curHC===0)return; const tr=document.createElement('tr'); const prevStr=r.prevRate===null?'<span class="text-muted">N/A</span>':`<strong>${r.prevRate.toFixed(1)}%</strong><br><span class="sample-size-tag" style="margin-left:0;">${r.prevL}/${r.prevHC} HC basis</span>`; const curStr=r.curRate===null?'<span class="text-muted">N/A</span>':`<strong>${r.curRate.toFixed(1)}%</strong><br><span class="sample-size-tag" style="margin-left:0;">${r.curL}/${r.curHC} HC basis</span>`; const ppStr=r.pp===null?'-':`<span class="${r.pp<0?'text-success':r.pp>0?'text-danger':''}">${r.pp>0?'+':''}${r.pp.toFixed(1)} pts</span>`; tr.innerHTML=`<td><strong>${r.gov}</strong></td><td>${prevStr}</td><td>${curStr}</td><td><strong>${ppStr}</strong></td><td><span class="insight-tag" style="background:${r.status==='Improved'?'#D1FAE5':(r.status==='Increased'?'#FEE2E2':'#F1F5F9')}; color:${r.status==='Improved'?'#065F46':(r.status==='Increased'?'#991B1B':'#475569')};">${r.status}</span></td>`; tbody.appendChild(tr); });
         attachUniversalTableSorting('mos-gov-table');
     }
 
