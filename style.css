@@ -1384,3 +1384,192 @@ body {
 @media (max-width: 560px) {
     .mos-exit-timing-grid { grid-template-columns: 1fr; }
 }
+
+/* ================================================================
+   MOS 2 — TOTAL WORKFORCE IMPACT
+   ================================================================ */
+.mos2-controls-bar {
+    display:flex;
+    align-items:flex-end;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:16px;
+}
+.mos2-summary-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr .9fr;
+    gap:16px;
+}
+.mos2-period-card,
+.mos2-change-card {
+    background:#F8FAFC;
+    border:1px solid var(--border-color);
+    border-radius:var(--radius-md);
+    padding:18px;
+}
+.mos2-rate {
+    font-size:34px;
+    font-weight:700;
+    color:#0F172A;
+    line-height:1;
+    margin-top:8px;
+}
+.mos2-stat-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px 16px;
+    margin-top:14px;
+    font-size:11px;
+    color:var(--text-muted);
+}
+.mos2-stat-grid span {
+    display:flex;
+    justify-content:space-between;
+    gap:8px;
+}
+.mos2-stat-grid strong { color:var(--text-main); }
+.mos2-change-card { display:flex; flex-direction:column; justify-content:center; }
+.mos2-month-block + .mos2-month-block { margin-top:20px; }
+.mos2-month-title {
+    font-size:11px;
+    font-weight:700;
+    color:var(--text-muted);
+    letter-spacing:.03em;
+    margin-bottom:10px;
+}
+.mos2-gov-table td { vertical-align:middle; }
+.mos2-exit-denom {
+    border-top:1px solid var(--border-color);
+    padding-top:8px;
+    font-size:10px;
+    line-height:1.35;
+    color:var(--text-muted);
+}
+@media (max-width:1100px) {
+    .mos2-summary-grid { grid-template-columns:1fr 1fr; }
+    .mos2-change-card { grid-column:1 / -1; }
+}
+@media (max-width:760px) {
+    .mos2-summary-grid { grid-template-columns:1fr; }
+    .mos2-change-card { grid-column:auto; }
+    .mos2-stat-grid { grid-template-columns:1fr; }
+    .mos2-controls-bar { align-items:stretch; }
+}
+
+/* MOS 2 refinements — current HC, readable date controls, dynamic position filter */
+.mos2-filter-panel { padding: 16px 24px 20px; min-height: auto; }
+.mos2-current-hc-strip {
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 14px; margin-bottom:14px;
+    background:#F8FAFC; border:1px solid var(--border-color); border-radius:12px;
+}
+.mos2-current-hc-value { font-size:28px; line-height:1; font-weight:800; color:var(--text-main); margin-top:4px; }
+.mos2-current-hc-sub { font-size:10.5px; color:var(--text-muted); margin-top:5px; }
+
+/* Filter layout: dates + governorate on the left; profile filters expanded on the right. */
+.mos2-filter-layout {
+    display:grid;
+    grid-template-columns:minmax(0, 1.08fr) minmax(0, 1.42fr);
+    gap:18px;
+    align-items:stretch;
+}
+.mos2-filter-dates {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+    gap:12px 14px;
+    min-width:0;
+    align-content:start;
+}
+.mos2-date-group { min-width:0; }
+.mos2-date-pair {
+    display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);
+    align-items:end; gap:7px; width:100%;
+}
+.mos2-date-field { display:flex; flex-direction:column; gap:4px; min-width:0; }
+.mos2-date-field > span {
+    font-size:9px; font-weight:700; color:var(--text-muted); letter-spacing:.05em;
+}
+.mos2-date-field .mos-date-input {
+    min-width:0; width:100%; height:42px; font-size:12px; padding:0 10px;
+}
+.mos2-date-pair .mos-sep { margin-bottom:13px; }
+.mos2-governorate-group { grid-column:1 / -1; min-width:0; }
+.mos2-governorate-group .premium-select { width:100%; min-width:0 !important; height:42px; }
+
+.mos2-filter-profile {
+    display:grid;
+    grid-template-columns:minmax(150px,.72fr) minmax(0,1.8fr);
+    gap:14px;
+    align-items:stretch;
+    min-width:0;
+}
+.mos2-business-group,
+.mos2-position-group { min-width:0; }
+.mos2-position-checklist { max-height:138px; overflow:hidden; }
+.mos2-position-checklist .mos-checklist-box {
+    display:grid;
+    grid-template-columns:1fr;
+    grid-auto-rows:minmax(28px,auto);
+    max-height:138px;
+    min-height:138px;
+    overflow-y:auto;
+    overflow-x:hidden;
+    padding:8px 10px;
+    scrollbar-width:thin;
+    scrollbar-color:#CBD5E1 transparent;
+}
+.mos2-position-checklist .mos-check-item { min-height:26px; align-items:flex-start; padding:3px 0; }
+.mos2-position-checklist .mos-check-item span {
+    min-width:0;
+    overflow:visible;
+    text-overflow:clip;
+    white-space:normal;
+    line-height:1.25;
+    word-break:break-word;
+}
+.mos2-position-checklist .mos-check-all {
+    position:sticky; top:0; z-index:1; background:var(--card-bg);
+}
+.mos2-summary-grid { align-items:stretch; }
+.mos2-compare-metrics {
+    display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; margin-top:14px;
+}
+.mos2-month-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.mos2-period-total {
+    margin-top:10px; padding:11px 12px; background:#F8FAFC; border:1px solid var(--border-color); border-radius:10px;
+}
+.mos2-total-grid {
+    display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:8px 14px; font-size:11px; color:var(--text-muted);
+}
+.mos2-total-grid span { display:flex; justify-content:space-between; gap:8px; }
+.mos2-total-grid strong { color:var(--text-main); }
+.mos2-exit-summary {
+    display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:12px;
+}
+.mos2-exit-summary > div {
+    display:flex; justify-content:space-between; align-items:center; gap:12px;
+    padding:10px 12px; background:#F8FAFC; border:1px solid var(--border-color); border-radius:10px;
+    font-size:11px; color:var(--text-muted);
+}
+.mos2-exit-summary strong { color:var(--text-main); font-size:13px; }
+
+@media (max-width:1180px) {
+    .mos2-filter-layout { grid-template-columns:1fr; }
+    .mos2-filter-profile { grid-template-columns:minmax(140px,.75fr) minmax(0,1.85fr); }
+}
+@media (max-width:900px){
+    .mos2-filter-layout { grid-template-columns:1fr; }
+    .mos2-filter-profile { grid-template-columns:1fr 1.7fr; }
+    .mos2-month-grid{grid-template-columns:1fr;}
+    .mos2-total-grid{grid-template-columns:1fr 1fr;}
+}
+@media (max-width:640px){
+    .mos2-filter-panel { padding-left:16px; padding-right:16px; }
+    .mos2-filter-dates { grid-template-columns:1fr; }
+    .mos2-governorate-group { grid-column:auto; }
+    .mos2-filter-profile { grid-template-columns:1fr; }
+    .mos2-position-checklist .mos-checklist-box { min-height:130px; max-height:130px; }
+    .mos2-current-hc-strip{align-items:flex-start;}
+    .mos2-exit-summary{grid-template-columns:1fr;}
+    .mos2-total-grid{grid-template-columns:1fr;}
+}

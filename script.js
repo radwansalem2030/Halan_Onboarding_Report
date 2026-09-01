@@ -3134,23 +3134,28 @@ function renderHQTable(govMap, supMap) {
     // TAB 6: MEASURE OF SUCCESS ENGINE (Flexible Period Turnover Analysis)
     // ==========================================================================
     function parseDDMMYYYY(dateStr) {
+        // Unified turnover source supports both M/D/YYYY (historical source)
+        // and D/M/YYYY (legacy source). The historical master is M/D/YYYY.
         if (!dateStr || typeof dateStr !== 'string') return null;
         const cleaned = dateStr.trim();
         if (!cleaned) return null;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) return parseLocalISO(cleaned);
 
-        const parts = cleaned.split('/');
-        if (parts.length === 3) {
-            const day = parseInt(parts[0], 10);
-            const month = parseInt(parts[1], 10) - 1;
-            const year = parseInt(parts[2], 10);
-            if (!isNaN(day) && !isNaN(month) && !isNaN(year) && year > 1900 && year < 2100) {
-                const d = new Date(year, month, day);
-                if (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) {
-                    return d;
-                }
-            }
-        }
-        return null;
+        const parts = cleaned.split(/[\/\-]/).map(v => parseInt(v, 10));
+        if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+        let a = parts[0], b = parts[1], year = parts[2];
+        if (year < 100) year += 2000;
+        if (year < 1900 || year > 2100) return null;
+
+        // Unambiguous cases first. For ambiguous dates, prefer M/D/YYYY,
+        // which is the format of the consolidated historical turnover source.
+        let month, day;
+        if (a > 12 && b <= 12) { day = a; month = b - 1; }
+        else if (b > 12 && a <= 12) { month = a - 1; day = b; }
+        else { month = a - 1; day = b; }
+
+        const d = new Date(year, month, day);
+        return (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) ? d : null;
     }
 
     function toISODateStr(dObj) {
@@ -3236,7 +3241,8 @@ function renderHQTable(govMap, supMap) {
         records.forEach(r => {
             r.hasTermination = isMosLeaverRecord(r);
             r.daysToExit = r.hasTermination && r.terminationDate >= r.hiringDate
-                ? Math.floor((r.terminationDate.getTime() - r.hiringDate.getTime()) / 86400000)
+                ? Math.round(Date.UTC(r.terminationDate.getFullYear(), r.terminationDate.getMonth(), r.terminationDate.getDate()) / 86400000)
+                  - Math.round(Date.UTC(r.hiringDate.getFullYear(), r.hiringDate.getMonth(), r.hiringDate.getDate()) / 86400000)
                 : null;
         });
 
@@ -3769,16 +3775,17 @@ function renderHQTable(govMap, supMap) {
         ];
 
         // Primary concept: same-employee NEW-HIRE cohorts.
-        // A hire is included in a window only after the full observation window
-        // has elapsed by the end of that period. This prevents partially observed
-        // cohorts from creating misleading rates (e.g. 100% at 90 days).
+        // For each window, only hires whose outcome is observable by the
+        // end of the period are eligible for the denominator.
         const getCohort = (from, to) => records.filter(r => r.hiringDate >= from && r.hiringDate <= to);
         const getWindowStats = (cohort, periodEnd, maxDays) => {
             const maturityCutoff = addDaysLocal(periodEnd, -maxDays);
-            const eligible = cohort.filter(r => r.hiringDate <= maturityCutoff);
+            const eligible = cohort.filter(r =>
+                r.hiringDate <= maturityCutoff ||
+                (r.hasTermination && r.terminationDate <= periodEnd)
+            );
             const exitsWithin = eligible.filter(r =>
                 r.hasTermination &&
-                r.terminationDate >= r.hiringDate &&
                 r.terminationDate <= periodEnd &&
                 r.daysToExit !== null &&
                 r.daysToExit >= 0 &&
@@ -3805,29 +3812,29 @@ function renderHQTable(govMap, supMap) {
                     <div class="mos-exit-timing-row">
                         <span class="mos-exit-timing-label">Previous</span>
                         <div class="mos-exit-timing-value">
-                            <strong>${prev.pct === null ? 'N/A' : prev.count.toLocaleString()}</strong>
+                            <strong>${prev.count.toLocaleString()}</strong>
                             <span>${prev.pct === null ? 'N/A' : prev.pct.toFixed(1) + '%'}</span>
                         </div>
                     </div>
                     <div class="mos-exit-timing-row" style="font-size:10px;color:var(--text-muted);">
-                        <span>Eligible hires</span><span>${prev.pct === null ? 'Not mature' : prev.eligible.toLocaleString()}</span>
+                        <span>Eligible hires</span><span>${prev.eligible.toLocaleString()}</span>
                     </div>
                     <div class="mos-exit-timing-row">
                         <span class="mos-exit-timing-label current">Selected</span>
                         <div class="mos-exit-timing-value current">
-                            <strong>${cur.pct === null ? 'N/A' : cur.count.toLocaleString()}</strong>
+                            <strong>${cur.count.toLocaleString()}</strong>
                             <span>${cur.pct === null ? 'N/A' : cur.pct.toFixed(1) + '%'}</span>
                         </div>
                     </div>
                     <div class="mos-exit-timing-row" style="font-size:10px;color:var(--text-muted);">
-                        <span>Eligible hires</span><span>${cur.pct === null ? 'Not mature' : cur.eligible.toLocaleString()}</span>
+                        <span>Eligible hires</span><span>${cur.eligible.toLocaleString()}</span>
                     </div>
                     <div class="mos-exit-timing-change ${ppClass}">${ppText}</div>
                 </div>`;
         });
 
         html += `</div><div class="mos-exit-timing-footnote">
-            Same-employee new-hire cohorts. Each 15/30/60/90-day window uses only hires whose full observation window is complete by the end of that period. A window with no mature cohort is shown as N/A.
+            Same-employee new-hire cohorts. The denominator for each window includes only hires whose outcome for that window is observable by the end of the period; active hires that have not yet reached the window are excluded.
         </div>`;
         container.innerHTML = html;
     }
@@ -4591,15 +4598,343 @@ function renderHQTable(govMap, supMap) {
             console.warn("Supervisor KPI Results.csv File Offline or Unreachable:", err);
         });
 
-    // Dynamic Live Data Loader - turnover.csv (New Tab Dataset)
+
+
+    // ======================================================================
+    // MOS 2: TOTAL WORKFORCE IMPACT (Historical Workforce Database)
+    // ======================================================================
+    let workforceHistoryDatasetGlobal = [];
+    let workforceHistoryRecordsGlobal = [];
+    let workforceHistoryAsOfDate = null;
+    let mos2State = {
+        currentFrom: '2026-07-01',
+        currentTo: '2026-09-01',
+        previousFrom: '2026-05-01',
+        previousTo: '2026-06-30',
+        businessLines: ['all'],
+        positions: ['all'],
+        gov: 'all'
+    };
+
+    const MOS2_GOVERNORATE_ORDER = [
+        'Cairo','Alexandria','Beheira','Dakahlia','Damietta','Sharqia','Qalyubia',
+        'Kafr El Sheikh','Gharbia','Menoufia','Giza','Fayoum','Beni Suef','Minya',
+        'Assiut','Sohag','Qena','Luxor','Aswan','Red Sea','New Valley','Matrouh',
+        'Ismailia','Suez','Port Said'
+    ];
+    const MOS2_GOV_ALIASES = [
+        ['Cairo',['cairo','القاهرة']],
+        ['Alexandria',['alexandria','الاسكندرية','الإسكندرية','الاسكندريه']],
+        ['Beheira',['beheira','البحيرة','البحيره']],
+        ['Dakahlia',['dakahlia','الدقهلية','الدقهليه']],
+        ['Damietta',['damietta','دمياط']],
+        ['Sharqia',['sharqia','الشرقية','الشرقيه']],
+        ['Qalyubia',['qalyubia','القليوبية','القليوبيه']],
+        ['Kafr El Sheikh',['kafr el sheikh','kafr el-sheikh','كفر الشيخ']],
+        ['Gharbia',['gharbia','الغربية','الغربيه']],
+        ['Menoufia',['menoufia','المنوفية','المنوفيه']],
+        ['Giza',['giza','الجيزة']],
+        ['Fayoum',['fayoum','fayum','الفيوم']],
+        ['Beni Suef',['beni suef','بني سويف','بنى سويف']],
+        ['Minya',['minya','المنيا']],
+        ['Assiut',['assuit','assiut','as-suyut','أسيوط','اسيوط']],
+        ['Sohag',['sohag','سوهاج']],
+        ['Qena',['qena','قنا']],
+        ['Luxor',['luxor','الأقصر','الاقصر']],
+        ['Aswan',['aswan','أسوان','اسوان']],
+        ['Red Sea',['red sea','البحر الأحمر','البحر الاحمر']],
+        ['New Valley',['new valley','الوادي الجديد','الوادى الجديد']],
+        ['Matrouh',['matrouh','مرسى مطروح','مرسي مطروح']],
+        ['Ismailia',['ismailia','الإسماعيلية','الاسماعيلية']],
+        ['Suez',['suez','السويس']],
+        ['Port Said',['port said','بورسعيد']]
+    ];
+
+    function parseHistoryDate(dateStr) {
+        if (!dateStr || typeof dateStr !== 'string') return null;
+        const cleaned = dateStr.trim();
+        if (!cleaned) return null;
+        if (/^\d{4}-\d{2}-\d{2}$/.test(cleaned)) return parseLocalISO(cleaned);
+        const parts = cleaned.split(/[\/-]/).map(Number);
+        if (parts.length !== 3 || parts.some(Number.isNaN)) return null;
+        let a = parts[0], b = parts[1], y = parts[2];
+        if (y < 100) y += 2000;
+        if (a > 12 && b <= 12) return new Date(y, b - 1, a);
+        if (b > 12 && a <= 12) return new Date(y, a - 1, b);
+        return new Date(y, b - 1, a);
+    }
+
+    function cleanMos2Governorate(row) {
+        // The supplied history contains a "Governorate" field that may hold
+        // branch/locality labels (not always a governorate). Use the cleaned
+        // Governorate when it is already canonical; otherwise read the
+        // governorate prefix from Standard Branch / Site before matching.
+        const rawGov = String(row['Governorate'] || '').trim();
+        const standardBranch = String(row['Standard Branch'] || '').trim();
+        const siteEnglish = String(row['Site - English'] || '').trim();
+        const siteArabic = String(row['Site - Arabic'] || '').trim();
+
+        for (const [canonical, aliases] of MOS2_GOV_ALIASES) {
+            if (aliases.some(alias => rawGov.toLowerCase() === alias.toLowerCase())) return canonical;
+        }
+
+        const candidates = [standardBranch, siteEnglish, siteArabic];
+        for (const value of candidates) {
+            const segments = String(value || '').split(/\s*[-–—]\s*/).map(x => x.trim()).filter(Boolean);
+            for (const segment of segments) {
+                for (const [canonical, aliases] of MOS2_GOV_ALIASES) {
+                    if (aliases.some(alias => segment.toLowerCase() === alias.toLowerCase())) return canonical;
+                }
+            }
+        }
+
+        // Conservative fallback: exact canonical Arabic governorate names only.
+        const normalizedArabic = rawGov.replace(/\s+/g,' ').trim();
+        const exactArabic = new Map([
+            ['القاهرة','Cairo'],['الإسكندرية','Alexandria'],['الاسكندرية','Alexandria'],['البحيرة','Beheira'],['البحيره','Beheira'],
+            ['الدقهلية','Dakahlia'],['الدقهليه','Dakahlia'],['دمياط','Damietta'],['الشرقية','Sharqia'],['الشرقيه','Sharqia'],
+            ['القليوبية','Qalyubia'],['القليوبيه','Qalyubia'],['كفر الشيخ','Kafr El Sheikh'],['الغربية','Gharbia'],['الغربيه','Gharbia'],
+            ['المنوفية','Menoufia'],['المنوفيه','Menoufia'],['الجيزة','Giza'],['الفيوم','Fayoum'],['بني سويف','Beni Suef'],['بنى سويف','Beni Suef'],
+            ['المنيا','Minya'],['أسيوط','Assiut'],['اسيوط','Assiut'],['سوهاج','Sohag'],['قنا','Qena'],['الأقصر','Luxor'],['الاقصر','Luxor'],
+            ['أسوان','Aswan'],['اسوان','Aswan'],['البحر الأحمر','Red Sea'],['البحر الاحمر','Red Sea'],['الوادي الجديد','New Valley'],['الوادى الجديد','New Valley'],
+            ['مرسى مطروح','Matrouh'],['مرسي مطروح','Matrouh'],['الإسماعيلية','Ismailia'],['الاسماعيلية','Ismailia'],['السويس','Suez'],['بورسعيد','Port Said']
+        ]);
+        return exactArabic.get(normalizedArabic) || 'Unknown';
+    }
+
+    function isHistoryLeaver(record) {
+        return !!record.terminationDate && MOS_LEAVER_TYPES.has(String(record.terminationType || '').trim().toLowerCase());
+    }
+
+    function isHistoryActiveAt(record, dateObj) {
+        if (!record || !record.hiringDate || !dateObj || record.hiringDate > dateObj) return false;
+        if (isHistoryLeaver(record)) return !!record.terminationDate && record.terminationDate > dateObj;
+        return true; // blank / transfer states remain active
+    }
+
+    function buildWorkforceHistoryRecords(rawRows) {
+        const byEmployee = new Map();
+        let minDate = null, maxDate = null;
+
+        rawRows.forEach(row => {
+            const empCode = normalizeEmployeeCode(row['Employee Code']);
+            const hDate = parseHistoryDate(row['Hiring Date']);
+            if (!empCode || !hDate) return;
+            const tDate = parseHistoryDate(row['Termination Date']);
+            const position = String(row['Position - English'] || '').trim() || 'Unknown';
+            const businessLine = deriveBusinessLine(position);
+            const governorate = cleanMos2Governorate(row);
+            const candidate = { empCode, hiringDate: hDate, terminationDate: tDate,
+                terminationType: String(row['Termination Type - English'] || '').trim(),
+                position, businessLine, governorate };
+            if (!minDate || hDate < minDate) minDate = hDate;
+            if (!maxDate || hDate > maxDate) maxDate = hDate;
+            if (tDate) {
+                if (!minDate || tDate < minDate) minDate = tDate;
+                if (!maxDate || tDate > maxDate) maxDate = tDate;
+            }
+
+            const existing = byEmployee.get(empCode);
+            if (!existing) {
+                byEmployee.set(empCode, candidate);
+            } else {
+                const exT = existing.terminationDate ? existing.terminationDate.getTime() : -1;
+                const caT = tDate ? tDate.getTime() : -1;
+                // Prefer the latest dated employment state, but do not let a blank row erase a termination.
+                if (caT > exT) byEmployee.set(empCode, candidate);
+            }
+        });
+
+        workforceHistoryAsOfDate = maxDate || new Date();
+        const records = Array.from(byEmployee.values());
+        records.forEach(r => {
+            r.hasTermination = isHistoryLeaver(r);
+            r.daysToExit = r.hasTermination && r.terminationDate >= r.hiringDate
+                ? Math.round(Date.UTC(r.terminationDate.getFullYear(), r.terminationDate.getMonth(), r.terminationDate.getDate()) / 86400000)
+                  - Math.round(Date.UTC(r.hiringDate.getFullYear(), r.hiringDate.getMonth(), r.hiringDate.getDate()) / 86400000)
+                : null;
+        });
+        return records;
+    }
+
+    function mos2RecordMatchesFilters(record) {
+        const bl = Array.isArray(mos2State.businessLines) && mos2State.businessLines.length ? mos2State.businessLines : ['all'];
+        const pos = Array.isArray(mos2State.positions) && mos2State.positions.length ? mos2State.positions : ['all'];
+        const businessOk = bl.includes('all') || bl.includes(String(record.businessLine || '').trim());
+        const positionOk = pos.includes('all') || pos.includes(String(record.position || '').trim());
+        const govOk = !mos2State.gov || mos2State.gov === 'all' || mos2State.gov === record.governorate;
+        return businessOk && positionOk && govOk;
+    }
+
+    function getMos2PeriodMetrics(records, fromD, toD) {
+        const opening = records.filter(r => r.hiringDate < fromD && (!isHistoryLeaver(r) || r.terminationDate >= fromD)).length;
+        const closing = records.filter(r => r.hiringDate <= toD && (!isHistoryLeaver(r) || r.terminationDate > toD)).length;
+        const hires = records.filter(r => r.hiringDate >= fromD && r.hiringDate <= toD).length;
+        const leavers = records.filter(r => isHistoryLeaver(r) && r.terminationDate >= fromD && r.terminationDate <= toD).length;
+        const average = (opening + closing) / 2;
+        const turnoverRate = average > 0 ? (leavers / average) * 100 : null;
+        return { opening, closing, hires, leavers, average, turnoverRate };
+    }
+
+    function getMos2CurrentActiveCount(records) {
+        const asOf = workforceHistoryAsOfDate || new Date();
+        return records.filter(r => isHistoryActiveAt(r, asOf)).length;
+    }
+
+    function renderMos2Summary(previousMetrics, currentMetrics) {
+        const container = document.getElementById('mos2-summary-container');
+        if (!container) return;
+        const cur = currentMetrics.turnoverRate;
+        const prev = previousMetrics.turnoverRate;
+        const pp = (cur !== null && prev !== null) ? cur - prev : null;
+        const rel = (pp !== null && prev !== 0) ? Math.abs((pp / prev) * 100) : null;
+        const statusClass = pp === null ? 'text-muted' : pp < 0 ? 'text-success' : pp > 0 ? 'text-danger' : 'text-muted';
+        const statusText = pp === null ? 'No comparable data' : pp < 0 ? `Improved by ${Math.abs(pp).toFixed(1)} pts` : pp > 0 ? `Increased by ${Math.abs(pp).toFixed(1)} pts` : 'No change';
+        const relativeText = rel === null ? 'N/A' : pp < 0 ? `${rel.toFixed(1)}% relative reduction` : pp > 0 ? `${rel.toFixed(1)}% relative increase` : '0.0% relative change';
+        const periodCard = (label, m, rate, periodText, cls='') => `
+            <div class="mos2-period-card">
+                <div class="mos-company-card-label">${label}</div>
+                <div class="mos2-rate ${cls}">${rate === null ? 'N/A' : rate.toFixed(1) + '%'}</div>
+                <div class="mos-company-card-period">${periodText}</div>
+                <div class="mos2-stat-grid">
+                    <span>Opening HC <strong>${m.opening.toLocaleString()}</strong></span>
+                    <span>Hires <strong>${m.hires.toLocaleString()}</strong></span>
+                    <span>Leavers <strong>${m.leavers.toLocaleString()}</strong></span>
+                    <span>Closing HC <strong>${m.closing.toLocaleString()}</strong></span>
+                    <span>Average HC <strong>${m.average.toLocaleString(undefined,{maximumFractionDigits:1})}</strong></span>
+                    <span>Net Change <strong>${(m.hires-m.leavers)>=0?'+':''}${(m.hires-m.leavers).toLocaleString()}</strong></span>
+                </div>
+            </div>`;
+        container.innerHTML = `<div class="mos2-summary-grid">
+            ${periodCard('SELECTED PERIOD', currentMetrics, cur, formatPeriodLabel(parseLocalISO(mos2State.currentFrom), parseLocalISO(mos2State.currentTo)), statusClass)}
+            ${periodCard('COMPARISON PERIOD', previousMetrics, prev, formatPeriodLabel(parseLocalISO(mos2State.previousFrom), parseLocalISO(mos2State.previousTo)))}
+            <div class="mos2-change-card">
+                <div class="mos-company-card-label">TURNOVER IMPACT</div>
+                <div class="mos2-rate ${statusClass}">${pp === null ? 'N/A' : Math.abs(pp).toFixed(1) + ' pts'}</div>
+                <div class="mos-company-impact ${statusClass}">${statusText}</div>
+                <div class="mos-company-impact-sub">${relativeText}</div>
+                <div class="mos-company-note">Formula: qualifying leavers during period ÷ average headcount during period.</div>
+                <div class="mos-company-note">Leaver types: Resignation, Service Termination, End Of Contract. Transfers and blank termination states remain active.</div>
+            </div>
+        </div>`;
+    }
+
+    function monthStartsInRange(fromD, toD) {
+        const out=[]; let d=new Date(fromD.getFullYear(),fromD.getMonth(),1);
+        while(d<=toD){out.push(new Date(d)); d=new Date(d.getFullYear(),d.getMonth()+1,1);} return out;
+    }
+
+    function renderMos2Monthly(previousRecords, currentRecords) {
+        const container=document.getElementById('mos2-monthly-container'); if(!container)return;
+        const prevFrom=parseLocalISO(mos2State.previousFrom),prevTo=parseLocalISO(mos2State.previousTo),curFrom=parseLocalISO(mos2State.currentFrom),curTo=parseLocalISO(mos2State.currentTo);
+        const makeRows=(records,fromD,toD)=>monthStartsInRange(fromD,toD).map(monthStart=>{const rawEnd=new Date(monthStart.getFullYear(),monthStart.getMonth()+1,0);const start=monthStart<fromD?fromD:monthStart;const end=rawEnd>toD?toD:rawEnd;return {month:monthStart.toLocaleString('en-US',{month:'short',year:'numeric'}),...getMos2PeriodMetrics(records,start,end)};});
+        const prevRows=makeRows(previousRecords,prevFrom,prevTo),curRows=makeRows(currentRecords,curFrom,curTo);
+        const renderTable=(title,rows,total)=>{
+            const rowHtml=rows.map(r=>`<tr><td><strong>${r.month}</strong></td><td>${r.opening.toLocaleString()}</td><td>${r.hires.toLocaleString()}</td><td>${r.leavers.toLocaleString()}</td><td>${r.closing.toLocaleString()}</td><td>${r.average.toLocaleString(undefined,{maximumFractionDigits:1})}</td><td><strong>${r.turnoverRate===null?'N/A':r.turnoverRate.toFixed(1)+'%'}</strong></td></tr>`).join('');
+            return `<div class="mos2-month-block"><div class="mos2-month-title">${title}</div><div class="matrix-table-container"><table class="premium-matrix-table"><thead><tr><th>MONTH</th><th>OPENING HC</th><th>HIRES</th><th>LEAVERS</th><th>CLOSING HC</th><th>AVG HC</th><th>TURNOVER</th></tr></thead><tbody>${rowHtml}</tbody></table></div><div class="mos2-period-total"><div class="mos2-month-title">PERIOD TOTAL — CALCULATED</div><div class="mos2-total-grid"><span>Opening HC <strong>${total.opening.toLocaleString()}</strong></span><span>Hires <strong>${total.hires.toLocaleString()}</strong></span><span>Leavers <strong>${total.leavers.toLocaleString()}</strong></span><span>Closing HC <strong>${total.closing.toLocaleString()}</strong></span><span>Average HC <strong>${total.average.toLocaleString(undefined,{maximumFractionDigits:1})}</strong></span><span>Turnover <strong>${total.turnoverRate===null?'N/A':total.turnoverRate.toFixed(1)+'%'}</strong></span></div></div></div>`;
+        };
+        const prevTotal=getMos2PeriodMetrics(previousRecords,prevFrom,prevTo),curTotal=getMos2PeriodMetrics(currentRecords,curFrom,curTo);
+        container.innerHTML=`<div class="mos2-month-grid"><div>${renderTable('SELECTED PERIOD — MONTHLY MOVEMENT',curRows,curTotal)}</div><div>${renderTable('COMPARISON PERIOD — MONTHLY MOVEMENT',prevRows,prevTotal)}</div></div>`;
+    }
+
+    function renderMos2Governorate(previousRecords,currentRecords){
+        const tbody=document.getElementById('mos2-gov-tbody'); if(!tbody)return;
+        // Always render the standard 25 governorates in a fixed order so the
+        // dashboard is stable and never turns branch/locality labels into extra rows.
+        const govs=MOS2_GOVERNORATE_ORDER.filter(g=>
+            previousRecords.some(r=>r.governorate===g) || currentRecords.some(r=>r.governorate===g)
+        );
+        const get=(recs,g,fromD,toD)=>getMos2PeriodMetrics(recs.filter(r=>r.governorate===g),fromD,toD);
+        const prevFrom=parseLocalISO(mos2State.previousFrom),prevTo=parseLocalISO(mos2State.previousTo),curFrom=parseLocalISO(mos2State.currentFrom),curTo=parseLocalISO(mos2State.currentTo);
+        const rows=govs.map(g=>{const prev=get(previousRecords,g,prevFrom,prevTo),cur=get(currentRecords,g,curFrom,curTo);const pp=prev.turnoverRate!==null&&cur.turnoverRate!==null?cur.turnoverRate-prev.turnoverRate:null;return {g,prev,cur,pp};});
+        tbody.innerHTML=rows.map(x=>{const status=x.pp===null?'-':x.pp<0?'Improved':x.pp>0?'Increased':'No Change';const cls=x.pp===null?'text-muted':x.pp<0?'text-success':x.pp>0?'text-danger':'text-muted';const prevTxt=x.prev.turnoverRate===null?'N/A':`${x.prev.turnoverRate.toFixed(1)}%<br><span class="sample-size-tag">${x.prev.leavers}/${x.prev.average.toLocaleString(undefined,{maximumFractionDigits:1})} avg HC</span>`;const curTxt=x.cur.turnoverRate===null?'N/A':`${x.cur.turnoverRate.toFixed(1)}%<br><span class="sample-size-tag">${x.cur.leavers}/${x.cur.average.toLocaleString(undefined,{maximumFractionDigits:1})} avg HC</span>`;return `<tr><td><strong>${x.g}</strong></td><td>${prevTxt}</td><td>${curTxt}</td><td><strong class="${cls}">${x.pp===null?'—':(x.pp>0?'+':'')+x.pp.toFixed(1)+' pts'}</strong></td><td><span class="insight-tag ${cls}">${status}</span></td></tr>`;}).join('');
+    }
+
+    function renderMos2ExitTiming(previousRecords,currentRecords){
+        const container=document.getElementById('mos2-exit-timing-container'); if(!container)return;
+        const windows=[15,30,60,90];
+        const calc=(records,fromD,toD)=>{
+            const leavers=records.filter(r=>isHistoryLeaver(r)&&r.terminationDate>=fromD&&r.terminationDate<=toD);
+            const counts=Object.fromEntries(windows.map(d=>[d,leavers.filter(r=>Number.isFinite(r.daysToExit)&&r.daysToExit>=0&&r.daysToExit<=d).length]));
+            const unknownTiming=leavers.filter(r=>r.daysToExit===null||r.daysToExit<0).length;
+            return {total:leavers.length,counts,unknownTiming};
+        };
+        const prev=calc(previousRecords,parseLocalISO(mos2State.previousFrom),parseLocalISO(mos2State.previousTo));
+        const cur=calc(currentRecords,parseLocalISO(mos2State.currentFrom),parseLocalISO(mos2State.currentTo));
+        let html='<div class="mos-exit-timing-grid">';
+        windows.forEach(d=>{const pc=prev.total?prev.counts[d]/prev.total*100:null,cc=cur.total?cur.counts[d]/cur.total*100:null;html+=`<div class="mos-exit-timing-card"><div class="mos-exit-timing-title">Within ${d} Days</div><div class="mos-exit-timing-row"><span class="mos-exit-timing-label">Previous</span><div class="mos-exit-timing-value"><strong>${prev.counts[d].toLocaleString()}</strong><span>${pc===null?'N/A':pc.toFixed(1)+'%'}</span></div></div><div class="mos-exit-timing-row"><span class="mos-exit-timing-label current">Selected</span><div class="mos-exit-timing-value current"><strong>${cur.counts[d].toLocaleString()}</strong><span>${cc===null?'N/A':cc.toFixed(1)+'%'}</span></div></div></div>`;});
+        html+=`</div><div class="mos2-exit-summary"><div><span>Previous qualifying leavers</span><strong>${prev.total.toLocaleString()}</strong></div><div><span>Selected qualifying leavers</span><strong>${cur.total.toLocaleString()}</strong></div></div><div class="mos-exit-timing-footnote">Total-workforce view. Percentages use all qualifying leavers in the corresponding period as the denominator. Windows are cumulative (≤15, ≤30, ≤60, ≤90); day 91+ is excluded from the 90-day count.${prev.unknownTiming||cur.unknownTiming?` Timing unavailable for ${prev.unknownTiming.toLocaleString()} previous and ${cur.unknownTiming.toLocaleString()} selected leavers.`:''}</div>`;
+        container.innerHTML=html;
+    }
+
+    function updateMos2CurrentActiveHC(records){
+        const el=document.getElementById('mos2-current-hc'); if(!el)return;
+        const filtered=records.filter(mos2RecordMatchesFilters);
+        el.textContent=getMos2CurrentActiveCount(filtered).toLocaleString();
+    }
+
+    function renderMos2PositionChecklist(selectedValues,onChange){
+        const container=document.getElementById('mos2-position-filter'); if(!container)return;
+        const positions=Array.from(new Set(workforceHistoryRecordsGlobal.map(r=>r.position).filter(Boolean))).sort((a,b)=>a.localeCompare(b));
+        if(!container.querySelector('input[data-mos2-position]')){
+            container.innerHTML=`<div class="mos-checklist-box mos-business-checklist-box"><label class="mos-check-item mos-check-all"><input type="checkbox" data-mos2-position value="all"><span>All</span></label>${positions.map(v=>`<label class="mos-check-item"><input type="checkbox" data-mos2-position value="${String(v).replace(/"/g,'&quot;')}"><span>${v}</span></label>`).join('')}</div>`;
+            container.addEventListener('change',e=>{const changed=e.target.closest('input[data-mos2-position]');if(!changed)return;const boxes=Array.from(container.querySelectorAll('input[data-mos2-position]'));const all=boxes.find(b=>b.value==='all');const vals=boxes.filter(b=>b.value!=='all');if(changed.value==='all'){if(changed.checked)vals.forEach(b=>b.checked=false);else changed.checked=true;}else{if(changed.checked)all.checked=false;else if(!vals.some(b=>b.checked))all.checked=true;}const selected=vals.filter(b=>b.checked).map(b=>b.value);onChange(selected.length?selected:['all']);});
+        }
+        const boxes=Array.from(container.querySelectorAll('input[data-mos2-position]'));const all=boxes.find(b=>b.value==='all');const vals=boxes.filter(b=>b.value!=='all');const isAll=!selectedValues||!selectedValues.length||selectedValues.includes('all');all.checked=isAll;vals.forEach(b=>b.checked=!isAll&&selectedValues.includes(b.value));
+    }
+
+    function setupMos2Controls(records){
+        const cf=document.getElementById('mos2-current-from'),ct=document.getElementById('mos2-current-to'),pf=document.getElementById('mos2-previous-from'),pt=document.getElementById('mos2-previous-to'),gov=document.getElementById('mos2-gov-filter');
+        if(!cf||!ct||!pf||!pt||!gov)return;
+        cf.value=mos2State.currentFrom;ct.value=mos2State.currentTo;pf.value=mos2State.previousFrom;pt.value=mos2State.previousTo;
+        const govs=MOS2_GOVERNORATE_ORDER.filter(g=>records.some(r=>r.governorate===g));
+        if(gov.options.length<=1){govs.forEach(g=>{const o=document.createElement('option');o.value=g;o.textContent=g;gov.appendChild(o);});}
+        gov.value=mos2State.gov||'all';
+        renderMosBusinessChecklistForTarget('mos2-business-filter',mos2State.businessLines||['all'],lines=>{mos2State.businessLines=lines;renderTotalWorkforceMosTab(true);});
+        renderMos2PositionChecklist(mos2State.positions||['all'],positions=>{mos2State.positions=positions;renderTotalWorkforceMosTab(true);});
+        const apply=()=>{mos2State.currentFrom=cf.value;mos2State.currentTo=ct.value;mos2State.previousFrom=pf.value;mos2State.previousTo=pt.value;mos2State.gov=gov.value;renderTotalWorkforceMosTab(true);};
+        [cf,ct,pf,pt,gov].forEach(el=>el.onchange=apply);
+    }
+
+    function renderMosBusinessChecklistForTarget(targetId,selectedValues,onChange){
+        const container=document.getElementById(targetId); if(!container)return;
+        if(!container.querySelector('input[data-mos2-business]')){
+            container.innerHTML=`<div class="mos-checklist-box mos-business-checklist-box"><label class="mos-check-item mos-check-all"><input type="checkbox" data-mos2-business value="all"><span>All</span></label>${['MF','CF','Invest','Gamaya'].map(v=>`<label class="mos-check-item"><input type="checkbox" data-mos2-business value="${v}"><span>${v}</span></label>`).join('')}</div>`;
+            container.addEventListener('change',e=>{const c=e.target.closest('input[data-mos2-business]');if(!c)return;const boxes=Array.from(container.querySelectorAll('input[data-mos2-business]'));const all=boxes.find(b=>b.value==='all');const vals=boxes.filter(b=>b.value!=='all');if(c.value==='all'){if(c.checked)vals.forEach(b=>b.checked=false);else c.checked=true;}else{if(c.checked)all.checked=false;else if(!vals.some(b=>b.checked))all.checked=true;}const selected=vals.filter(b=>b.checked).map(b=>b.value);onChange(selected.length?selected:['all']);});
+        }
+        const boxes=Array.from(container.querySelectorAll('input[data-mos2-business]'));const all=boxes.find(b=>b.value==='all');const vals=boxes.filter(b=>b.value!=='all');const isAll=!selectedValues||!selectedValues.length||selectedValues.includes('all');all.checked=isAll;vals.forEach(b=>b.checked=!isAll&&selectedValues.includes(b.value));
+    }
+
+    function renderTotalWorkforceMosTab(skipControls=false){
+        if(!workforceHistoryRecordsGlobal.length)return;
+        if(!skipControls)setupMos2Controls(workforceHistoryRecordsGlobal);
+        const curFrom=parseLocalISO(mos2State.currentFrom),curTo=parseLocalISO(mos2State.currentTo),prevFrom=parseLocalISO(mos2State.previousFrom),prevTo=parseLocalISO(mos2State.previousTo);
+        if(!curFrom||!curTo||!prevFrom||!prevTo||curFrom>curTo||prevFrom>prevTo)return;
+        const scoped=workforceHistoryRecordsGlobal.filter(mos2RecordMatchesFilters);
+        updateMos2CurrentActiveHC(workforceHistoryRecordsGlobal);
+        const previousRecords=scoped,currentRecords=scoped;
+        const previousMetrics=getMos2PeriodMetrics(previousRecords,prevFrom,prevTo),currentMetrics=getMos2PeriodMetrics(currentRecords,curFrom,curTo);
+        renderMos2Summary(previousMetrics,currentMetrics);
+        renderMos2Monthly(previousRecords,currentRecords);
+        renderMos2Governorate(previousRecords,currentRecords);
+        renderMos2ExitTiming(previousRecords,currentRecords);
+    }
+
+    // Unified turnover master source: one file powers both MOS tabs and all turnover views.
+    // turnover.csv is the consolidated historical workforce file.
     fetch('turnover.csv', { cache: 'no-store' })
         .then(res => {
             if (!res.ok) throw new Error("Offline Turnover CSV Data");
             return res.text();
         })
         .then(csvText => {
-            turnoverDatasetGlobal = parseCSVDataEngine(csvText);
+            const unifiedTurnoverRecords = parseCSVDataEngine(csvText);
+            turnoverDatasetGlobal = unifiedTurnoverRecords;
+            workforceHistoryDatasetGlobal = unifiedTurnoverRecords;
+            workforceHistoryRecordsGlobal = buildWorkforceHistoryRecords(unifiedTurnoverRecords);
+
             renderMeasureOfSuccessTab();
+            renderTotalWorkforceMosTab();
             renderResignationAuditTab();
             renderHRReconciliationGapDiagnostics();
         })

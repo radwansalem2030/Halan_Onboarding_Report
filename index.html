@@ -76,9 +76,13 @@
                     <span class="tab-icon">📋</span>
                     <span class="tab-label">OPERATIONAL CASES</span>
                 </button>
-                <button class="nav-tab-btn" data-tab="tab-measure-success" title="MEASURE OF SUCCESS">
+                <button class="nav-tab-btn" data-tab="tab-measure-success" title="MOS – NEW HIRE COHORT IMPACT">
                     <span class="tab-icon">🎯</span>
-                    <span class="tab-label">MEASURE OF SUCCESS</span>
+                    <span class="tab-label">MOS – NEW HIRE COHORT</span>
+                </button>
+                <button class="nav-tab-btn" data-tab="tab-total-workforce-mos" title="MOS – TOTAL WORKFORCE IMPACT">
+                    <span class="tab-icon">📈</span>
+                    <span class="tab-label">MOS – TOTAL WORKFORCE</span>
                 </button>
                 <button class="nav-tab-btn" data-tab="tab-audit" title="RESIGNATION AUDIT">
                     <span class="tab-icon">🔍</span>
@@ -733,7 +737,7 @@
                 <!-- TAB 6: MEASURE OF SUCCESS -->
             <div id="tab-measure-success" class="tab-content">
                 <div class="analytics-header-block">
-                    <h2>MEASURE OF SUCCESS</h2>
+                    <h2>MOS – NEW HIRE COHORT IMPACT</h2>
                     <p class="subtitle">New-hire cohort impact and company-wide turnover analysis by selected period and workforce profile.</p>
                 </div>
                 <div class="analytics-section">
@@ -845,6 +849,119 @@
                             <div class="mos-company-definition">Business-standard workforce turnover</div>
                         </div>
                         <div id="mos-company-wide-container"></div>
+                    </div>
+                </div>
+            </div>
+
+
+
+            <!-- TAB 7: MOS – TOTAL WORKFORCE IMPACT -->
+            <div id="tab-total-workforce-mos" class="tab-content">
+                <div class="analytics-header-block">
+                    <h2>MOS – TOTAL WORKFORCE IMPACT</h2>
+                    <p class="subtitle">Business-standard workforce impact using total active headcount across the full historical employee database.</p>
+                </div>
+                <div class="analytics-section">
+                    <div class="metric-card mos2-filter-panel">
+                        <div class="mos2-current-hc-strip">
+                            <div>
+                                <span class="mos-control-label">CURRENT ACTIVE HEADCOUNT</span>
+                                <div class="mos2-current-hc-value" id="mos2-current-hc">—</div>
+                                <div class="mos2-current-hc-sub">Active employees in the selected workforce population • independent of date periods</div>
+                            </div>
+                        </div>
+                        <div class="mos2-filter-layout">
+                            <div class="mos2-filter-dates">
+                                <div class="mos-control-group mos2-date-group">
+                                    <span class="mos-control-label">SELECTED PERIOD</span>
+                                    <div class="mos2-date-pair">
+                                        <label class="mos2-date-field"><span>FROM</span><input type="date" id="mos2-current-from" class="premium-input mos-date-input"></label>
+                                        <span class="mos-sep">→</span>
+                                        <label class="mos2-date-field"><span>TO</span><input type="date" id="mos2-current-to" class="premium-input mos-date-input"></label>
+                                    </div>
+                                </div>
+                                <div class="mos-control-group mos2-date-group">
+                                    <span class="mos-control-label">COMPARISON PERIOD</span>
+                                    <div class="mos2-date-pair">
+                                        <label class="mos2-date-field"><span>FROM</span><input type="date" id="mos2-previous-from" class="premium-input mos-date-input"></label>
+                                        <span class="mos-sep">→</span>
+                                        <label class="mos2-date-field"><span>TO</span><input type="date" id="mos2-previous-to" class="premium-input mos-date-input"></label>
+                                    </div>
+                                </div>
+                                <div class="mos-control-group mos2-governorate-group">
+                                    <span class="mos-control-label">GOVERNORATE</span>
+                                    <select id="mos2-gov-filter" class="premium-select">
+                                        <option value="all">All Governorates ▼</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="mos2-filter-profile">
+                                <div class="mos-control-group mos2-business-group">
+                                    <span class="mos-control-label">BUSINESS LINE</span>
+                                    <div class="mos-checklist" id="mos2-business-filter"></div>
+                                </div>
+                                <div class="mos-control-group mos2-position-group">
+                                    <span class="mos-control-label">POSITION</span>
+                                    <div class="mos-checklist mos2-position-checklist" id="mos2-position-filter"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <div class="metric-card mos2-summary-card">
+                        <div class="section-title-container mos-section-heading">
+                            <div>
+                                <h3>WORKFORCE TURNOVER SUMMARY</h3>
+                                <p class="section-subtitle">Selected vs comparison period for the full eligible workforce.</p>
+                            </div>
+                            <div class="mos-company-definition">Active HC based</div>
+                        </div>
+                        <div id="mos2-summary-container"></div>
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <div class="metric-card">
+                        <div class="section-title-container">
+                            <h3>MONTHLY WORKFORCE MOVEMENT</h3>
+                            <p class="section-subtitle">Opening HC, hires, leavers and closing HC by month inside each selected period.</p>
+                        </div>
+                        <div id="mos2-monthly-container"></div>
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <div class="metric-card">
+                        <div class="section-title-container">
+                            <h3>GOVERNORATE TURNOVER IMPACT</h3>
+                            <p class="section-subtitle">Company-wide turnover rate by governorate using average headcount.</p>
+                        </div>
+                        <div class="matrix-table-container">
+                            <table class="premium-matrix-table mos2-gov-table">
+                                <thead>
+                                    <tr>
+                                        <th>GOVERNORATE</th>
+                                        <th>PREVIOUS</th>
+                                        <th>SELECTED</th>
+                                        <th>CHANGE</th>
+                                        <th>STATUS</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mos2-gov-tbody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-section">
+                    <div class="metric-card">
+                        <div class="section-title-container">
+                            <h3>WHEN DO LEAVERS EXIT?</h3>
+                            <p class="section-subtitle">Among all qualifying workforce leavers in each period, how many exited within 15, 30, 60 or 90 days of hiring?</p>
+                        </div>
+                        <div id="mos2-exit-timing-container"></div>
                     </div>
                 </div>
             </div>
