@@ -4851,18 +4851,19 @@ function renderHQTable(govMap, supMap) {
         if(!container)return;
 
         // Exclusive tenure buckets. Each employee can be counted only once.
-        // Analysis population: hires INSIDE the selected period who also terminated
-        // INSIDE the same period and meet the standard qualifying-leaver definition.
-        // Any exit on day 0 through day 3 is grouped as one "Same-Day / Immediate Exit"
-        // category and excluded from the timing buckets, regardless of reason.
+        // Analysis population: hires INSIDE each period who also terminated INSIDE
+        // the same period and meet the standard qualifying-leaver definition.
+        // Selected period: Day 0–3 are excluded from the timing numerator.
+        // Previous period: Day 0–3 remain INCLUDED only in the 15-day numerator,
+        // while the denominator stays the cleaned hire population.
         const buckets=[
-            {key:'4_15', label:'4–15 Days', min:4, max:15},
-            {key:'16_30', label:'16–30 Days', min:16, max:30},
-            {key:'31_60', label:'31–60 Days', min:31, max:60},
-            {key:'61_90', label:'61–90 Days', min:61, max:90}
+            {key:'15', label:'15 DAYS', min:4, max:15},
+            {key:'16_30', label:'16–30 DAYS', min:16, max:30},
+            {key:'31_60', label:'31–60 DAYS', min:31, max:60},
+            {key:'61_90', label:'61–90 DAYS', min:61, max:90}
         ];
 
-        const calc=(records,fromD,toD)=>{
+        const calc=(records,fromD,toD,isPrevious)=>{
             const cohort=records.filter(r=>r.hiringDate>=fromD&&r.hiringDate<=toD);
             const samePeriodLeavers=cohort.filter(r=>
                 isHistoryLeaver(r)&&
@@ -4881,18 +4882,32 @@ function renderHQTable(govMap, supMap) {
                 return !isImmediate;
             });
 
-            const stats={};
-            buckets.forEach(b=>{
-                const count=cleanLeavers.filter(r=>r.daysToExit>=b.min&&r.daysToExit<=b.max).length;
-                stats[b.key]={
-                    count,
-                    pct:cleanHires.length ? (count/cleanHires.length)*100 : null
-                };
-            });
-
             const before=samePeriodLeavers.length;
             const excluded=immediate.length;
             const net=cleanLeavers.length;
+
+            const stats={};
+            buckets.forEach(b=>{
+                const exactBucketCount=cleanLeavers.filter(r=>r.daysToExit>=b.min&&r.daysToExit<=b.max).length;
+                let count=exactBucketCount;
+                let labelOverride='';
+
+                if(isPrevious && b.key==='15'){
+                    // Previous-period special rule agreed with user:
+                    // 15-day numerator includes Day 0–3 + Day 4–15.
+                    count=excluded+exactBucketCount;
+                    labelOverride='0–15 Days (incl. immediate)';
+                } else if(b.key==='15'){
+                    // Selected-period definition remains cleaned/exclusive.
+                    labelOverride='4–15 Days';
+                }
+
+                stats[b.key]={
+                    count,
+                    pct:cleanHires.length ? (count/cleanHires.length)*100 : null,
+                    label:labelOverride || b.label
+                };
+            });
 
             return {
                 cohortHires:cohort.length,
@@ -4905,8 +4920,8 @@ function renderHQTable(govMap, supMap) {
             };
         };
 
-        const prev=calc(previousRecords,parseLocalISO(mos2State.previousFrom),parseLocalISO(mos2State.previousTo));
-        const cur=calc(currentRecords,parseLocalISO(mos2State.currentFrom),parseLocalISO(mos2State.currentTo));
+        const prev=calc(previousRecords,parseLocalISO(mos2State.previousFrom),parseLocalISO(mos2State.previousTo),true);
+        const cur=calc(currentRecords,parseLocalISO(mos2State.currentFrom),parseLocalISO(mos2State.currentTo),false);
 
         const periodBlock=(label,data,accentClass='')=>`
             <div class="mos2-exit-period-block ${accentClass}">
@@ -4933,15 +4948,14 @@ function renderHQTable(govMap, supMap) {
                 </div>
             </div>`;
 
-        // Keep the same left-to-right convention used by the page: Selected first,
-        // Previous second, so the viewer does not have to mentally flip the comparison.
+        // Keep the page-wide comparison convention: Selected first, Previous second.
         let html=`
             <div class="mos2-exit-periods">
                 ${periodBlock('SELECTED PERIOD',cur,'current')}
                 ${periodBlock('PREVIOUS PERIOD',prev)}
             </div>
             <div class="mos2-exit-rule-note">
-                <strong>Exit Timing Rule:</strong> only employees hired and terminated within the same period are evaluated. Employees who exited on the hiring date or within the first 3 days are grouped as Same-Day / Immediate Exit and removed from the timing buckets, regardless of termination reason. Each remaining employee is counted once only.
+                <strong>Exit Timing Rule:</strong> only employees hired and terminated within the same period are evaluated. Selected-period timing excludes Day 0–3 immediate exits. Previous-period 15-day reporting includes Day 0–3 in the 0–15 numerator while keeping the cleaned hire denominator. Each employee is counted once only.
             </div>
             <div class="mos-exit-timing-grid">`;
 
@@ -4957,7 +4971,7 @@ function renderHQTable(govMap, supMap) {
                     <div class="mos-exit-timing-value ${label==='Selected'?'current':''}">
                         <strong>${stat.count.toLocaleString()}</strong>
                         <span>${stat.pct===null?'N/A':stat.pct.toFixed(1)+'%'}</span>
-                        <small>of hires after cleanup</small>
+                        <small>${label==='Previous' && b.key==='15' ? '0–15 days incl. immediate' : (label==='Selected' && b.key==='15' ? '4–15 days' : 'exclusive bucket')}</small>
                     </div>
                 </div>`;
 
@@ -4978,7 +4992,7 @@ function renderHQTable(govMap, supMap) {
                 <div><span>Previous same-period leavers after cleanup</span><strong>${prev.net.toLocaleString()}</strong></div>
             </div>
             <div class="mos-exit-timing-footnote">
-                Same-period new-hire cohort. The four ranges are exclusive: 4–15, 16–30, 31–60 and 61–90 days. A leaver is counted in one range only. Day 0 through Day 3 are grouped as Same-Day / Immediate Exit and excluded. The 90-day range naturally shows 0 when the selected period contains no same-period exits that late.
+                Same-period new-hire cohort. Selected uses exclusive 4–15, 16–30, 31–60 and 61–90 day buckets after removing Day 0–3 immediate exits. Previous uses the same denominator after removing Day 0–3, but its 15-day numerator intentionally includes Day 0–3 (0–15). All later Previous buckets remain exclusive. Each employee is counted once only.
             </div>`;
 
         container.innerHTML=html;
