@@ -517,9 +517,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof processTab4CasesPipeline === 'function') {
             processTab4CasesPipeline(scopedData, metrics);
         }
-        if (typeof renderMeasureOfSuccessTab === 'function') {
-            renderMeasureOfSuccessTab();
-        }
         if (typeof renderResignationAuditTab === 'function') {
             renderResignationAuditTab(); 
         }
@@ -3423,7 +3420,6 @@ function renderHQTable(govMap, supMap) {
             }
 
             syncAliases();
-            renderMeasureOfSuccessTab();
         };
 
         if (currentFromInp) currentFromInp.onchange = () => handleFilterChange('current-from');
@@ -4851,19 +4847,140 @@ function renderHQTable(govMap, supMap) {
     }
 
     function renderMos2ExitTiming(previousRecords,currentRecords){
-        const container=document.getElementById('mos2-exit-timing-container'); if(!container)return;
-        const windows=[15,30,60,90];
+        const container=document.getElementById('mos2-exit-timing-container');
+        if(!container)return;
+
+        // Exclusive tenure buckets. Each employee can be counted only once.
+        // Analysis population: hires INSIDE the selected period who also terminated
+        // INSIDE the same period and meet the standard qualifying-leaver definition.
+        // Any exit on day 0 through day 3 is grouped as one "Same-Day / Immediate Exit"
+        // category and excluded from the timing buckets, regardless of reason.
+        const buckets=[
+            {key:'4_15', label:'4–15 Days', min:4, max:15},
+            {key:'16_30', label:'16–30 Days', min:16, max:30},
+            {key:'31_60', label:'31–60 Days', min:31, max:60},
+            {key:'61_90', label:'61–90 Days', min:61, max:90}
+        ];
+
         const calc=(records,fromD,toD)=>{
-            const leavers=records.filter(r=>isHistoryLeaver(r)&&r.terminationDate>=fromD&&r.terminationDate<=toD);
-            const counts=Object.fromEntries(windows.map(d=>[d,leavers.filter(r=>Number.isFinite(r.daysToExit)&&r.daysToExit>=0&&r.daysToExit<=d).length]));
-            const unknownTiming=leavers.filter(r=>r.daysToExit===null||r.daysToExit<0).length;
-            return {total:leavers.length,counts,unknownTiming};
+            const cohort=records.filter(r=>r.hiringDate>=fromD&&r.hiringDate<=toD);
+            const samePeriodLeavers=cohort.filter(r=>
+                isHistoryLeaver(r)&&
+                r.terminationDate>=fromD&&
+                r.terminationDate<=toD&&
+                Number.isFinite(r.daysToExit)&&
+                r.daysToExit>=0
+            );
+
+            const immediate=samePeriodLeavers.filter(r=>r.daysToExit<=3);
+            const cleanLeavers=samePeriodLeavers.filter(r=>r.daysToExit>3);
+            const cleanHires=cohort.filter(r=>{
+                const isImmediate = r.hasTermination &&
+                    r.terminationDate>=fromD && r.terminationDate<=toD &&
+                    Number.isFinite(r.daysToExit) && r.daysToExit>=0 && r.daysToExit<=3;
+                return !isImmediate;
+            });
+
+            const stats={};
+            buckets.forEach(b=>{
+                const count=cleanLeavers.filter(r=>r.daysToExit>=b.min&&r.daysToExit<=b.max).length;
+                stats[b.key]={
+                    count,
+                    pct:cleanHires.length ? (count/cleanHires.length)*100 : null
+                };
+            });
+
+            const before=samePeriodLeavers.length;
+            const excluded=immediate.length;
+            const net=cleanLeavers.length;
+
+            return {
+                cohortHires:cohort.length,
+                excluded,
+                before,
+                cleanHires:cleanHires.length,
+                net,
+                excludedPct:before?(excluded/before)*100:null,
+                stats
+            };
         };
+
         const prev=calc(previousRecords,parseLocalISO(mos2State.previousFrom),parseLocalISO(mos2State.previousTo));
         const cur=calc(currentRecords,parseLocalISO(mos2State.currentFrom),parseLocalISO(mos2State.currentTo));
-        let html='<div class="mos-exit-timing-grid">';
-        windows.forEach(d=>{const pc=prev.total?prev.counts[d]/prev.total*100:null,cc=cur.total?cur.counts[d]/cur.total*100:null;html+=`<div class="mos-exit-timing-card"><div class="mos-exit-timing-title">Within ${d} Days</div><div class="mos-exit-timing-row"><span class="mos-exit-timing-label">Previous</span><div class="mos-exit-timing-value"><strong>${prev.counts[d].toLocaleString()}</strong><span>${pc===null?'N/A':pc.toFixed(1)+'%'}</span></div></div><div class="mos-exit-timing-row"><span class="mos-exit-timing-label current">Selected</span><div class="mos-exit-timing-value current"><strong>${cur.counts[d].toLocaleString()}</strong><span>${cc===null?'N/A':cc.toFixed(1)+'%'}</span></div></div></div>`;});
-        html+=`</div><div class="mos2-exit-summary"><div><span>Previous qualifying leavers</span><strong>${prev.total.toLocaleString()}</strong></div><div><span>Selected qualifying leavers</span><strong>${cur.total.toLocaleString()}</strong></div></div><div class="mos-exit-timing-footnote">Total-workforce view. Percentages use all qualifying leavers in the corresponding period as the denominator. Windows are cumulative (≤15, ≤30, ≤60, ≤90); day 91+ is excluded from the 90-day count.${prev.unknownTiming||cur.unknownTiming?` Timing unavailable for ${prev.unknownTiming.toLocaleString()} previous and ${cur.unknownTiming.toLocaleString()} selected leavers.`:''}</div>`;
+
+        const periodBlock=(label,data,accentClass='')=>`
+            <div class="mos2-exit-period-block ${accentClass}">
+                <div class="mos2-exit-period-title">${label}</div>
+                <div class="mos2-exit-period-grid">
+                    <div class="mos2-exit-period-item">
+                        <span>Hires in Period</span>
+                        <strong>${data.cohortHires.toLocaleString()}</strong>
+                    </div>
+                    <div class="mos2-exit-period-item">
+                        <span>Qualifying Leavers Before Cleanup</span>
+                        <strong>${data.before.toLocaleString()}</strong>
+                    </div>
+                    <div class="mos2-exit-period-item is-excluded">
+                        <span>Same-Day / Immediate Exit</span>
+                        <strong>${data.excluded.toLocaleString()}</strong>
+                        <small>${data.excludedPct===null?'N/A':data.excludedPct.toFixed(1)+'% of qualifying leavers'}</small>
+                    </div>
+                    <div class="mos2-exit-period-item is-net">
+                        <span>Hires Remaining After Cleanup</span>
+                        <strong>${data.cleanHires.toLocaleString()}</strong>
+                        <small>${data.net.toLocaleString()} same-period leavers</small>
+                    </div>
+                </div>
+            </div>`;
+
+        // Keep the same left-to-right convention used by the page: Selected first,
+        // Previous second, so the viewer does not have to mentally flip the comparison.
+        let html=`
+            <div class="mos2-exit-periods">
+                ${periodBlock('SELECTED PERIOD',cur,'current')}
+                ${periodBlock('PREVIOUS PERIOD',prev)}
+            </div>
+            <div class="mos2-exit-rule-note">
+                <strong>Exit Timing Rule:</strong> only employees hired and terminated within the same period are evaluated. Employees who exited on the hiring date or within the first 3 days are grouped as Same-Day / Immediate Exit and removed from the timing buckets, regardless of termination reason. Each remaining employee is counted once only.
+            </div>
+            <div class="mos-exit-timing-grid">`;
+
+        buckets.forEach(b=>{
+            const ps=prev.stats[b.key], cs=cur.stats[b.key];
+            const pp=(ps.pct!==null&&cs.pct!==null)?cs.pct-ps.pct:null;
+            const changeClass=pp===null?'text-muted':pp<0?'text-success':pp>0?'text-danger':'text-muted';
+            const changeText=pp===null?'—':`${pp>0?'+':''}${pp.toFixed(1)} pts`;
+
+            const side=(label,stat)=>`
+                <div class="mos2-exit-bucket-side ${label==='Selected'?'current':''}">
+                    <span class="mos-exit-timing-label ${label==='Selected'?'current':''}">${label}</span>
+                    <div class="mos-exit-timing-value ${label==='Selected'?'current':''}">
+                        <strong>${stat.count.toLocaleString()}</strong>
+                        <span>${stat.pct===null?'N/A':stat.pct.toFixed(1)+'%'}</span>
+                        <small>of hires after cleanup</small>
+                    </div>
+                </div>`;
+
+            html+=`
+                <div class="mos-exit-timing-card">
+                    <div class="mos-exit-timing-title">${b.label}</div>
+                    ${side('Selected',cs)}
+                    ${side('Previous',ps)}
+                    <div class="mos-exit-change-row ${changeClass}">
+                        <span>Change</span><strong>${changeText}</strong>
+                    </div>
+                </div>`;
+        });
+
+        html+=`</div>
+            <div class="mos2-exit-summary">
+                <div><span>Selected same-period leavers after cleanup</span><strong>${cur.net.toLocaleString()}</strong></div>
+                <div><span>Previous same-period leavers after cleanup</span><strong>${prev.net.toLocaleString()}</strong></div>
+            </div>
+            <div class="mos-exit-timing-footnote">
+                Same-period new-hire cohort. The four ranges are exclusive: 4–15, 16–30, 31–60 and 61–90 days. A leaver is counted in one range only. Day 0 through Day 3 are grouped as Same-Day / Immediate Exit and excluded. The 90-day range naturally shows 0 when the selected period contains no same-period exits that late.
+            </div>`;
+
         container.innerHTML=html;
     }
 
@@ -4933,7 +5050,6 @@ function renderHQTable(govMap, supMap) {
             workforceHistoryDatasetGlobal = unifiedTurnoverRecords;
             workforceHistoryRecordsGlobal = buildWorkforceHistoryRecords(unifiedTurnoverRecords);
 
-            renderMeasureOfSuccessTab();
             renderTotalWorkforceMosTab();
             renderResignationAuditTab();
             renderHRReconciliationGapDiagnostics();
