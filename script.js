@@ -4850,17 +4850,19 @@ function renderHQTable(govMap, supMap) {
         const container=document.getElementById('mos2-exit-timing-container');
         if(!container)return;
 
-        // Exclusive tenure buckets. Each employee can be counted only once.
-        // Analysis population: hires INSIDE each period who also terminated INSIDE
-        // the same period and meet the standard qualifying-leaver definition.
-        // Selected period: Day 0–3 are excluded from the timing numerator.
-        // Previous period: Day 0–3 remain INCLUDED only in the 15-day numerator,
-        // while the denominator stays the cleaned hire population.
-        const buckets=[
-            {key:'15', label:'15 DAYS', min:4, max:15},
-            {key:'16_30', label:'16–30 DAYS', min:16, max:30},
-            {key:'31_60', label:'31–60 DAYS', min:31, max:60},
-            {key:'61_90', label:'61–90 DAYS', min:61, max:90}
+        // Final Exit-Timing definition:
+        // 1) Hires and qualifying exits must both occur inside the same period.
+        // 2) Immediate exits are Day 0, Day 1, Day 2 only.
+        // 3) Selected: Day 0–2 are removed from both numerator and denominator.
+        // 4) Previous: Day 0–2 remain in the numerator, but are removed from the denominator.
+        // 5) Windows are cumulative (15 / 30 / 60 / 90), not exclusive buckets.
+        // 6) A period can never contribute exits beyond its own available span because
+        //    both hiring and termination dates are required to be inside that period.
+        const windows=[
+            {key:'15',label:'WITHIN 15 DAYS',days:15},
+            {key:'30',label:'WITHIN 30 DAYS',days:30},
+            {key:'60',label:'WITHIN 60 DAYS',days:60},
+            {key:'90',label:'WITHIN 90 DAYS',days:90}
         ];
 
         const calc=(records,fromD,toD,isPrevious)=>{
@@ -4873,49 +4875,43 @@ function renderHQTable(govMap, supMap) {
                 r.daysToExit>=0
             );
 
-            const immediate=samePeriodLeavers.filter(r=>r.daysToExit<=3);
-            const cleanLeavers=samePeriodLeavers.filter(r=>r.daysToExit>3);
+            // Immediate exits are exactly Day 0–2, regardless of termination reason.
+            const immediate=samePeriodLeavers.filter(r=>r.daysToExit<=2);
+            const immediateIds=new Set(immediate.map(r=>r.employeeCode||r['Employee Code']||r.hrCode||r['HR Code']||`${r.hiringDate?.getTime?.()||''}|${r.terminationDate?.getTime?.()||''}`));
+
+            // Clean hire denominator = hires in the same period minus Day 0–2 exits.
             const cleanHires=cohort.filter(r=>{
-                const isImmediate = r.hasTermination &&
-                    r.terminationDate>=fromD && r.terminationDate<=toD &&
-                    Number.isFinite(r.daysToExit) && r.daysToExit>=0 && r.daysToExit<=3;
-                return !isImmediate;
+                const id=r.employeeCode||r['Employee Code']||r.hrCode||r['HR Code']||`${r.hiringDate?.getTime?.()||''}|${r.terminationDate?.getTime?.()||''}`;
+                return !immediateIds.has(id);
             });
 
-            const before=samePeriodLeavers.length;
-            const excluded=immediate.length;
-            const net=cleanLeavers.length;
+            // Selected excludes Day 0–2 from the timing numerator.
+            // Previous keeps Day 0–2 in the cumulative numerator.
+            const timingPool=isPrevious
+                ? samePeriodLeavers
+                : samePeriodLeavers.filter(r=>r.daysToExit>2);
 
             const stats={};
-            buckets.forEach(b=>{
-                const exactBucketCount=cleanLeavers.filter(r=>r.daysToExit>=b.min&&r.daysToExit<=b.max).length;
-                let count=exactBucketCount;
-                let labelOverride='';
-
-                if(isPrevious && b.key==='15'){
-                    // Previous-period special rule agreed with user:
-                    // 15-day numerator includes Day 0–3 + Day 4–15.
-                    count=excluded+exactBucketCount;
-                    labelOverride='0–15 Days (incl. immediate)';
-                } else if(b.key==='15'){
-                    // Selected-period definition remains cleaned/exclusive.
-                    labelOverride='4–15 Days';
-                }
-
-                stats[b.key]={
-                    count,
-                    pct:cleanHires.length ? (count/cleanHires.length)*100 : null,
-                    label:labelOverride || b.label
+            windows.forEach(w=>{
+                const count=timingPool.filter(r=>r.daysToExit<=w.days).length;
+                const periodSpanDays=Math.floor((toD-fromD)/86400000);
+                // A window longer than the selected period cannot yield an in-period outcome.
+                const applicable=w.days<=periodSpanDays;
+                stats[w.key]={
+                    count: applicable ? count : 0,
+                    pct: cleanHires.length ? ((applicable ? count : 0)/cleanHires.length)*100 : null,
+                    applicable,
+                    days:w.days
                 };
             });
 
             return {
                 cohortHires:cohort.length,
-                excluded,
-                before,
+                immediate:immediate.length,
+                immediatePct:cohort.length?(immediate.length/cohort.length)*100:null,
                 cleanHires:cleanHires.length,
-                net,
-                excludedPct:before?(excluded/before)*100:null,
+                samePeriodLeavers:samePeriodLeavers.length,
+                cleanLeavers:samePeriodLeavers.filter(r=>r.daysToExit>2).length,
                 stats
             };
         };
@@ -4923,76 +4919,85 @@ function renderHQTable(govMap, supMap) {
         const prev=calc(previousRecords,parseLocalISO(mos2State.previousFrom),parseLocalISO(mos2State.previousTo),true);
         const cur=calc(currentRecords,parseLocalISO(mos2State.currentFrom),parseLocalISO(mos2State.currentTo),false);
 
-        const periodBlock=(label,data,accentClass='')=>`
-            <div class="mos2-exit-period-block ${accentClass}">
+        const periodBlock=(label,data,accent='')=>`
+            <div class="mos2-exit-period-block ${accent}">
                 <div class="mos2-exit-period-title">${label}</div>
                 <div class="mos2-exit-period-grid">
                     <div class="mos2-exit-period-item">
-                        <span>Hires in Period</span>
+                        <span>HIRES IN PERIOD</span>
                         <strong>${data.cohortHires.toLocaleString()}</strong>
                     </div>
-                    <div class="mos2-exit-period-item">
-                        <span>Qualifying Leavers Before Cleanup</span>
-                        <strong>${data.before.toLocaleString()}</strong>
-                    </div>
                     <div class="mos2-exit-period-item is-excluded">
-                        <span>Same-Day / Immediate Exit</span>
-                        <strong>${data.excluded.toLocaleString()}</strong>
-                        <small>${data.excludedPct===null?'N/A':data.excludedPct.toFixed(1)+'% of qualifying leavers'}</small>
+                        <span>SAME-DAY / IMMEDIATE EXIT (0–2 DAYS)</span>
+                        <strong>${data.immediate.toLocaleString()}</strong>
+                        <small>${data.immediatePct===null?'N/A':data.immediatePct.toFixed(1)+'% of hires'}</small>
                     </div>
                     <div class="mos2-exit-period-item is-net">
-                        <span>Hires Remaining After Cleanup</span>
+                        <span>HIRES AFTER 0–2 DAY CLEANUP</span>
                         <strong>${data.cleanHires.toLocaleString()}</strong>
-                        <small>${data.net.toLocaleString()} same-period leavers</small>
+                        <small>Denominator for 15 / 30 / 60 / 90 day rates</small>
+                    </div>
+                    <div class="mos2-exit-period-item">
+                        <span>SAME-PERIOD QUALIFYING LEAVERS</span>
+                        <strong>${data.samePeriodLeavers.toLocaleString()}</strong>
+                        <small>Before timing-window treatment</small>
                     </div>
                 </div>
             </div>`;
 
-        // Keep the page-wide comparison convention: Selected first, Previous second.
+        const renderMetric=(title,statPrev,statCur)=>{
+            const pp=(statPrev.pct!==null&&statCur.pct!==null)?statCur.pct-statPrev.pct:null;
+            const cls=pp===null?'text-muted':pp<0?'text-success':pp>0?'text-danger':'text-muted';
+            const change=pp===null?'—':`${pp>0?'+':''}${pp.toFixed(1)} pts`;
+            return `
+                <div class="mos2-exit-cumulative-row">
+                    <div class="mos2-exit-cumulative-title">${title}</div>
+                    <div class="mos2-exit-cumulative-values">
+                        <div><span class="mos2-exit-mini-label current">SELECTED</span><strong class="current">${statCur.applicable?statCur.count.toLocaleString():'0'}</strong><small>${statCur.pct===null?'N/A':statCur.pct.toFixed(1)+'%'}</small></div>
+                        <div><span class="mos2-exit-mini-label">PREVIOUS</span><strong>${statPrev.applicable?statPrev.count.toLocaleString():'0'}</strong><small>${statPrev.pct===null?'N/A':statPrev.pct.toFixed(1)+'%'}</small></div>
+                        <div><span class="mos2-exit-mini-label">CHANGE</span><strong class="${cls}">${change}</strong></div>
+                    </div>
+                </div>`;
+        };
+
+        // The 30-day and 90-day totals are the cumulative endpoints of their groups.
+        // No arithmetic summing of percentages is used.
         let html=`
             <div class="mos2-exit-periods">
                 ${periodBlock('SELECTED PERIOD',cur,'current')}
                 ${periodBlock('PREVIOUS PERIOD',prev)}
             </div>
             <div class="mos2-exit-rule-note">
-                <strong>Exit Timing Rule:</strong> only employees hired and terminated within the same period are evaluated. Selected-period timing excludes Day 0–3 immediate exits. Previous-period 15-day reporting includes Day 0–3 in the 0–15 numerator while keeping the cleaned hire denominator. Each employee is counted once only.
+                <strong>Exit Timing Rule:</strong> same-period hires and same-period qualifying leavers only. Day 0–2 exits are the Immediate Exit population. Selected excludes them from the timing numerator and denominator. Previous keeps them in the timing numerator but removes them from the denominator. Timing windows are cumulative and never use employees from outside the selected period.
             </div>
-            <div class="mos-exit-timing-grid">`;
-
-        buckets.forEach(b=>{
-            const ps=prev.stats[b.key], cs=cur.stats[b.key];
-            const pp=(ps.pct!==null&&cs.pct!==null)?cs.pct-ps.pct:null;
-            const changeClass=pp===null?'text-muted':pp<0?'text-success':pp>0?'text-danger':'text-muted';
-            const changeText=pp===null?'—':`${pp>0?'+':''}${pp.toFixed(1)} pts`;
-
-            const side=(label,stat)=>`
-                <div class="mos2-exit-bucket-side ${label==='Selected'?'current':''}">
-                    <span class="mos-exit-timing-label ${label==='Selected'?'current':''}">${label}</span>
-                    <div class="mos-exit-timing-value ${label==='Selected'?'current':''}">
-                        <strong>${stat.count.toLocaleString()}</strong>
-                        <span>${stat.pct===null?'N/A':stat.pct.toFixed(1)+'%'}</span>
-                        <small>${label==='Previous' && b.key==='15' ? '0–15 days incl. immediate' : (label==='Selected' && b.key==='15' ? '4–15 days' : 'exclusive bucket')}</small>
+            <div class="mos2-exit-cumulative-groups">
+                <div class="mos2-exit-cumulative-group current">
+                    <div class="mos2-exit-group-title">15–30 DAY CUMULATIVE EXIT</div>
+                    ${renderMetric('WITHIN 15 DAYS',prev.stats['15'],cur.stats['15'])}
+                    ${renderMetric('WITHIN 30 DAYS',prev.stats['30'],cur.stats['30'])}
+                    <div class="mos2-exit-group-total">
+                        <span>TOTAL 30-DAY CUMULATIVE</span>
+                        <strong>${cur.stats['30'].count.toLocaleString()}</strong>
+                        <small>Selected vs Previous: ${prev.stats['30'].count.toLocaleString()} | ${cur.stats['30'].pct===null?'N/A':cur.stats['30'].pct.toFixed(1)+'%'} vs ${prev.stats['30'].pct===null?'N/A':prev.stats['30'].pct.toFixed(1)+'%'}</small>
                     </div>
-                </div>`;
-
-            html+=`
-                <div class="mos-exit-timing-card">
-                    <div class="mos-exit-timing-title">${b.label}</div>
-                    ${side('Selected',cs)}
-                    ${side('Previous',ps)}
-                    <div class="mos-exit-change-row ${changeClass}">
-                        <span>Change</span><strong>${changeText}</strong>
+                </div>
+                <div class="mos2-exit-cumulative-group">
+                    <div class="mos2-exit-group-title">60–90 DAY CUMULATIVE EXIT</div>
+                    ${renderMetric('WITHIN 60 DAYS',prev.stats['60'],cur.stats['60'])}
+                    ${renderMetric('WITHIN 90 DAYS',prev.stats['90'],cur.stats['90'])}
+                    <div class="mos2-exit-group-total">
+                        <span>TOTAL 90-DAY CUMULATIVE</span>
+                        <strong>${cur.stats['90'].count.toLocaleString()}</strong>
+                        <small>Selected vs Previous: ${prev.stats['90'].count.toLocaleString()} | ${cur.stats['90'].pct===null?'N/A':cur.stats['90'].pct.toFixed(1)+'%'} vs ${prev.stats['90'].pct===null?'N/A':prev.stats['90'].pct.toFixed(1)+'%'}</small>
                     </div>
-                </div>`;
-        });
-
-        html+=`</div>
+                </div>
+            </div>
             <div class="mos2-exit-summary">
-                <div><span>Selected same-period leavers after cleanup</span><strong>${cur.net.toLocaleString()}</strong></div>
-                <div><span>Previous same-period leavers after cleanup</span><strong>${prev.net.toLocaleString()}</strong></div>
+                <div><span>Selected same-period leavers after 0–2 day cleanup</span><strong>${cur.cleanLeavers.toLocaleString()}</strong></div>
+                <div><span>Previous same-period leavers</span><strong>${prev.samePeriodLeavers.toLocaleString()}</strong></div>
             </div>
             <div class="mos-exit-timing-footnote">
-                Same-period new-hire cohort. Selected uses exclusive 4–15, 16–30, 31–60 and 61–90 day buckets after removing Day 0–3 immediate exits. Previous uses the same denominator after removing Day 0–3, but its 15-day numerator intentionally includes Day 0–3 (0–15). All later Previous buckets remain exclusive. Each employee is counted once only.
+                Cumulative windows: 15 ⊂ 30 ⊂ 60 ⊂ 90. Selected excludes Day 0–2; Previous includes Day 0–2 in each cumulative numerator while using the cleaned hire denominator. A window is zero when its length cannot occur inside the selected period.
             </div>`;
 
         container.innerHTML=html;
