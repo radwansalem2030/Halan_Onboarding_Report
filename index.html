@@ -76,6 +76,10 @@
                     <span class="tab-icon">📋</span>
                     <span class="tab-label">OPERATIONAL CASES</span>
                 </button>
+                <button class="nav-tab-btn" data-tab="tab-late-72h" title="72H LATE & COMPLETED">
+                    <span class="tab-icon">⏱️</span>
+                    <span class="tab-label">72H LATE & COMPLETED</span>
+                </button>
                 <button class="nav-tab-btn" data-tab="tab-total-workforce-mos" title="MOS – TOTAL WORKFORCE IMPACT">
                     <span class="tab-icon">📈</span>
                     <span class="tab-label">MOS – TOTAL WORKFORCE</span>
@@ -731,6 +735,45 @@
                 </div>
 
 <!-- TAB 6: MOS – TOTAL WORKFORCE IMPACT -->
+            <div id="tab-late-72h" class="tab-content">
+                <div class="analytics-header-block">
+                    <h2>72H LATE &amp; COMPLETED</h2>
+                    <p class="subtitle">Officers who exceeded the initial 72-hour SLA and later completed both the questionnaire and declaration.</p>
+                </div>
+                <div class="analytics-section">
+                    <div class="metric-card op-case-module">
+                        <div class="op-section-header">
+                            <div class="op-title-group">
+                                <span class="card-icon-wrapper progress-icon">⏱️</span>
+                                <div>
+                                    <h3 id="sec-late72h-title">72H LATE &amp; COMPLETED <span class="op-count-badge text-warning" id="sec-late72h-badge">0 Cases</span></h3>
+                                    <p class="section-subtitle" id="sec-late72h-sub">Historical late cases only: Trained – Exceeded 72h + completed questionnaire + signed declaration.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="op-controls-row">
+                            <div class="op-filter-group">
+                                <label for="filter-late72h-gov">Governorate</label>
+                                <select id="filter-late72h-gov" class="premium-select op-select">
+                                    <option value="all">All Governorates</option>
+                                </select>
+                            </div>
+                            <div class="op-filter-group">
+                                <label for="filter-late72h-sup">Supervisor</label>
+                                <select id="filter-late72h-sup" class="premium-select op-select">
+                                    <option value="all">All Supervisors</option>
+                                </select>
+                            </div>
+                            <div class="op-filter-group op-search-group">
+                                <label for="search-late72h">Search</label>
+                                <input type="text" id="search-late72h" class="premium-input op-input" placeholder="Search Officer Name or HR Code...">
+                            </div>
+                        </div>
+                        <div id="container-late72h-cases" class="op-cases-container"></div>
+                    </div>
+                </div>
+            </div>
+
             <div id="tab-total-workforce-mos" class="tab-content">
                 <div class="analytics-header-block">
                     <h2>MOS – TOTAL WORKFORCE IMPACT</h2>

@@ -335,10 +335,170 @@ document.addEventListener('DOMContentLoaded', () => {
         return compiledRecords;
     }
 
+    // ==========================================================================
+    // PRIMARY DATA COMPATIBILITY LAYER
+    // Keep the existing dashboard logic stable while accepting the refreshed
+    // Excel-exported values used by the new Main_Data_Final_3762_records.csv.
+    // ==========================================================================
+    function normalizeStatusToken(value) {
+        return String(value ?? '')
+            .replace(/[–—]/g, '-')
+            .replace(/\s+/g, ' ')
+            .trim()
+            .toLowerCase();
+    }
+
+    function excelSerialToDate(value) {
+        const serial = Number(String(value ?? '').trim());
+        if (!Number.isFinite(serial) || serial < 1 || serial > 100000) return null;
+        const utcMillis = Date.UTC(1899, 11, 30) + (serial * 86400000);
+        return new Date(utcMillis);
+    }
+
+    function excelSerialToMDY(value) {
+        const d = excelSerialToDate(value);
+        if (!d) return '';
+        return `${d.getUTCMonth() + 1}/${d.getUTCDate()}/${d.getUTCFullYear()}`;
+    }
+
+    function pad2(v) { return String(v).padStart(2, '0'); }
+
+    function makeLocalDateSafe(year, month, day) {
+        const y = Number(year), m = Number(month), d = Number(day);
+        if (!Number.isInteger(y) || !Number.isInteger(m) || !Number.isInteger(d)) return null;
+        if (m < 1 || m > 12 || d < 1 || d > 31) return null;
+        const candidate = new Date(y, m - 1, d);
+        if (candidate.getFullYear() !== y || candidate.getMonth() !== m - 1 || candidate.getDate() !== d) return null;
+        return candidate;
+    }
+
+    // Primary Hiring Date normalizer.
+    // The refreshed export can contain Excel serials, DD/MM/YYYY text, or M/D/YYYY.
+    // Month + Year columns are used only as a consistency anchor to resolve
+    // ambiguous/swapped month-day values. This prevents impossible future months
+    // (e.g. October) from leaking into the dashboard when the row itself says Month=9.
+    function normalizePrimaryHiringDate(value, row = {}) {
+        const token = String(value ?? '').trim();
+        if (!token) return '';
+
+        let expectedMonth = Number(String(row?.['Month'] ?? '').trim());
+        let expectedYear = Number(String(row?.['Year'] ?? '').trim());
+        const hasExpected = Number.isInteger(expectedMonth) && expectedMonth >= 1 && expectedMonth <= 12
+            && Number.isInteger(expectedYear) && expectedYear >= 1900 && expectedYear <= 2200;
+
+        const serialDate = excelSerialToDate(token);
+        if (serialDate) {
+            let y = serialDate.getUTCFullYear();
+            let m = serialDate.getUTCMonth() + 1;
+            let d = serialDate.getUTCDate();
+            if (hasExpected && (y !== expectedYear || m !== expectedMonth)) {
+                const aligned = makeLocalDateSafe(expectedYear, expectedMonth, d);
+                if (aligned) {
+                    y = aligned.getFullYear();
+                    m = aligned.getMonth() + 1;
+                    d = aligned.getDate();
+                }
+            }
+            return `${m}/${d}/${y}`;
+        }
+
+        const datePart = token.split(/\s+/, 1)[0];
+        const parts = datePart.split(/[\/-]/);
+        if (parts.length === 3 && parts[2]) {
+            let a = Number(parts[0]), b = Number(parts[1]), y = Number(parts[2]);
+            if (Number.isFinite(a) && Number.isFinite(b) && Number.isFinite(y)) {
+                if (y < 100) y += 2000;
+                const candidates = [];
+                if (a >= 1 && a <= 12 && b >= 1 && b <= 31) candidates.push([y, a, b]); // M/D
+                if (b >= 1 && b <= 12 && a >= 1 && a <= 31) candidates.push([y, b, a]); // D/M
+                if (hasExpected) {
+                    for (const [cy, cm, cd] of candidates) {
+                        const dObj = makeLocalDateSafe(cy, cm, cd);
+                        if (dObj && dObj.getFullYear() === expectedYear && dObj.getMonth() + 1 === expectedMonth) {
+                            return `${expectedMonth}/${dObj.getDate()}/${expectedYear}`;
+                        }
+                    }
+                }
+                for (const [cy, cm, cd] of candidates) {
+                    const dObj = makeLocalDateSafe(cy, cm, cd);
+                    if (dObj) return `${cm}/${cd}/${cy}`;
+                }
+            }
+        }
+        return token;
+    }
+
+    function normalizePrimaryDataUpdated(value) {
+        const token = String(value ?? '').trim();
+        if (!token) return '';
+        const serialDate = excelSerialToDate(token);
+        if (serialDate) {
+            const y = serialDate.getUTCFullYear();
+            const m = serialDate.getUTCMonth() + 1;
+            const d = serialDate.getUTCDate();
+            const hh = serialDate.getUTCHours();
+            const mm = serialDate.getUTCMinutes();
+            return hh || mm ? `${m}/${d}/${y} ${String(((hh + 11) % 12) + 1).padStart(1,'0')}:${pad2(mm)} ${hh >= 12 ? 'PM' : 'AM'}` : `${m}/${d}/${y}`;
+        }
+        const match = token.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(.*))?$/);
+        if (match) {
+            const day = Number(match[1]), month = Number(match[2]), year = Number(match[3]);
+            const dObj = makeLocalDateSafe(year, month, day);
+            if (dObj) return `${month}/${day}/${year}${match[4] ? ` ${match[4]}` : ''}`;
+        }
+        return token;
+    }
+
+    function normalizePrimaryDataset(records) {
+        return records.map(row => ({
+            ...row,
+            'Hiring Date': normalizePrimaryHiringDate(row['Hiring Date'], row),
+            'Data Updated': normalizePrimaryDataUpdated(row['Data Updated'])
+        }));
+    }
+
+    function isCurrent72hExceeded(row) {
+        return normalizeStatusToken(row?.['72 hours']) === 'exceeded 72h';
+    }
+
+    function isHistorical72hExceeded(row) {
+        return normalizeStatusToken(row?.['72 hours']) === 'trained - exceeded 72h';
+    }
+
+    function isSurveySigned(row) {
+        const value = normalizeStatusToken(row?.['Survey Result']);
+        return value === 'signed' || value === 'signed - done';
+    }
+
+    // Declaration Pending is a precise status, not a derived count of
+    // trained-minus-signed and not the same as 'Not Eligible Yet'.
+    function isDeclarationPending(row) {
+        return normalizeStatusToken(row?.['Survey Result']) === 'not signed';
+    }
+
+    function isQuestionnaireCompleted(row) {
+        const value = normalizeStatusToken(row?.['Questionnaire Result']);
+        return value === 'questionnaire done - normal'
+            || value === 'questionnaire done - late'
+            || value === 'done';
+    }
+
+    function isHistorical72hLateCompleted(row) {
+        return isHistorical72hExceeded(row)
+            && isQuestionnaireCompleted(row)
+            && isSurveySigned(row);
+    }
+
     // Helper Engine to extract standard YYYY-MM key from Hiring Date
     function parseMonthKey(hDate) {
         if (!hDate) return '';
-        let token = hDate.trim();
+        let token = String(hDate).trim();
+
+        // Extra tolerance for any remaining Excel serial date values.
+        if (/^\d{5}(?:\.\d+)?$/.test(token)) {
+            token = excelSerialToMDY(token);
+        }
+
         if (token.includes('-')) {
             const chunks = token.split('-');
             if (chunks[0].length === 4) return `${chunks[0]}-${chunks[1].padStart(2, '0')}`;
@@ -386,47 +546,24 @@ document.addEventListener('DOMContentLoaded', () => {
     function isQuestionnaireExceeded(row) {
         if (!row || typeof row !== 'object') return false;
 
-        let statusVal = '';
-        for (const k of Object.keys(row)) {
-            const cleanK = k.trim().toLowerCase();
-            if (cleanK.includes('training status') || cleanK.includes('trainingstatus') || cleanK === 'training') {
-                statusVal = String(row[k] || '').trim();
-                break;
-            }
-        }
-        if (!statusVal.includes('100%')) return false;
+        const trainingStatus = normalizeStatusToken(row['Training Status']);
+        if (!trainingStatus.includes('100%')) return false;
 
-        let questVal = '';
-        for (const k of Object.keys(row)) {
-            const cleanK = k.trim().toLowerCase();
-            if (cleanK.includes('questionnaire')) {
-                questVal = String(row[k] || '').trim();
-                break;
-            }
+        const questionnaireStatus = normalizeStatusToken(row['Questionnaire Result']);
+
+        // New export contains an explicit questionnaire SLA breach state.
+        if (questionnaireStatus === 'questionnaire exceeded 10 working days') {
+            return true;
         }
-        const isBlankQuest = (questVal === '' || questVal.toLowerCase() === 'null' || questVal.toLowerCase() === 'undefined');
+
+        // Legacy compatibility: blank questionnaire + explicit 10-working-day breach.
+        const isBlankQuest = questionnaireStatus === ''
+            || questionnaireStatus === 'null'
+            || questionnaireStatus === 'undefined';
         if (!isBlankQuest) return false;
 
-        let test10dVal = '';
-        for (const k of Object.keys(row)) {
-            const cleanK = k.trim().toLowerCase();
-            if (cleanK.includes('10') && (cleanK.includes('working') || cleanK.includes('days') || cleanK.includes('day'))) {
-                test10dVal = String(row[k] || '').trim().toLowerCase();
-                break;
-            }
-        }
-        if (!test10dVal) {
-            for (const k of Object.keys(row)) {
-                const cleanK = k.trim().toLowerCase();
-                if (cleanK.includes('working days') || cleanK.includes('10 working') || cleanK.includes('10 days')) {
-                    test10dVal = String(row[k] || '').trim().toLowerCase();
-                    break;
-                }
-            }
-        }
-
-        const isExceeded = test10dVal.includes('exceeded') && !test10dVal.includes('not');
-        return isExceeded;
+        const test10dVal = normalizeStatusToken(row['10 Working Days (Test)']);
+        return test10dVal.includes('exceeded') && !test10dVal.includes('not');
     }
 
     function calculateCentralMetrics(rawRecords) {
@@ -455,10 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const notTrainedCount = notTrainedSubset.length;
         const notTrainedPct = effectivePopulation > 0 ? (notTrainedCount / effectivePopulation) * 100 : 0;
 
-        const slaBreachSubset = rawRecords.filter(r => 
-            (!r['Training Status'] || r['Training Status'].trim() === '') && 
-            r['72 hours'] && r['72 hours'].includes('Exceeded')
-        );
+        const slaBreachSubset = rawRecords.filter(r => isCurrent72hExceeded(r));
         const sla72hBreachCount = slaBreachSubset.length;
         const sla72hBreachRate = effectivePopulation > 0 ? (sla72hBreachCount / effectivePopulation) * 100 : 0;
 
@@ -469,8 +603,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const questOverdueCount = questOverdueSubset.length;
         const questOverdueRate = effectivePopulation > 0 ? (questOverdueCount / effectivePopulation) * 100 : 0;
 
-        const signedCount = trainedSubset.filter(r => r['Survey Result'] && r['Survey Result'].trim().toLowerCase() === 'signed').length;
-        const declPendingCount = trainedCount - signedCount;
+        const signedCount = rawRecords.filter(r => isSurveySigned(r)).length;
+        const declPendingCount = rawRecords.filter(r => isDeclarationPending(r)).length;
         const declPendingRate = effectivePopulation > 0 ? (declPendingCount / effectivePopulation) * 100 : 0;
 
         return {
@@ -1103,16 +1237,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 govMap[gov].effective++;
                 if (status.includes('100%')) {
                     govMap[gov].trained++;
-                    if (!r['Survey Result'] || r['Survey Result'].trim().toLowerCase() !== 'signed') {
+                    if (isDeclarationPending(r)) {
                         govMap[gov].declPending++;
                     }
                 } else if (status !== '') {
                     govMap[gov].inProgress++;
                 } else {
                     govMap[gov].notTrained++;
-                    if (r['72 hours'] && r['72 hours'].includes('Exceeded')) {
-                        govMap[gov].slaBreach++;
-                    }
+                }
+
+                // Current SLA report is defined solely by the live 72h value.
+                if (isCurrent72hExceeded(r)) {
+                    govMap[gov].slaBreach++;
                 }
 
                 if (isQuestionnaireExceeded(r)) {
@@ -2889,11 +3025,12 @@ function renderHQTable(govMap, supMap) {
     let opFilters = {
         '72h': { gov: 'all', sup: 'all', search: '' },
         'quest': { gov: 'all', sup: 'all', search: '' },
-        'decl': { gov: 'all', sup: 'all', search: '' }
+        'decl': { gov: 'all', sup: 'all', search: '' },
+        'late72h': { gov: 'all', sup: 'all', search: '' }
     };
 
     function setupOpControlsListeners() {
-        ['72h', 'quest', 'decl'].forEach(sec => {
+        ['72h', 'quest', 'decl', 'late72h'].forEach(sec => {
             const govSel = document.getElementById(`filter-${sec}-gov`);
             const supSel = document.getElementById(`filter-${sec}-sup`);
             const searchInp = document.getElementById(`search-${sec}`);
@@ -2930,23 +3067,97 @@ function renderHQTable(govMap, supMap) {
     }
 
     function renderTab4OperationalCases(scopedData) {
-        const cases72h = scopedData.filter(r => 
-            (!r['Training Status'] || r['Training Status'].trim() === '') && 
-            r['72 hours'] && r['72 hours'].includes('Exceeded')
-        );
+        // Current operational SLA report: only the live 'Exceeded 72h' state.
+        // Historical 'Trained – Exceeded 72h' is intentionally excluded here.
+        const cases72h = scopedData.filter(r => isCurrent72hExceeded(r));
 
         const casesQuest = scopedData.filter(r => isQuestionnaireExceeded(r));
 
-        const casesDecl = scopedData.filter(r => {
-            const status = (r['Training Status'] || '').trim();
-            if (!status.includes('100%')) return false;
-            const signed = r['Survey Result'] && r['Survey Result'].trim().toLowerCase() === 'signed';
-            return !signed;
-        });
+        // Declaration Pending = explicit 'Not Signed' only.
+        // 'Not Eligible Yet' is intentionally excluded.
+        const casesDecl = scopedData.filter(r => isDeclarationPending(r));
+
+        const casesLate72h = scopedData.filter(r => isHistorical72hLateCompleted(r));
 
         renderOpSection('72h', cases72h, '72H EXCEEDED', 'sec-72h-badge', 'container-72h-cases', true);
         renderOpSection('quest', casesQuest, 'QUESTIONNAIRE OVERDUE', 'sec-quest-badge', 'container-quest-cases', false);
         renderOpSection('decl', casesDecl, 'DECLARATION PENDING', 'sec-decl-badge', 'container-decl-cases', false);
+        renderLate72hCompletedSection(casesLate72h);
+    }
+
+    function renderLate72hCompletedSection(population) {
+        const badgeNode = document.getElementById('sec-late72h-badge');
+        const containerNode = document.getElementById('container-late72h-cases');
+        const govSel = document.getElementById('filter-late72h-gov');
+        const supSel = document.getElementById('filter-late72h-sup');
+        if (!containerNode) return;
+
+        if (badgeNode) badgeNode.textContent = `${population.length.toLocaleString()} ${population.length === 1 ? 'Case' : 'Cases'}`;
+
+        const govs = Array.from(new Set(population.map(r => (r['Governorate'] || '').trim()).filter(Boolean))).sort((a,b) => a.localeCompare(b));
+        let currentGov = opFilters.late72h.gov;
+        if (currentGov !== 'all' && !govs.includes(currentGov)) { currentGov = 'all'; opFilters.late72h.gov = 'all'; }
+        if (govSel) {
+            govSel.innerHTML = '<option value="all">All Governorates</option>';
+            govs.forEach(g => { const opt=document.createElement('option'); opt.value=g; opt.textContent=g; govSel.appendChild(opt); });
+            govSel.value=currentGov;
+        }
+
+        let supPopulation = currentGov === 'all' ? population : population.filter(r => (r['Governorate'] || '').trim() === currentGov);
+        const sups = Array.from(new Set(supPopulation.map(r => (r['Supervisor'] || '').trim()).filter(Boolean))).sort((a,b) => a.localeCompare(b));
+        let currentSup = opFilters.late72h.sup;
+        if (currentSup !== 'all' && !sups.includes(currentSup)) { currentSup = 'all'; opFilters.late72h.sup = 'all'; }
+        if (supSel) {
+            supSel.innerHTML = '<option value="all">All Supervisors</option>';
+            sups.forEach(s => { const opt=document.createElement('option'); opt.value=s; opt.textContent=s; supSel.appendChild(opt); });
+            supSel.value=currentSup;
+        }
+
+        const searchVal = opFilters.late72h.search;
+        const filtered = population.filter(r => {
+            const g=(r['Governorate'] || '').trim();
+            const s=(r['Supervisor'] || '').trim();
+            const name=(r['Officer Name'] || '').trim().toLowerCase();
+            const hr=(r['HR Code'] || '').trim().toLowerCase();
+            if (currentGov !== 'all' && g !== currentGov) return false;
+            if (currentSup !== 'all' && s !== currentSup) return false;
+            if (searchVal && !name.includes(searchVal) && !hr.includes(searchVal)) return false;
+            return true;
+        }).sort((a,b) => {
+            const g=((a['Governorate']||'').trim()).localeCompare((b['Governorate']||'').trim());
+            if (g) return g;
+            const s=((a['Supervisor']||'').trim()).localeCompare((b['Supervisor']||'').trim());
+            if (s) return s;
+            const n=((a['Officer Name']||'').trim()).localeCompare((b['Officer Name']||'').trim());
+            return n;
+        });
+
+        if (!population.length) {
+            containerNode.innerHTML = '<div class="op-empty-state">No completed late-72h cases found for the selected period.</div>';
+            return;
+        }
+        if (!filtered.length) {
+            containerNode.innerHTML = '<div class="op-empty-state">No cases match the selected filters.</div>';
+            return;
+        }
+
+        const groups = {};
+        filtered.forEach(r => { const g=(r['Governorate']||'').trim() || 'Unknown'; (groups[g] ||= []).push(r); });
+
+        let html='';
+        Object.keys(groups).sort((a,b)=>a.localeCompare(b)).forEach(gov => {
+            const list=groups[gov];
+            html += `<div class="op-gov-group"><div class="op-gov-header"><div class="op-gov-title-wrapper"><span class="op-gov-name">${gov}</span><span class="op-gov-chip">${list.length} ${list.length===1?'Case':'Cases'}</span></div></div><div class="op-table-wrapper"><table class="op-cases-table"><thead><tr><th>Officer Name</th><th>Specialization</th><th>Branch</th><th>Supervisor</th><th>Hiring Date</th><th>72h Status</th><th>Questionnaire</th><th>Declaration</th></tr></thead><tbody>`;
+            list.forEach(r => {
+                const name=(r['Officer Name']||'N/A').trim();
+                const hr=(r['HR Code']||'').trim();
+                const hrHtml=hr?`<span class="op-hr-code">(${hr})</span>`:'';
+                html += `<tr><td><strong>${name}</strong> ${hrHtml}</td><td>${(r['Specialized']||'N/A').trim()}</td><td>${(r['Branch']||'N/A').trim()}</td><td>${(r['Supervisor']||'N/A').trim()}</td><td>${(r['Hiring Date']||'N/A').trim()}</td><td>${(r['72 hours']||'N/A').trim()}</td><td>${(r['Questionnaire Result']||'N/A').trim()}</td><td>${(r['Survey Result']||'N/A').trim()}</td></tr>`;
+            });
+            html += '</tbody></table></div></div>';
+        });
+
+        containerNode.innerHTML = html;
     }
 
     function renderOpSection(secKey, population, titlePrefix, badgeId, containerId, includeHiringDate) {
@@ -4570,7 +4781,7 @@ function renderHQTable(govMap, supMap) {
             return res.text();
         })
         .then(csvText => {
-            globalDataset = parseCSVDataEngine(csvText);
+            globalDataset = normalizePrimaryDataset(parseCSVDataEngine(csvText));
             populateMonthFilter();
             applyDynamicFiltering();
             if(nodeUpdateBadge) nodeUpdateBadge.textContent = "Data Synced Live";
